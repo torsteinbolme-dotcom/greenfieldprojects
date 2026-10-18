@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { projectMountain } from "@/exampleProject";
-import { withLinkedTicketPrices } from "@/lib/ticket-pricing";
+import { withLinkedTicketPrices, type PricedSegment } from "@/lib/ticket-pricing";
 import { safeCalculate } from "@/lib/model";
 
 const faresAt = (price: number) => withLinkedTicketPrices({
@@ -39,5 +39,19 @@ describe("linked ticket pricing", () => {
     const custom = { name: "Group", share: 0, grossPrice: 125, vatRate: 0.12, commission: 0, boardingsPerGuest: 2 };
     expect(withLinkedTicketPrices({ ...projectMountain, segments: [...projectMountain.segments, custom] }).segments.at(-1)?.grossPrice).toBe(125);
     expect(withLinkedTicketPrices({ ...projectMountain, segments: [custom] }).segments).toEqual([custom]);
+  });
+
+  it("uses an edited percentage instead of its default and retains it after saving", () => {
+    const segments: PricedSegment[] = faresAt(699).segments.map((s) => s.name === "One-way adult" ? { ...s, roundTripAdultRatio: 0.65 } : s);
+    const edited = withLinkedTicketPrices({ ...projectMountain, segments });
+    expect(edited.segments.find((s) => s.name === "One-way adult")?.grossPrice).toBe(454.35);
+    const stored = JSON.parse(JSON.stringify(edited));
+    stored.segments[0].grossPrice = 800;
+    expect(withLinkedTicketPrices(stored).segments.find((s) => s.name === "One-way adult")?.grossPrice).toBe(520);
+  });
+
+  it("preserves an explicitly entered zero percentage", () => {
+    const segments: PricedSegment[] = faresAt(699).segments.map((s) => s.name === "Cruise" ? { ...s, roundTripAdultRatio: 0 } : s);
+    expect(withLinkedTicketPrices({ ...projectMountain, segments }).segments.find((s) => s.name === "Cruise")?.grossPrice).toBe(0);
   });
 });

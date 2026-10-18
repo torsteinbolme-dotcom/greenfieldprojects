@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Field, GrowthList, NumField } from "./inputs";
 import { int, mult, nok, nokM, pct } from "@/lib/format";
 import { segmentNetPerGuest, shareSum, type ModelResult } from "@/lib/model";
-import { isAdultRoundTrip, ticketPriceRatio } from "@/lib/ticket-pricing";
+import { isAdultRoundTrip, segmentTicketRatio, type PricedSegment } from "@/lib/ticket-pricing";
 
 type P = { a: Assumptions; set: (patch: Partial<Assumptions>) => void; ro: boolean };
 
@@ -47,8 +47,8 @@ export function Limitations() {
 
 export function SegmentsSection({ a, set, ro }: P) {
   const sum = shareSum(a);
-  const hasAdultFare = a.segments.some((s) => isAdultRoundTrip(s.name));
-  const upd = (i: number, patch: Partial<Assumptions["segments"][number]>) =>
+  const adultFare = a.segments.find((s) => isAdultRoundTrip(s.name));
+  const upd = (i: number, patch: Partial<PricedSegment>) =>
     set({ segments: a.segments.map((s, j) => (j === i ? { ...s, ...patch } : s)) });
   const weighted = a.segments.reduce((s, x) => s + x.share * segmentNetPerGuest(x), 0);
   return (
@@ -59,16 +59,19 @@ export function SegmentsSection({ a, set, ro }: P) {
         </div>
       )}
       <div className="overflow-x-auto">
-        <table className="fin-table">
-          <thead><tr><th>Segment</th><th>Share</th><th>Ticket gross incl VAT (NOK)</th><th>VAT</th><th>Commission</th><th>Boardings / guest</th><th className="text-right">Net realized / guest (NOK)</th><th /></tr></thead>
+        <table className="fin-table [&_td]:min-w-24">
+          <thead><tr><th>Segment</th><th>Share</th><th>% of adult round trip</th><th>Ticket gross incl VAT (NOK)</th><th>VAT</th><th>Commission</th><th>Boardings / guest</th><th className="text-right">Net realized / guest (NOK)</th><th /></tr></thead>
           <tbody>
             {a.segments.map((s, i) => (
               <tr key={i}>
                 <td><Input className="h-8 min-w-40" value={s.name} disabled={ro} onChange={(e) => upd(i, { name: e.target.value })} /></td>
                 <td className="w-24"><NumField percent value={s.share} disabled={ro} onChange={(v) => upd(i, { share: v })} /></td>
+                <td className="w-28">
+                  {adultFare ? (isAdultRoundTrip(s.name) ? <span className="num block text-right">100%</span> : <NumField percent value={segmentTicketRatio(s, adultFare.grossPrice)} disabled={ro} onChange={(v) => upd(i, { roundTripAdultRatio: v })} />) : <span className="block text-right text-muted-foreground">—</span>}
+                </td>
                 <td className="w-32">
-                  {hasAdultFare && !isAdultRoundTrip(s.name) && ticketPriceRatio(s.name) !== null ? (
-                    <div className="text-right"><span className="num">{nok(s.grossPrice, 2)}</span><span className="block text-xs text-muted-foreground">{pct(ticketPriceRatio(s.name), 0)} × adult round trip</span></div>
+                  {adultFare && !isAdultRoundTrip(s.name) ? (
+                    <span className="num block text-right">{nok(s.grossPrice, 2)}</span>
                   ) : <NumField value={s.grossPrice} disabled={ro} onChange={(v) => upd(i, { grossPrice: v })} />}
                 </td>
                 <td className="w-24"><NumField percent value={s.vatRate} disabled={ro} onChange={(v) => upd(i, { vatRate: v })} /></td>
@@ -79,7 +82,7 @@ export function SegmentsSection({ a, set, ro }: P) {
               </tr>
             ))}
             <tr className="font-medium">
-              <td>Total / weighted</td><td className="num text-right">{pct(sum, 2)}</td><td colSpan={4} />
+              <td>Total / weighted</td><td className="num text-right">{pct(sum, 2)}</td><td colSpan={5} />
               <td className="num text-right">{nok(weighted, 2)}</td><td />
             </tr>
           </tbody>

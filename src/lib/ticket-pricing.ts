@@ -1,6 +1,6 @@
 import type { Assumptions } from "@/financialEngine";
 
-type Segment = Assumptions["segments"][number];
+export type PricedSegment = Assumptions["segments"][number] & { roundTripAdultRatio?: number };
 
 /** Recognize standard fares while leaving custom segments independent. */
 export function ticketPriceRatio(name: string): number | null {
@@ -21,13 +21,18 @@ export function isAdultRoundTrip(name: string): boolean {
   return key === "roundtripadult" || key === "adultroundtrip";
 }
 
-export function linkedTicketSegments(segments: Segment[]): Segment[] {
+export function segmentTicketRatio(s: PricedSegment, adultPrice: number): number {
+  if (isAdultRoundTrip(s.name)) return 1;
+  return s.roundTripAdultRatio ?? ticketPriceRatio(s.name) ?? (adultPrice === 0 ? 0 : s.grossPrice / adultPrice);
+}
+
+export function linkedTicketSegments(segments: PricedSegment[]): PricedSegment[] {
   const adult = segments.find((s) => isAdultRoundTrip(s.name));
   if (!adult) return segments;
   return segments.map((s) => {
-    const ratio = ticketPriceRatio(s.name);
-    if (ratio === null || isAdultRoundTrip(s.name)) return s;
-    return { ...s, grossPrice: Number((adult.grossPrice * ratio).toPrecision(12)) };
+    if (isAdultRoundTrip(s.name)) return s;
+    const ratio = segmentTicketRatio(s, adult.grossPrice);
+    return { ...s, roundTripAdultRatio: ratio, grossPrice: Number((adult.grossPrice * ratio).toPrecision(12)) };
   });
 }
 

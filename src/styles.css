@@ -75,10 +75,12 @@
   --border: color-mix(in srgb, #14314D 16%, #F2F2F2);
   --input: color-mix(in srgb, #14314D 25%, #F2F2F2);
   --ring: #14314D;
+  --color-supplement-blue: #1A4483;
+  --color-supplement-grey: #CECECE;
   --chart-1: #14314D;
   --chart-2: #DABE86;
-  --chart-3: oklch(0.55 0.08 190);
-  --chart-4: oklch(0.6 0.12 30);
+  --chart-3: #1A4483;
+  --chart-4: #CECECE;
   --chart-5: oklch(0.65 0.06 140);
   --sidebar: #14314D;
   --sidebar-foreground: #F2F2F2;

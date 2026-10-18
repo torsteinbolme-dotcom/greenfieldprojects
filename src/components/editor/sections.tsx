@@ -222,8 +222,11 @@ const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) =>
 ];
 const bold = new Set(["Total revenue", "Total OPEX", "EBITDA", "Cash flow after debt service"]);
 
-export function ForecastSection({ r, a }: { r: ModelResult; a: Assumptions }) {
+export function ForecastSection({ r, a }: { r: ModelResult; a: Assumptions | undefined }) {
   const [expanded, setExpanded] = useState<Record<ForecastGroup, boolean>>({ revenue: true, opex: true });
+  // A live module update can briefly render the previous caller without the new
+  // assumptions prop. Wait for real inputs rather than inventing expense values.
+  if (!a) return <p role="status" className="text-muted-foreground">Loading forecast inputs…</p>;
   return (
     <Card title="Forecast (NOK m unless stated)">
       <div className="overflow-x-auto">

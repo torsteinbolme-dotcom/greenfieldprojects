@@ -17,7 +17,8 @@ export function useCoverUrls(paths: (string | null | undefined)[]) {
       if (error) throw error;
       const map: Record<string, string> = {};
       (data ?? []).forEach((d, i) => {
-        if (d?.signedUrl) map[key[i]] = d.signedUrl;
+        const k = key[i];
+        if (d?.signedUrl && k) map[k] = d.signedUrl;
       });
       return map;
     },

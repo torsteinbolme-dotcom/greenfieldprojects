@@ -14,7 +14,7 @@ const ALLOWED = ["jpg", "jpeg", "png", "webp", "gif"];
  * bucket can check membership straight from the file name.
  */
 export function coverPath(orgId: string, projectId: string, ext = "jpg") {
-  const clean = String(ext).toLowerCase().replace(/[^a-z0-9]/g, "");
+  const clean = String(ext).toLowerCase().split(".").pop()?.replace(/[^a-z0-9]/g, "") ?? "";
   return `${orgId}/${projectId}.${ALLOWED.includes(clean) ? clean : "jpg"}`;
 }
 

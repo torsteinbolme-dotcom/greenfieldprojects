@@ -295,7 +295,33 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      latest_scenario_assumptions: {
+        Row: {
+          assumptions: Json | null
+          calculation_version: string | null
+          created_at: string | null
+          id: string | null
+          organization_id: string | null
+          scenario_id: string | null
+          version: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scenario_assumptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scenario_assumptions_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       can_edit_org: { Args: { _org: string; _user: string }; Returns: boolean }

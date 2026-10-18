@@ -46,3 +46,4 @@
 - [x] Automatically passenger-scale every selected restaurant's revenue and OPEX, including existing selections; verified saved Hoven amounts after reload.
 - [x] Use year 1 rather than year 3 for restaurant passenger scaling; verified revenue 31 225 263 and OPEX 29 030 921 for 225 000 project passengers.
 - [x] Default the Benchmarking comparison to operating year 3 (stabilised), matching Year 3 everywhere; verified in the signed-in preview.
+- [x] Label Overview headline figures with the year they cover (Weighted ticket Y1, Y3 passengers, MOIC/Exit equity at the exit year); verified in the signed-in preview.

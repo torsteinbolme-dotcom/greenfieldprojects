@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAutosave } from "@/hooks/use-autosave";
 import { SaveControls } from "@/components/editor/save-controls";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/editor/sections";
 import { useMembership, type Membership } from "@/lib/data";
 
@@ -40,8 +42,8 @@ function SettingsPage() {
             </td></tr>
           ))}</tbody>
         </table>
-        <p className="mt-3 text-xs text-muted-foreground">Each new account gets its own organization. Inviting colleagues into an existing organization is not yet available.</p>
       </Card>
+      {admin && <InviteCard m={m} />}
       <Card title="Activity log (latest 50)">
         <table className="fin-table">
           <thead><tr><th>When</th><th>Entity</th><th>Action</th><th>Details</th></tr></thead>

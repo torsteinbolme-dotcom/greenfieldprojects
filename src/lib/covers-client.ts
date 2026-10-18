@@ -29,6 +29,8 @@ export function useCoverUrls(paths: (string | null | undefined)[]) {
 export async function uploadCover(orgId: string, projectId: string, file: File) {
   const ext = (file.name.split(".").pop() ?? "").toLowerCase();
   const path = coverPath(orgId, projectId, ext);
+  const { data: own } = await supabase.from("projects").select("cover_image_url").eq("id", projectId).maybeSingle();
+  const previous = own?.cover_image_url ?? null;
   const { error } = await supabase.storage.from(COVER_BUCKET).upload(path, file, {
     upsert: true,
     contentType: file.type || "image/jpeg",
@@ -39,5 +41,7 @@ export async function uploadCover(orgId: string, projectId: string, file: File) 
     .update({ cover_image_url: path, updated_at: new Date().toISOString() })
     .eq("id", projectId);
   if (dbError) throw dbError;
+  // a photo saved under another file type would otherwise linger in storage
+  if (previous && previous !== path) await supabase.storage.from(COVER_BUCKET).remove([previous]);
   return path;
 }

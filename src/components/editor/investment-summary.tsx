@@ -20,7 +20,6 @@ export function InvestmentSummary({ a, r, name, location, onPerformanceYear, onE
   const exit = r.rows[a.exitYear - 1];
   const split = perfRow ? bridgeValues(a, perfRow) : null;
   const development = r.rows.map(row => ({ year: row.year, Revenue: row.revenue, EBITDA: row.ebitda, Passengers: row.passengers }));
-  const cashflows = r.cashflows.map((flow, year) => ({ year, 'Equity cash flow': flow }));
   const perfSelect = onPerformanceYear && <Select value={String(perfYear)} onValueChange={v => onPerformanceYear(Number(v))}><SelectTrigger className="h-7 w-24 text-sm"><SelectValue /></SelectTrigger><SelectContent>{r.rows.map(row => <SelectItem key={row.year} value={String(row.year)}>Year {row.year}</SelectItem>)}</SelectContent></Select>;
   const exitSelect = onExitYear && <Select value={String(a.exitYear)} onValueChange={v => onExitYear(Number(v))}><SelectTrigger className="h-7 w-24 text-sm"><SelectValue /></SelectTrigger><SelectContent>{r.rows.map(row => <SelectItem key={row.year} value={String(row.year)}>Year {row.year}</SelectItem>)}</SelectContent></Select>;
   return <section className="space-y-6" aria-label="Investment Summary">

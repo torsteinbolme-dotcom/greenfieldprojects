@@ -130,11 +130,12 @@ function ComparisonPage() {
                 <SortHeader k="moic" sort={sort} onSort={onSort} right />
                 <SortHeader k="capex" sort={sort} onSort={onSort} right />
                 <SortHeader k="exit" sort={sort} onSort={onSort} right />
+                <SortHeader k="exitYear" sort={sort} onSort={onSort} right />
                 <SortHeader k="irr" sort={sort} onSort={onSort} right />
                 <SortHeader k="exitEquity" sort={sort} onSort={onSort} right />
               </tr></thead>
               <tbody>{rows.map((e) => (
-                <tr key={e.project.id}><td>{e.project.name}</td><td className="num text-right">{nokM(e.result.equity)}</td><td className="num text-right">{mult(e.result.equityMultiple)}</td><td className="num text-right">{nokM(e.result.capex)}</td><td className="num text-right">Y{e.a.exitYear} @ {mult(e.a.exitMultiple)}</td>
+                <tr key={e.project.id}><td>{e.project.name}</td><td className="num text-right">{nokM(e.result.equity)}</td><td className="num text-right">{mult(e.result.equityMultiple)}</td><td className="num text-right">{nokM(e.result.capex)}</td><td className="num text-right">{mult(e.a.exitMultiple)}</td><td className="num text-right">Y{e.a.exitYear}</td>
                   <td className="num text-right">{pct(e.result.equityIrr)}</td><td className="num text-right">{nokM(e.result.exitEquityValue)}</td></tr>
               ))}</tbody>
             </table></div>

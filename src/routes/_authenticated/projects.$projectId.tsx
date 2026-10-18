@@ -27,6 +27,7 @@ import { InvestmentSummary } from "@/components/editor/investment-summary";
 import { BreakEvenPanel } from "@/components/editor/break-even";
 import { SaveControls } from "@/components/editor/save-controls";
 import { CapacitySection } from "@/components/editor/capacity";
+import { PresentationExport } from "@/components/editor/presentation-export";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
   validateSearch: z.object({ scenario: z.string().optional(), tab: z.string().optional() }),
@@ -103,6 +104,7 @@ function EditorPage() {
           <p className="text-sm text-muted-foreground">{project.location ?? "No location"} · {project.status}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          {r && <PresentationExport key={scenario.id} coverPath={project.cover_image_url} input={{ project, scenario, assumptions: draft, result: r, assets: bench.data?.assets ?? [], records: bench.data?.records ?? [], version: latest?.version }} />}
           <Select value={scenario.id} onValueChange={async (v) => {
             await controller?.flush();
             if (controller?.getSnapshot().status === "error") return;

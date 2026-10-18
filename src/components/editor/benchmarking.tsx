@@ -125,7 +125,7 @@ export function BenchmarkingSection({ projectId, config, a, r, ro, apply }: Prop
               <SelectContent>{years.map((y) => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}</SelectContent>
             </Select></div>
           <div><Label className="text-xs">Project year type</Label>
-            <Select value={mode} onValueChange={(v) => update({ ...cfg, yearMode: v as "operating" | "calendar", compareYear: undefined } as BenchmarkConfig)}>
+            <Select value={mode} onValueChange={(v) => update({ ...cfg, yearMode: v as "operating" | "calendar", compareYear: undefined })}>
               <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
               <SelectContent><SelectItem value="operating">Operating year</SelectItem><SelectItem value="calendar">Calendar year</SelectItem></SelectContent>
             </Select></div>

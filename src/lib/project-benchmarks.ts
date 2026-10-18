@@ -6,7 +6,7 @@ export type BenchmarkConfig = {
   fnb?: Record<string, number>;
   benchmarkYear?: number;
   yearMode?: "operating" | "calendar";
-  compareYear?: number; // operating year (1..n) or calendar year
+  compareYear?: number | undefined; // operating year (1..n) or calendar year
   threshold?: number; // relative deviation, e.g. 0.2
 };
 export const DEFAULT_THRESHOLD = 0.2;

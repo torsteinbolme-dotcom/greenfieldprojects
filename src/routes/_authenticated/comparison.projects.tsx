@@ -105,7 +105,7 @@ function ProjectVsProject() {
   const label = (r: Row) => `${r.project.name}${r.scenario.kind === "base" ? "" : ` (${r.scenario.name})`}`;
 
   function exportCsv() {
-    const head = ["Rank", "Project", "Scenario", ...visible.map((m) => m.label)];
+    const head = ["Rank", "Project", "Scenario", ...visible.map((m) => metricLabel(m))];
     const lines = sorted.map((r, i) => [i + 1, r.project.name, r.scenario.kind === "base" ? "Base Case" : r.scenario.name, ...visible.map((m) => { const v = m.get(r); return v == null || !Number.isFinite(v) ? "N/A" : String(Math.round(v * 10000) / 10000); })]);
     const csv = [head, ...lines].map((l) => l.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(";")).join("\n");
     const a = document.createElement("a");
@@ -152,7 +152,7 @@ function ProjectVsProject() {
                 <tr>
                   <th>#</th>
                   <SortTh k="name" label="Project" sort={sort} onSort={onSort} />
-                  {visible.map((m) => <SortTh key={m.key} k={m.key} label={m.label} sort={sort} onSort={onSort} right />)}
+                  {visible.map((m) => <SortTh key={m.key} k={m.key} label={metricLabel(m)} sort={sort} onSort={onSort} right />)}
                 </tr>
               </thead>
               <tbody>{sorted.map((r, i) => (
@@ -169,7 +169,7 @@ function ProjectVsProject() {
 
         <div className="grid gap-4 md:grid-cols-2">
           {CHARTS.map((k) => { const m = METRICS.find((x) => x.key === k)!; return (
-            <Card key={k} title={m.key === "capex" ? m.label : m.group === "operations" ? `Year 3 ${/^[A-Z][a-z]/.test(m.label) ? m.label.charAt(0).toLowerCase() + m.label.slice(1) : m.label}` : m.label}>
+            <Card key={k} title={m.key === "capex" ? metricLabel(m) : m.group === "operations" ? `Year 3 ${/^[A-Z][a-z]/.test(m.label) ? m.label.charAt(0).toLowerCase() + m.label.slice(1) : m.label}` : metricLabel(m)}>
               <div className="h-56"><ResponsiveContainer>
                 <BarChart margin={{ top: 18, right: 12, left: 4, bottom: 0 }} data={sorted.map((r) => { const v = m.get(r); return { name: label(r), id: r.project.id, v: v == null ? null : m.fmt === "nokM" ? v / 1e6 : m.fmt === "pct" ? v * 100 : v }; })}>
                   <CartesianGrid stroke="var(--border)" vertical={false} />

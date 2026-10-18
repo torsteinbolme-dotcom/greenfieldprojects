@@ -29,10 +29,10 @@ describe("forecast operating expenses", () => {
     }
   });
 
-  it("does not itemize a cable car variable cost line", () => {
-    const a = { ...projectMountain };
+  it("itemizes the cable car variable cost line", () => {
+    const a = { ...projectMountain, cableVariableCostPerPassenger: 3 };
     const row = calculate(a).rows[0];
     if (!row) throw new Error("Missing forecast years");
-    expect(forecastOpex(a, row)).not.toHaveProperty("cableVariable");
+    expect(forecastOpex(a, row).cableVariable).toBeCloseTo(3 * row.passengers, 6);
   });
 });

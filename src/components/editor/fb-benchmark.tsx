@@ -1,7 +1,6 @@
 import type { Assumptions } from "@/financialEngine";
 import { AlertTriangle } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useBenchmarks } from "@/lib/benchmarks";
 import { FB_BASIS_YEAR, fbLine, latestYear, passengersAt, withFbBenchmark, type AssumptionsWithFb, type FbBenchmark, type FbLine } from "@/lib/fb-benchmark";
@@ -9,16 +8,16 @@ import { formatNumber, nok, pct } from "@/lib/format";
 
 const MANUAL = "manual";
 
-/** "Use Benchmark" selectors for F&B revenue and F&B OPEX, with a shared passenger adjustment toggle. */
+/** Restaurant revenue and OPEX sources automatically scaled to project year-1 passengers. */
 export function FbBenchmarkPanel({ a, set, ro }: { a: Assumptions; set: (p: Partial<Assumptions>) => void; ro: boolean }) {
   const { data } = useBenchmarks();
   const aw = a as AssumptionsWithFb;
-  const sel: FbBenchmark = aw.fbBenchmark ?? { adjust: true };
+  const sel: FbBenchmark = { ...aw.fbBenchmark, adjust: true };
   if (!data) return <p className="text-sm text-muted-foreground">Loading benchmarks…</p>;
   const restaurants = data.assets.filter((x) => x.business_type === "fnb");
 
   const update = (next: FbBenchmark) => {
-    const follows = next.adjust && !!(next.revenue || next.opex);
+    const follows = !!(next.revenue || next.opex);
     const derived = withFbBenchmark({ ...aw, fbBenchmark: next, fbFollowsPassengers: follows }, data.assets, data.records);
     set({ fbBenchmark: next, fbRevenueYear1: derived.fbRevenueYear1, fbOpexYear1: derived.fbOpexYear1, fbFollowsPassengers: follows } as Partial<Assumptions>);
   };
@@ -49,7 +48,7 @@ export function FbBenchmarkPanel({ a, set, ro }: { a: Assumptions; set: (p: Part
           <dt className="text-muted-foreground">Benchmark financial year</dt><dd className="text-right">{l.source.year}</dd>
           <dt className="text-muted-foreground">Original benchmark value</dt><dd className="text-right tabular-nums">{l.original == null ? "N/A" : `${nok(l.original)} NOK`}</dd>
           <dt className="text-muted-foreground">Cable car passengers</dt><dd className="text-right tabular-nums">{l.benchPassengers == null ? "N/A" : formatNumber(l.benchPassengers, 0, 0)}</dd>
-          <dt className="text-muted-foreground">Passenger-adjusted (year 3)</dt><dd className="text-right tabular-nums">{sel.adjust && l.adjusted != null ? `${nok(l.adjusted)} NOK` : "—"}</dd>
+          <dt className="text-muted-foreground">Passenger-adjusted (year 1)</dt><dd className="text-right tabular-nums">{l.adjusted != null ? `${nok(l.adjusted)} NOK` : "—"}</dd>
           {l.warning && <dd className="col-span-2 flex items-start gap-1 text-destructive"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />{l.warning}</dd>}
         </dl>
       ) : <p className="text-xs text-muted-foreground">Manual Input — edit the year-1 amount below.</p>}
@@ -62,11 +61,7 @@ export function FbBenchmarkPanel({ a, set, ro }: { a: Assumptions; set: (p: Part
         <Row kind="revenue" title="F&B revenue" l={rev} />
         <Row kind="opex" title="F&B OPEX" l={opex} />
       </div>
-      <div className="flex items-center gap-2">
-        <Switch id="fb-adjust" checked={sel.adjust} disabled={ro} onCheckedChange={(c) => update({ ...sel, adjust: c })} />
-        <Label htmlFor="fb-adjust">Adjust to Project Passenger Volume</Label>
-      </div>
-      <p className="text-xs text-muted-foreground">With the switch on, each benchmark figure is scaled to year 3: benchmark × year-3 project passengers ({formatNumber(passengersAt(a, FB_BASIS_YEAR), 0, 0)}) ÷ the passengers of the restaurant's own cable car in the benchmark year — and year 1 is set so the model's year-3 F&amp;B lands exactly on that amount. Every later year then follows the passenger forecast: revenue also grows with ticket price growth, OPEX with cost inflation. With the switch off, the original benchmark figure is used as-is for year 1.</p>
+      <p className="text-xs text-muted-foreground">Project passengers year 1: {formatNumber(passengersAt(a, FB_BASIS_YEAR), 0, 0)} · Restaurant revenue and OPEX are passenger-adjusted.</p>
       <div className="grid grid-cols-3 gap-3 rounded-md bg-muted/40 p-3 text-sm">
         <div><p className="text-xs text-muted-foreground">F&B revenue year 1</p><p className="tabular-nums font-medium">{nok(a.fbRevenueYear1)}</p></div>
         <div><p className="text-xs text-muted-foreground">F&B OPEX year 1</p><p className="tabular-nums font-medium">{nok(a.fbOpexYear1)}</p></div>

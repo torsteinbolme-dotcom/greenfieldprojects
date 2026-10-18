@@ -69,19 +69,29 @@ function ProjectsPage() {
         {list.map((p) => (
           <article key={p.id} className="group overflow-hidden rounded-md border bg-card shadow-sm transition hover:shadow-md">
             <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-              <img
-                src={coverSrc(p, signed)}
-                alt={`${p.name} photo`}
-                loading="lazy"
-                className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
-              />
+              <Link
+                to="/projects/$projectId"
+                params={{ projectId: p.id }}
+                aria-label={`Open ${p.name}`}
+                className="absolute inset-0 block"
+              >
+                <img
+                  src={coverSrc(p, signed)}
+                  alt={`${p.name} photo`}
+                  loading="lazy"
+                  className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                />
+              </Link>
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-primary/85 via-primary/25 to-transparent" />
-              <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+              <div className="pointer-events-none absolute left-3 top-3 flex flex-wrap gap-2">
                 <span className="rounded-full bg-card/85 px-2.5 py-1 text-xs font-medium text-card-foreground">{p.location ?? "No location"}</span>
                 <span className={p.status === "archived" ? "rounded-full bg-card/85 px-2.5 py-1 text-xs font-medium text-muted-foreground" : "rounded-full bg-card/85 px-2.5 py-1 text-xs font-medium text-success"}>{p.status}</span>
               </div>
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <span className="rounded-full bg-card/90 px-3 py-1.5 text-xs font-medium text-card-foreground opacity-0 shadow-sm transition duration-200 group-hover:opacity-100">Open project</span>
+              </div>
               {canEdit && (
-                <label className="absolute right-3 top-3 cursor-pointer rounded-full bg-card/85 px-2.5 py-1 text-xs font-medium text-card-foreground transition hover:bg-card">
+                <label className="absolute right-3 top-3 z-10 cursor-pointer rounded-full bg-card/85 px-2.5 py-1 text-xs font-medium text-card-foreground transition hover:bg-card">
                   {uploading === p.id ? "Saving…" : p.cover_image_url ? "Change photo" : "Add photo"}
                   <input
                     type="file"

@@ -173,7 +173,7 @@ export function RevenueOpexSection({ a, set, ro }: P) {
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
           <Field label="Cable car fixed OPEX year 1 (NOK)"><NumField value={a.cableFixedOpex} disabled={ro} onChange={(v) => set({ cableFixedOpex: v })} /></Field>
           <Field label="F&B OPEX year 1 (NOK)" hint="Scales with F&B revenue"><NumField value={a.fbOpexYear1} disabled={ro || !!fbSel?.opex} onChange={(v) => set({ fbOpexYear1: v })} /></Field>
-          <Field label="Merchandise OPEX (% of merchandise revenue)" hint="Always this share of merchandise revenue, every year"><NumField percent value={a.merchOpexRate ?? (a.merchRevenueYear1 > 0 ? a.merchOpexYear1 / a.merchRevenueYear1 : 0)} disabled={ro} onChange={(v) => set({ merchOpexRate: v, merchOpexYear1: v * a.merchRevenueYear1 })} /></Field>
+          <Field label="Merchandise OPEX (% of merchandise revenue)" hint="Always this share of merchandise revenue, every year"><NumField percent value={a.merchOpexRate ?? (a.merchRevenueYear1 > 0 ? a.merchOpexYear1 / a.merchRevenueYear1 : 0)} disabled={ro} onChange={(v) => set({ merchOpexRate: v, merchOpexYear1: v * a.merchRevenueYear1 })} /><span className="block text-xs text-muted-foreground">= {formatNumber((a.merchOpexRate ?? (a.merchRevenueYear1 > 0 ? a.merchOpexYear1 / a.merchRevenueYear1 : 0)) * a.merchRevenueYear1, 0, 2)} NOK in year 1</span></Field>
         </div>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <Field label="Cable car OPEX growth"><GrowthList values={a.opexGrowth?.cable ?? [a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, cable: v } })} /></Field>

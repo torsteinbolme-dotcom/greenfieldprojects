@@ -57,10 +57,10 @@ function SortTable<T>({ rows, cols, initial, onEdit }: { rows: (T & { id: string
         <thead><tr>{head("name", "Asset", false)}{cols.map((c) => head(c.key, c.label))}{onEdit && <th />}</tr></thead>
         <tbody>
           {sorted.map((r) => (
-            <tr key={r.id}>
+            <tr key={r.id} className={onEdit ? "cursor-pointer hover:bg-muted/50" : undefined} onClick={onEdit ? () => onEdit(r.id) : undefined} title={onEdit ? "Click to edit" : undefined}>
               <td>{r.name}</td>
               {cols.map((c) => <td key={c.key} className="text-right tabular-nums">{c.fmt(c.get(r) as number | null)}</td>)}
-              {onEdit && <td className="text-right"><button aria-label={`Edit ${r.name}`} onClick={() => onEdit(r.id)}><Pencil className="h-3.5 w-3.5 opacity-60 hover:opacity-100" /></button></td>}
+              {onEdit && <td className="text-right"><button aria-label={`Edit ${r.name}`} onClick={(e) => { e.stopPropagation(); onEdit(r.id); }} className="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium text-primary hover:bg-primary/10"><Pencil className="h-3 w-3" />Edit</button></td>}
             </tr>
           ))}
           {sorted.length === 0 && <tr><td colSpan={cols.length + 2} className="text-muted-foreground">No records for this year.</td></tr>}

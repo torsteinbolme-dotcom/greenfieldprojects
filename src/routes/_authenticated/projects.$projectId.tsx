@@ -139,7 +139,7 @@ function EditorPage() {
         <TabsContent value="capex"><CapexSection a={draft} set={set} ro={ro} r={r} /></TabsContent>
         <TabsContent value="revenue"><RevenueOpexSection a={draft} set={set} ro={ro} /></TabsContent>
         <TabsContent value="financing"><FinancingSection a={draft} set={set} ro={ro} r={r} /></TabsContent>
-        <TabsContent value="forecast">{r ? <ForecastSection r={r} /> : <p className="text-muted-foreground">Fix the inputs above to see the forecast.</p>}</TabsContent>
+        <TabsContent value="forecast">{r ? <ForecastSection r={r} a={draft} /> : <p className="text-muted-foreground">Fix the inputs above to see the forecast.</p>}</TabsContent>
         <TabsContent value="exit">{r ? <ExitSection a={draft} set={set} ro={ro} r={r} /> : <p className="text-muted-foreground">Fix the inputs to see exit analysis.</p>}</TabsContent>
         <TabsContent value="history">
           <Card title={`Version history — ${scenario.name}`}>

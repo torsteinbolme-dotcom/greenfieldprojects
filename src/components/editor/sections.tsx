@@ -8,6 +8,7 @@ import { Field, GrowthList, NumField } from "./inputs";
 import { int, mult, nok, nokM, pct } from "@/lib/format";
 import { segmentNetPerGuest, shareSum, type ModelResult } from "@/lib/model";
 import { isAdultRoundTrip, segmentTicketRatio, type PricedSegment } from "@/lib/ticket-pricing";
+import { forecastOpex } from "@/lib/forecast-opex";
 
 type P = { a: Assumptions; set: (patch: Partial<Assumptions>) => void; ro: boolean };
 
@@ -191,14 +192,18 @@ export function FinancingSection({ a, set, ro, r }: P & { r: ModelResult | null 
   );
 }
 
-const forecastRows: [string, (r: ModelResult["rows"][number]) => string][] = [
+const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) => string][] = [
   ["Passengers", (y) => int(y.passengers)],
   ["Avg. realized ticket ex VAT, after commission (NOK)", (y) => nok(y.ticketNetPrice, 1)],
   ["Cable car revenue", (y) => nokM(y.ticketRevenue)],
   ["F&B revenue", (y) => nokM(y.fbRevenue)],
   ["Merchandise revenue", (y) => nokM(y.merchRevenue)],
   ["Total revenue", (y) => nokM(y.revenue)],
-  ["OPEX", (y) => nokM(-y.opex)],
+  ["Cable car fixed OPEX", (y, a) => nokM(-forecastOpex(a, y).cableFixed)],
+  ["Cable car variable OPEX", (y, a) => nokM(-forecastOpex(a, y).cableVariable)],
+  ["F&B OPEX", (y, a) => nokM(-forecastOpex(a, y).fb)],
+  ["Merchandise OPEX", (y, a) => nokM(-forecastOpex(a, y).merchandise)],
+  ["Total OPEX", (y) => nokM(-y.opex)],
   ["EBITDA", (y) => nokM(y.ebitda)],
   ["EBITDA margin", (y) => pct(y.revenue ? y.ebitda / y.revenue : null)],
   ["Depreciation", (y) => nokM(-y.depreciation)],
@@ -212,9 +217,9 @@ const forecastRows: [string, (r: ModelResult["rows"][number]) => string][] = [
   ["Closing debt", (y) => nokM(y.closingDebt)],
   ["DSCR", (y) => mult(y.dscr)],
 ];
-const bold = new Set(["Total revenue", "EBITDA", "Cash flow after debt service"]);
+const bold = new Set(["Total revenue", "Total OPEX", "EBITDA", "Cash flow after debt service"]);
 
-export function ForecastSection({ r }: { r: ModelResult }) {
+export function ForecastSection({ r, a }: { r: ModelResult; a: Assumptions }) {
   return (
     <Card title="Forecast (NOK m unless stated)">
       <div className="overflow-x-auto">
@@ -226,7 +231,7 @@ export function ForecastSection({ r }: { r: ModelResult }) {
             {forecastRows.map(([label, f]) => (
               <tr key={label} className={bold.has(label) ? "font-semibold" : ""}>
                 <td className="sticky left-0 z-10 bg-card">{label}</td>
-                {r.rows.map((y) => <td key={y.year} className="num text-right">{f(y)}</td>)}
+                {r.rows.map((y) => <td key={y.year} className="num text-right">{f(y, a)}</td>)}
               </tr>
             ))}
           </tbody>

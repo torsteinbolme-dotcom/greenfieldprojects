@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { calculate, type Assumptions } from "@/financialEngine";
 import { withFbBenchmark, type AssumptionsWithFb } from "@/lib/fb-benchmark";
-import { maintenanceReview } from "@/lib/maintenance";
 
 // Independently hand-calculated two-year investment, no example-project fixture or derived expectations.
 const fixture = (patch: Partial<Assumptions> = {}): Assumptions => ({
@@ -96,17 +95,14 @@ describe("independent financial validation", () => {
     expect(a.fbBenchmark.revenue?.snapshot?.historicalAmount).toBe(200);
   });
 
-  it("legacy conflicts are flagged without changing the active percentage or saved history", () => {
+  it("legacy rate is inert and only the active percentage calculates maintenance", () => {
     const a = fixture({ maintenanceCapexPct: 0.005, maintenanceCapexRate: 0.01 });
     const before = JSON.stringify(a);
-    expect(maintenanceReview(a)).not.toBeNull();
-    expect(JSON.stringify(a)).toBe(before);
     expect(calculate(a).rows.map(x => x.maintenanceCapex)).toEqual([1, 1]);
+    expect(JSON.stringify(a)).toBe(before);
     const legacy = fixture({ maintenanceCapexRate: 0.01 });
     delete legacy.maintenanceCapexPct;
-    expect(maintenanceReview(legacy)).not.toBeNull();
     expect(calculate(legacy).rows.map(x => x.maintenanceCapex)).toEqual([0, 0]);
-    expect(maintenanceReview(fixture({ maintenanceCapexRate: 0 }))).toBeNull();
   });
   it("uses retained cash before requesting fresh equity", () => {
     const r = calculate(fixture({ initialPassengers: 200, passengerGrowth: [-0.5] }));

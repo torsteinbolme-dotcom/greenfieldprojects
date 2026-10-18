@@ -31,4 +31,4 @@
 - Per-cost OPEX growth lists (`opexGrowth.cable/fb`) and `merchOpexRate` (merch OPEX = % of merch revenue) are optional scenario fields read via `costIndex`/`merchOpexAt`; absent fields fall back to `costInflation` and the legacy ratio (user-approved 2026-10-18). Why: old versions keep identical results.
 - Project photos: private `project-covers` bucket, path `<org>/<project>.<ext>`; `projects.cover_image_url` stores that path and the UI signs URLs (`src/lib/covers*.ts`). Why: public buckets are blocked.
 - Capacity stays outside the engine in scenario JSON; distributions are local drafts until valid explicit Save; key the editor by scenario. Why: protect forecasts and isolate drafts.
-- `src/lib/maintenance.ts` flags ambiguous legacy rates without migration; only the active engine field calculates maintenance. Why: inert revenue-based rates cannot safely become CAPEX percentages.
+- Only the active maintenance CAPEX percentage calculates maintenance; inert legacy revenue-based rates stay untouched in saved history and are never surfaced as UI warnings. Why: they cannot safely become CAPEX percentages and the user removed the conflict banner.

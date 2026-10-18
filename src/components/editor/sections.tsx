@@ -116,7 +116,7 @@ export function SegmentsSection({ a, set, ro }: P) {
 
 function SegmentBridge({ a }: { a: Assumptions }) {
   const rows = segmentRows(a);
-  const steps = buildWaterfall(rows);
+  const steps = buildWaterfall(rows.map(r => ({ name: r.name, value: r.passengers })));
   const total = rows.reduce((s, r) => s + r.passengers, 0);
   const revTotal = rows.reduce((s, r) => s + r.netRevenue, 0);
   return (

@@ -2,7 +2,7 @@
 /** Project Mountain v1 financial engine. All amounts NOK, rates decimals. */
 export type Segment = {name:string;share:number;grossPrice:number;vatRate:number;commission:number;boardingsPerGuest:number};
 export type CapexItem = {name:string;quantity:number;unitCost:number};
-// cableVariableCostPerPassenger adds to cable car OPEX; maintenanceCapexRate is an annual investing outflow as % of initial CAPEX (mountain-v3).
+// cableVariableCostPerPassenger adds to cable car OPEX. maintenanceCapexRate is a legacy inert input; maintenanceCapexPct (absent = 0) is the annual investing outflow as % of initial CAPEX (mountain-v3).
 export type Assumptions = {
   name:string;openingYear:number;years:number;initialPassengers:number;
   segments:Segment[]; passengerGrowth:number[]; priceGrowth:number[];
@@ -11,7 +11,7 @@ export type Assumptions = {
   fbOpexYear1:number;merchOpexYear1:number;costInflation:number;
   capexItems:CapexItem[];contingencyRate:number;
   debtShare:number;interestRate:number;loanYears:number;taxRate:number;
-  depreciationYears:number;maintenanceCapexRate:number;
+  depreciationYears:number;maintenanceCapexRate:number;maintenanceCapexPct?:number;
   exitYear:number;exitMultiple:number;exitTransactionCostRate:number;performanceYear?:number;
   distributeCashAnnually:boolean;
   // Optional per-cost yearly growth lists (fall back to costInflation) and merchandise OPEX as share of merchandise revenue.
@@ -65,7 +65,7 @@ export function calculate(a:Assumptions){
     if(taxableIncome<0){lossCarryforward+=-taxableIncome;}
     else{const offset=Math.min(lossCarryforward,taxableIncome);lossCarryforward-=offset;tax=(taxableIncome-offset)*a.taxRate;}
     // Maintenance CAPEX is an investing outflow: reduces cash, never EBITDA.
-    const maintenanceCapex=capex*(a.maintenanceCapexRate||0)*costIndex(a,'cable',year);
+    const maintenanceCapex=capex*(a.maintenanceCapexPct||0)*costIndex(a,'cable',year);
     const cashAfterDebt=ebitda-interest-principal-tax-maintenanceCapex;
     const distribution=a.distributeCashAnnually?Math.max(0,cashAfterDebt):0;
     retainedCash+=cashAfterDebt-distribution;

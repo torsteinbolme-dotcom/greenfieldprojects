@@ -111,7 +111,7 @@ export async function createProject(orgId: string, name: string, location: strin
     .insert({ organization_id: orgId, name, location, assumption_notes: notes ?? null, created_by: (u.user?.id ?? null) })
     .select().single();
   if (error) throw error;
-  await createScenario(orgId, data.id, "Base", "base", { ...a, name });
+  await createScenario(orgId, data.id, "Base", "base", { maintenanceCapexPct: 0.01, ...a, name });
   await logAudit(orgId, "project", data.id, "created");
   return data as ProjectRow;
 }

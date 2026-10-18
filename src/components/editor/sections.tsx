@@ -1,3 +1,4 @@
+import { safeCalculate } from "@/lib/model";
 import type { Assumptions } from "@/financialEngine";
 import { calculate } from "@/financialEngine";
 import { Button } from "@/components/ui/button";
@@ -223,7 +224,7 @@ export function RevenueOpexSection({ a, set, ro }: P) {
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
           <Field label="Cable car fixed OPEX year 1 (NOK)"><NumField value={a.cableFixedOpex} disabled={ro} onChange={(v) => set({ cableFixedOpex: v })} /></Field>
           <Field label="Cable car variable OPEX per passenger (NOK)" hint="Year-1 price level; grows with cable car OPEX"><NumField value={a.cableVariableCostPerPassenger ?? 0} disabled={ro} onChange={(v) => set({ cableVariableCostPerPassenger: v })} /></Field>
-          <Field label="Annual maintenance CAPEX (% of initial CAPEX)" hint="Investing cash outflow, not OPEX; grows with cable car OPEX"><NumField percent value={a.maintenanceCapexRate ?? 0} disabled={ro} onChange={(v) => set({ maintenanceCapexRate: v })} /></Field>
+          <Field label="Annual maintenance CAPEX (% of initial CAPEX)" hint="Investing cash outflow, not OPEX; grows with cable car OPEX"><NumField percent value={a.maintenanceCapexPct ?? 0} disabled={ro} onChange={(v) => set({ maintenanceCapexPct: v })} /></Field>
           <Field label="F&B OPEX year 1 (NOK)" hint="Scales with F&B revenue"><NumField value={a.fbOpexYear1} disabled={ro || !!fbSel?.opex} onChange={(v) => set({ fbOpexYear1: v })} /></Field>
           <Field label="Merchandise OPEX (% of merchandise revenue)" hint="Always this share of merchandise revenue, every year"><NumField percent value={a.merchOpexRate ?? (a.merchRevenueYear1 > 0 ? a.merchOpexYear1 / a.merchRevenueYear1 : 0)} disabled={ro} onChange={(v) => set({ merchOpexRate: v, merchOpexYear1: v * a.merchRevenueYear1 })} /><span className="block text-xs text-muted-foreground">= {nok((a.merchOpexRate ?? (a.merchRevenueYear1 > 0 ? a.merchOpexYear1 / a.merchRevenueYear1 : 0)) * a.merchRevenueYear1)} NOK in year 1</span></Field>
         </div>
@@ -264,6 +265,7 @@ export function FinancingSection({ a, set, ro, r }: P & { r: ModelResult | null 
   );
 }
 
+const safeExit = (a: Assumptions) => safeCalculate(a).result?.exitEquityValue ?? null;
 type ForecastGroup = "revenue" | "opex";
 const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) => string, ForecastGroup?][] = [
   ["Passengers", (y) => int(y.passengers)],
@@ -283,9 +285,13 @@ const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) =>
   ["Interest", (y) => nokM(-y.interest)],
   ["Principal", (y) => nokM(-y.principal)],
   ["Tax", (y) => nokM(-y.tax)],
+  ["Operating cash flow (EBITDA − tax)", (y) => nokM(y.ebitda - y.tax)],
   ["Maintenance CAPEX", (y) => nokM(-y.maintenanceCapex)],
+  ["Debt service (interest + principal)", (y) => nokM(-(y.interest + y.principal))],
   ["Cash flow after debt service", (y) => nokM(y.cashAfterDebt)],
-  ["Additional equity injected", (y) => nokM(y.equityInjection)],
+  ["Additional equity contributions", (y) => nokM(y.equityInjection)],
+  ["Shareholder distributions", (y) => nokM(-y.distribution)],
+  ["Exit proceeds to equity", (y, a) => (y.year === a.exitYear ? nokM(safeExit(a)) : "–")],
   ["Retained cash (cumulative)", (y) => nokM(y.retainedCash)],
   ["Closing debt", (y) => nokM(y.closingDebt)],
   ["DSCR", (y) => mult(y.dscr)],

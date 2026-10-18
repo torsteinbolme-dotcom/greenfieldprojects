@@ -79,3 +79,39 @@ describe("financial engine", () => {
     expect(b.equityIrr!).toBeLessThan(a.equityIrr!);
   });
 });
+
+describe("tax-loss carryforward", () => {
+  const lossy = (): Assumptions => base({
+    years: 6, exitYear: 6, initialPassengers: 1000,
+    passengerGrowth: [0], priceGrowth: [0], ancillaryGrowth: [0],
+    fbRevenueYear1: 0, merchRevenueYear1: 0, fbOpexYear1: 0, merchOpexYear1: 0,
+    cableFixedOpex: 0, costInflation: 0,
+    capexItems: [{ name: "x", quantity: 1, unitCost: 1_000_000 }], contingencyRate: 0,
+    debtShare: 0, loanYears: 15, interestRate: 0, depreciationYears: 5, taxRate: 0.22,
+    segments: [{ name: "A", share: 1, grossPrice: 100, vatRate: 0, commission: 0, boardingsPerGuest: 1 }],
+  });
+
+  it("pays no tax while losses are carried forward, then offsets later profits", () => {
+    // revenue 100 000/yr, depreciation 200 000/yr -> loss 100 000/yr for 5 years, then profit
+    const r = calculate(lossy());
+    for (let y = 0; y < 5; y++) expect(r.rows[y]!.tax).toBe(0);
+    // year 6: taxable 100 000, carried loss 500 000 -> fully offset
+    expect(r.rows[5]!.tax).toBe(0);
+  });
+
+  it("taxes only the profit exceeding the carried loss", () => {
+    const a = lossy();
+    a.depreciationYears = 10; // depreciation 100 000/yr -> break-even; no loss, no tax
+    const r0 = calculate(a);
+    expect(r0.rows.every((row) => row.tax === 0)).toBe(true);
+    // smaller capex: depreciation 50 000/yr -> taxable 50 000/yr from year 1, no losses to carry
+    const r1 = calculate(base({ ...lossy(), capexItems: [{ name: "x", quantity: 1, unitCost: 500_000 }], depreciationYears: 10 }));
+    expect(r1.rows[0]!.tax).toBeCloseTo(50_000 * 0.22, 6);
+    // depreciation 200 000/yr for 2 years (loss 100 000/yr), then taxable 50 000/yr offset by 200 000 carried loss
+    const r2 = calculate(base({ ...lossy(), capexItems: [{ name: "x", quantity: 1, unitCost: 400_000 }], depreciationYears: 2 }));
+    expect(r2.rows[0]!.tax).toBe(0);
+    expect(r2.rows[1]!.tax).toBe(0);
+    expect(r2.rows[2]!.tax).toBe(0); // 50 000 offset, 150 000 loss remains
+    expect(r2.rows[5]!.tax).toBe(0);
+  });
+});

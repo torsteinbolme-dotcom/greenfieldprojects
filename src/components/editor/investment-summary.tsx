@@ -20,7 +20,6 @@ export function InvestmentSummary({ a, r, name, location, onPerformanceYear, onE
   const exit = r.rows[a.exitYear - 1];
   const split = perfRow ? bridgeValues(a, perfRow) : null;
   const development = r.rows.map(row => ({ year: row.year, Revenue: row.revenue, EBITDA: row.ebitda, Passengers: row.passengers }));
-  const cashflows = r.cashflows.map((flow, year) => ({ year, 'Equity cash flow': flow }));
   const perfSelect = onPerformanceYear && <Select value={String(perfYear)} onValueChange={v => onPerformanceYear(Number(v))}><SelectTrigger className="h-7 w-24 text-sm"><SelectValue /></SelectTrigger><SelectContent>{r.rows.map(row => <SelectItem key={row.year} value={String(row.year)}>Year {row.year}</SelectItem>)}</SelectContent></Select>;
   const exitSelect = onExitYear && <Select value={String(a.exitYear)} onValueChange={v => onExitYear(Number(v))}><SelectTrigger className="h-7 w-24 text-sm"><SelectValue /></SelectTrigger><SelectContent>{r.rows.map(row => <SelectItem key={row.year} value={String(row.year)}>Year {row.year}</SelectItem>)}</SelectContent></Select>;
   return <section className="space-y-6" aria-label="Investment Summary">
@@ -34,7 +33,7 @@ export function InvestmentSummary({ a, r, name, location, onPerformanceYear, onE
       {r.rows.some(row => row.cashAfterDebt < 0) && <p className="text-sm text-destructive">This scenario has negative cash after debt service in at least one year. Review the funding requirement before relying on the displayed returns.</p>}
     </section>
     <BreakEvenPanel a={a} />
-    <div className="grid gap-6 lg:grid-cols-2"><DevelopmentChart title="Revenue and EBITDA development" data={development} lines={['Revenue', 'EBITDA']} /><DevelopmentChart title="Annual passengers" data={development} lines={['Passengers']} passengers /><DevelopmentChart title="Equity cash flow" data={cashflows} lines={['Equity cash flow']} bar /></div>
+    <div className="grid gap-6 lg:grid-cols-2"><DevelopmentChart title="Revenue and EBITDA development" data={development} lines={['Revenue', 'EBITDA']} /><DevelopmentChart title="Annual passengers" data={development} lines={['Passengers']} passengers /></div>
     <EbitdaBridge a={a} r={r} />
   </section>;
 }

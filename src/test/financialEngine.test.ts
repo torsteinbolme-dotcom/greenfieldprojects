@@ -30,7 +30,7 @@ describe("financial engine", () => {
   });
 
   it("amortizes debt straight-line over the loan tenor", () => {
-    const r = calculate(base({ loanYears: 15 }));
+    const r = calculate(base({ loanYears: 15, years: 20 }));
     for (let i = 0; i < 15; i++) expect(r.rows[i]!.principal).toBeCloseTo(r.debt / 15, 4);
     expect(r.rows[14]!.closingDebt).toBeCloseTo(0, 4);
     expect(r.rows[15]!.principal).toBe(0);

@@ -32,3 +32,4 @@
 - Investment Summary reads engine outputs directly and discloses initial-equity-only returns and unsupported funding gaps. Why: additional equity is not modelled and must never be fabricated or silently included in IRR/MOIC.
 - Per-cost OPEX growth lists (`opexGrowth.cable/fb`) and `merchOpexRate` (merch OPEX = % of merch revenue) are optional scenario fields read via `costIndex`/`merchOpexAt`; absent fields fall back to `costInflation` and the legacy ratio (user-approved 2026-10-18). Why: old versions keep identical results.
 - Project photos: private `project-covers` bucket, path `<org>/<project>.<ext>`; `projects.cover_image_url` stores that path and the UI signs URLs (`src/lib/covers*.ts`). Why: public buckets are blocked.
+- Capacity & seasonality is validation-only: optional `capacity` in scenario JSON, derived in `src/lib/capacity.ts`, never read by the engine; allocation saves only when it totals 100%. Why: capacity must not change forecasts or returns.

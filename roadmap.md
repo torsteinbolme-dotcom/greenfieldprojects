@@ -34,3 +34,5 @@
 - [x] Comparison split into Project vs. Project and Year 3 vs. Benchmarks with expandable sidebar menu; verified signed in.
 - [x] Display differences with an explicit sign and colour them: + green, - red, zero and missing neutral; verified in the signed-in preview.
 - [x] Use Benchmark as Project Basis (project tab + Year 3 comparison)
+- [x] F&B revenue/OPEX "Use Benchmark" selectors with passenger adjustment
+- [ ] F&B following annual passengers in every year — waiting for the user to approve an engine formula change

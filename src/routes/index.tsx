@@ -1,4 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -16,6 +18,13 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    // Returning from Google sign-in lands here; send signed-in users straight to their portfolio.
+    supabase.auth.getSession().then(({ data }) => { if (data.session) navigate({ to: "/portfolio" }); });
+    const { data } = supabase.auth.onAuthStateChange((e, s) => { if (s && e === "SIGNED_IN") navigate({ to: "/portfolio" }); });
+    return () => data.subscription.unsubscribe();
+  }, [navigate]);
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto flex min-h-screen max-w-5xl flex-col justify-center px-6 py-16">

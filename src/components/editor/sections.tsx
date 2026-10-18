@@ -9,6 +9,8 @@ import { int, mult, nok, nokM, pct } from "@/lib/format";
 import { segmentNetPerGuest, shareSum, type ModelResult } from "@/lib/model";
 import { isAdultRoundTrip, segmentTicketRatio, type PricedSegment } from "@/lib/ticket-pricing";
 import { forecastOpex } from "@/lib/forecast-opex";
+import { useState } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 type P = { a: Assumptions; set: (patch: Partial<Assumptions>) => void; ro: boolean };
 
@@ -192,18 +194,19 @@ export function FinancingSection({ a, set, ro, r }: P & { r: ModelResult | null 
   );
 }
 
-const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) => string][] = [
+type ForecastGroup = "revenue" | "opex";
+const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) => string, ForecastGroup?][] = [
   ["Passengers", (y) => int(y.passengers)],
   ["Avg. realized ticket ex VAT, after commission (NOK)", (y) => nok(y.ticketNetPrice, 1)],
-  ["Cable car revenue", (y) => nokM(y.ticketRevenue)],
-  ["F&B revenue", (y) => nokM(y.fbRevenue)],
-  ["Merchandise revenue", (y) => nokM(y.merchRevenue)],
   ["Total revenue", (y) => nokM(y.revenue)],
-  ["Cable car fixed OPEX", (y, a) => nokM(-forecastOpex(a, y).cableFixed)],
-  ["Cable car variable OPEX", (y, a) => nokM(-forecastOpex(a, y).cableVariable)],
-  ["F&B OPEX", (y, a) => nokM(-forecastOpex(a, y).fb)],
-  ["Merchandise OPEX", (y, a) => nokM(-forecastOpex(a, y).merchandise)],
+  ["Cable car revenue", (y) => nokM(y.ticketRevenue), "revenue"],
+  ["F&B revenue", (y) => nokM(y.fbRevenue), "revenue"],
+  ["Merchandise revenue", (y) => nokM(y.merchRevenue), "revenue"],
   ["Total OPEX", (y) => nokM(-y.opex)],
+  ["Cable car fixed OPEX", (y, a) => nokM(-forecastOpex(a, y).cableFixed), "opex"],
+  ["Cable car variable OPEX", (y, a) => nokM(-forecastOpex(a, y).cableVariable), "opex"],
+  ["F&B OPEX", (y, a) => nokM(-forecastOpex(a, y).fb), "opex"],
+  ["Merchandise OPEX", (y, a) => nokM(-forecastOpex(a, y).merchandise), "opex"],
   ["EBITDA", (y) => nokM(y.ebitda)],
   ["EBITDA margin", (y) => pct(y.revenue ? y.ebitda / y.revenue : null)],
   ["Depreciation", (y) => nokM(-y.depreciation)],
@@ -220,6 +223,7 @@ const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) =>
 const bold = new Set(["Total revenue", "Total OPEX", "EBITDA", "Cash flow after debt service"]);
 
 export function ForecastSection({ r, a }: { r: ModelResult; a: Assumptions }) {
+  const [expanded, setExpanded] = useState<Record<ForecastGroup, boolean>>({ revenue: true, opex: true });
   return (
     <Card title="Forecast (NOK m unless stated)">
       <div className="overflow-x-auto">
@@ -228,12 +232,24 @@ export function ForecastSection({ r, a }: { r: ModelResult; a: Assumptions }) {
             <tr><th className="sticky left-0 z-10 bg-secondary">Year</th>{r.rows.map((y) => <th key={y.year} className="text-right">{y.calendarYear}<br /><span className="font-normal normal-case">Y{y.year}</span></th>)}</tr>
           </thead>
           <tbody>
-            {forecastRows.map(([label, f]) => (
+            {forecastRows.filter(([, , group]) => !group || expanded[group]).map(([label, f, group]) => {
+              const toggleGroup = label === "Total revenue" ? "revenue" : label === "Total OPEX" ? "opex" : null;
+              return (
               <tr key={label} className={bold.has(label) ? "font-semibold" : ""}>
-                <td className="sticky left-0 z-10 bg-card">{label}</td>
+                <td className="sticky left-0 z-10 bg-card">
+                  {toggleGroup ? (
+                    <Button variant="ghost" size="sm" className="h-7 justify-start px-1 font-semibold" aria-expanded={expanded[toggleGroup]}
+                      aria-label={`${expanded[toggleGroup] ? "Collapse" : "Expand"} ${label.toLowerCase()}`}
+                      title={`${expanded[toggleGroup] ? "Hide" : "Show"} ${toggleGroup === "revenue" ? "revenue items" : "operating expenses"}`}
+                      onClick={() => setExpanded((current) => ({ ...current, [toggleGroup]: !current[toggleGroup] }))}>
+                      {expanded[toggleGroup] ? <ChevronDown /> : <ChevronRight />}{label}
+                    </Button>
+                  ) : <span className={group ? "pl-7 text-muted-foreground" : ""}>{label}</span>}
+                </td>
                 {r.rows.map((y) => <td key={y.year} className="num text-right">{f(y, a)}</td>)}
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

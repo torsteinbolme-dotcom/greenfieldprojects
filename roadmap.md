@@ -1,4 +1,5 @@
 # Tasks
+- [ ] Add expandable total revenue and total OPEX rows that show or hide their individual items; verify both controls.
 - [ ] Show all four operating expense categories and total OPEX in the forecast; verify reconciliation and the signed-in display.
 - [x] Verify displayed base white (#F2F2F2) and blue (#14314D): browser measurements confirm page/panel backgrounds and sidebar use the exact requested colours.
 - [x] Format all numbers with spaced thousands, decimal commas and no more than two decimals, including editable fields and graphs.

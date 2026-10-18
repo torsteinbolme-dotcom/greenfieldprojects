@@ -1,72 +1,71 @@
-import type { Assumptions } from "@/financialEngine";
-import { AlertTriangle } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useBenchmarks } from "@/lib/benchmarks";
-import { FB_BASIS_YEAR, fbLine, latestYear, passengersAt, withFbBenchmark, type AssumptionsWithFb, type FbBenchmark, type FbLine } from "@/lib/fb-benchmark";
-import { formatNumber, nok, pct } from "@/lib/format";
-
-const MANUAL = "manual";
-
-/** Restaurant revenue and OPEX sources automatically scaled to project year-1 passengers. */
+import { useState } from 'react';
+import type { Assumptions } from '@/financialEngine';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useBenchmarks } from '@/lib/benchmarks';
+import { fbLine, latestYear, sourceAdjust, snapshotSource, withFbBenchmark, type AssumptionsWithFb, type FbBenchmark, type FbSource } from '@/lib/fb-benchmark';
+import { formatNumber, nok, pct } from '@/lib/format';
 export function FbBenchmarkPanel({ a, set, ro }: { a: Assumptions; set: (p: Partial<Assumptions>) => void; ro: boolean }) {
-  const { data } = useBenchmarks();
+  const { data, refetch } = useBenchmarks();
+  const [refresh, setRefresh] = useState<{ kind: 'revenue' | 'opex'; source: FbSource } | null>(null);
   const aw = a as AssumptionsWithFb;
-  const sel: FbBenchmark = { ...aw.fbBenchmark, adjust: true };
+  const sel: FbBenchmark = aw.fbBenchmark ?? { adjust: true };
   if (!data) return <p className="text-sm text-muted-foreground">Loading benchmarks…</p>;
-  const restaurants = data.assets.filter((x) => x.business_type === "fnb");
-
+  const restaurants = data.assets.filter(x => x.business_type === 'fnb');
   const update = (next: FbBenchmark) => {
-    const follows = !!(next.revenue || next.opex);
-    const derived = withFbBenchmark({ ...aw, fbBenchmark: next, fbFollowsPassengers: follows }, data.assets, data.records);
-    set({ fbBenchmark: next, fbRevenueYear1: derived.fbRevenueYear1, fbOpexYear1: derived.fbOpexYear1, fbFollowsPassengers: follows } as Partial<Assumptions>);
+    const derived = withFbBenchmark({ ...aw, fbBenchmark: next }, data.assets, data.records);
+    set({ fbBenchmark: derived.fbBenchmark, fbRevenueYear1: derived.fbRevenueYear1, fbOpexYear1: derived.fbOpexYear1 } as Partial<Assumptions>);
   };
-  const choose = (kind: "revenue" | "opex", v: string) =>
-    update({ ...sel, [kind]: v === MANUAL ? null : { assetId: v, year: latestYear(data.records, v) } });
-
-  const line = (kind: "revenue" | "opex"): FbLine | null => {
-    const s = sel[kind];
-    return s ? fbLine(kind, s, sel.adjust, passengersAt(a, FB_BASIS_YEAR), data.assets, data.records) : null;
-  };
-  const rev = line("revenue"), opex = line("opex");
-  const ebitda = a.fbRevenueYear1 - a.fbOpexYear1;
-
-  const Row = ({ kind, title, l }: { kind: "revenue" | "opex"; title: string; l: FbLine | null }) => (
-    <div className="space-y-2 rounded-md border p-3">
-      <Label className="text-xs">{title} — Use Benchmark</Label>
-      <Select value={sel[kind]?.assetId ?? MANUAL} disabled={ro} onValueChange={(v) => choose(kind, v)}>
-        <SelectTrigger><SelectValue /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value={MANUAL}>Manual Input</SelectItem>
-          {restaurants.map((r) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
-          {l && !l.asset && <SelectItem value={l.source.assetId}>Deleted benchmark</SelectItem>}
-        </SelectContent>
-      </Select>
-      {l ? (
-        <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
-          <dt className="text-muted-foreground">Selected benchmark</dt><dd className="text-right">{l.asset?.name ?? "—"}{l.parent ? ` (${l.parent.name})` : ""}</dd>
-          <dt className="text-muted-foreground">Benchmark financial year</dt><dd className="text-right">{l.source.year}</dd>
-          <dt className="text-muted-foreground">Original benchmark value</dt><dd className="text-right tabular-nums">{l.original == null ? "N/A" : `${nok(l.original)} NOK`}</dd>
-          <dt className="text-muted-foreground">Cable car passengers</dt><dd className="text-right tabular-nums">{l.benchPassengers == null ? "N/A" : formatNumber(l.benchPassengers, 0, 0)}</dd>
-          <dt className="text-muted-foreground">Passenger-adjusted (year 1)</dt><dd className="text-right tabular-nums">{l.adjusted != null ? `${nok(l.adjusted)} NOK` : "—"}</dd>
-          {l.warning && <dd className="col-span-2 flex items-start gap-1 text-destructive"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />{l.warning}</dd>}
-        </dl>
-      ) : <p className="text-xs text-muted-foreground">Manual Input — edit the year-1 amount below.</p>}
-    </div>
-  );
-
-  return (
-    <div className="space-y-3">
-      <div className="grid gap-3 md:grid-cols-2">
-        <Row kind="revenue" title="F&B revenue" l={rev} />
-        <Row kind="opex" title="F&B OPEX" l={opex} />
-      </div>
-      <p className="text-xs text-muted-foreground">Project passengers year 1: {formatNumber(passengersAt(a, FB_BASIS_YEAR), 0, 0)} · Restaurant revenue and OPEX are passenger-adjusted.</p>
-      <div className="grid grid-cols-3 gap-3 rounded-md bg-muted/40 p-3 text-sm">
-        <div><p className="text-xs text-muted-foreground">F&B revenue year 1</p><p className="tabular-nums font-medium">{nok(a.fbRevenueYear1)}</p></div>
-        <div><p className="text-xs text-muted-foreground">F&B OPEX year 1</p><p className="tabular-nums font-medium">{nok(a.fbOpexYear1)}</p></div>
-        <div><p className="text-xs text-muted-foreground">F&B EBITDA year 1</p><p className="tabular-nums font-medium">{nok(ebitda)}{a.fbRevenueYear1 ? ` (${pct(ebitda / a.fbRevenueYear1)})` : ""}</p></div>
-      </div>
-    </div>
-  );
+  return <div className="space-y-3">
+    <div className="grid gap-5 md:grid-cols-2">{(['revenue', 'opex'] as const).map(kind => {
+      const source = sel[kind];
+      const adjust = source ? sourceAdjust(sel, source) : true;
+      const line = source ? fbLine(kind, source, adjust, a.initialPassengers, data.assets, data.records) : null;
+      return <div className="space-y-3" key={kind}>
+        <Label>F&B {kind === 'revenue' ? 'revenue' : 'OPEX'} — Use Benchmark</Label>
+        <Select value={source?.assetId ?? 'manual'} disabled={ro} onValueChange={v => {
+          const year = latestYear(data.records, v);
+          update({ ...sel, [kind]: v === 'manual' ? null : snapshotSource(a, kind, { assetId: v, year: Number.isFinite(year) ? year : new Date().getFullYear() }, true, data.assets, data.records) });
+        }}><SelectTrigger aria-label={`F&B ${kind} benchmark`}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="manual">Manual</SelectItem>{restaurants.map(r => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}{source && !restaurants.some(r => r.id === source.assetId) && <SelectItem value={source.assetId}>{source.snapshot?.name ?? 'Unavailable benchmark'}</SelectItem>}</SelectContent></Select>
+        <div className="flex items-center justify-between gap-2"><Label htmlFor={`scale-${kind}`} className="text-xs">Adjust to Project Passenger Volume</Label><Switch id={`scale-${kind}`} aria-label={`Adjust F&B ${kind} to Project Passenger Volume`} checked={!!source && adjust} disabled={ro || !source} onCheckedChange={checked => {
+          if (!source) return;
+          update({ ...sel, [kind]: { ...source, adjust: checked, snapshot: source.snapshot ? { ...source.snapshot, adjust: checked } : undefined } });
+        }} /></div>
+        {line && <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+          <dt className="text-muted-foreground">Saved benchmark</dt><dd className="text-right">{line.asset?.name ?? 'Unavailable'}{line.parent ? ` (${line.parent.name})` : ''}</dd>
+          <dt className="text-muted-foreground">Financial year</dt><dd className="text-right">{source?.year}</dd>
+          <dt className="text-muted-foreground">Historical amount</dt><dd className="num text-right">{line.original == null ? 'N/A' : `${nok(line.original)} NOK`}</dd>
+          <dt className="text-muted-foreground">Cable car passengers</dt><dd className="num text-right">{line.benchPassengers == null ? 'N/A' : formatNumber(line.benchPassengers, 0, 0)}</dd>
+          <dt className="text-muted-foreground">Year 1 amount</dt><dd className="num text-right">{line.adjusted == null ? '—' : `${nok(line.adjusted)} NOK`}</dd>
+          {(line.warning || !source?.snapshot) && <dd className="col-span-2 flex gap-1 text-destructive"><AlertTriangle className="h-4 w-4 shrink-0" />{line.warning ?? 'Snapshot unavailable. The last applied amount is retained.'}</dd>}
+        </dl>}
+        {source && <Button variant="outline" size="sm" disabled={ro} onClick={async () => {
+          const fresh = await refetch();
+          if (!fresh.data) return;
+          setRefresh({ kind, source: snapshotSource(a, kind, source, adjust, fresh.data.assets, fresh.data.records) });
+        }}><RefreshCw className="h-4 w-4" />Refresh Benchmark</Button>}
+      </div>;
+    })}</div>
+    <p className="text-xs text-muted-foreground">Project passengers year 1: {formatNumber(a.initialPassengers, 0, 0)}</p>
+    <div className="grid grid-cols-3 gap-3 border-t pt-3 text-sm">{[['F&B revenue year 1', a.fbRevenueYear1], ['F&B OPEX year 1', a.fbOpexYear1], ['F&B EBITDA year 1', a.fbRevenueYear1 - a.fbOpexYear1]].map(([label, amount]) => <div key={label}><p className="text-xs text-muted-foreground">{label}</p><p className="num font-medium">{nok(Number(amount))}</p></div>)}</div>
+    <p className="text-xs text-muted-foreground">EBITDA margin: {pct(a.fbRevenueYear1 ? (a.fbRevenueYear1 - a.fbOpexYear1) / a.fbRevenueYear1 : null)}</p>
+    <Dialog open={!!refresh} onOpenChange={open => { if (!open) setRefresh(null); }}><DialogContent><DialogHeader><DialogTitle>Refresh Benchmark — preview</DialogTitle></DialogHeader>
+      {refresh && (() => {
+        const old = sel[refresh.kind];
+        const oldLine = old ? fbLine(refresh.kind, old, sourceAdjust(sel, old), a.initialPassengers, data.assets, data.records) : null;
+        const newLine = fbLine(refresh.kind, refresh.source, sourceAdjust(sel, refresh.source), a.initialPassengers, data.assets, data.records);
+        return <><table className="fin-table"><thead><tr><th>Saved source</th><th>Current</th><th>New</th></tr></thead><tbody>
+          <tr><td>Name</td><td>{oldLine?.asset?.name}</td><td>{newLine.asset?.name}</td></tr>
+          <tr><td>Financial year</td><td>{old?.year}</td><td>{refresh.source.year}</td></tr>
+          <tr><td>Historical amount (NOK)</td><td>{nok(oldLine?.original)}</td><td>{nok(newLine.original)}</td></tr>
+          <tr><td>Cable car passengers</td><td>{formatNumber(oldLine?.benchPassengers ?? 0, 0, 0)}</td><td>{formatNumber(newLine.benchPassengers ?? 0, 0, 0)}</td></tr>
+          <tr><td>Year 1 amount (NOK)</td><td>{nok(oldLine?.adjusted)}</td><td>{nok(newLine.adjusted)}</td></tr>
+        </tbody></table>{newLine.warning && <p className="text-destructive text-sm">{newLine.warning}</p>}<DialogFooter><Button variant="outline" onClick={() => setRefresh(null)}>Cancel</Button><Button disabled={!!newLine.warning} onClick={() => { update({ ...sel, [refresh.kind]: refresh.source }); setRefresh(null); }}>Confirm refresh</Button></DialogFooter></>;
+      })()}
+    </DialogContent></Dialog>
+  </div>;
 }

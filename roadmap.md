@@ -53,3 +53,4 @@
 - [x] Merchandise OPEX as % of merchandise revenue field
 - [x] Comparison table: MOIC moved to the first column after Project; verified header spans stay aligned.
 - [x] Comparison table: removed the CAPEX per Y3 passenger column.
+- [x] Year 3 vs. Benchmarks: cable car and restaurant benchmarks deselected by default; verified in the signed-in preview.

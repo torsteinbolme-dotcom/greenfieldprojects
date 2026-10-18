@@ -1,4 +1,7 @@
 # Tasks
+- [ ] Stage 1: independent F&B scaling, frozen snapshots and confirmed refresh; preserve legacy/manual scenarios.
+- [ ] Stage 1: Year 3 revenue/OPEX/EBITDA bridge with year and business filters; reconcile to engine.
+- [ ] Stage 1: automated tests and signed-in verification; no Stage 2 work.
 - [x] Add expandable total revenue and total OPEX rows that show or hide their individual items; verify both controls.
 - [x] Show all four operating expense categories and total OPEX in the forecast; verify reconciliation and the signed-in display.
 - [x] Verify displayed base white (#F2F2F2) and blue (#14314D): browser measurements confirm page/panel backgrounds and sidebar use the exact requested colours.

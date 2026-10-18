@@ -204,7 +204,6 @@ const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) =>
   ["Merchandise revenue", (y) => nokM(y.merchRevenue), "revenue"],
   ["Total OPEX", (y) => nokM(-y.opex)],
   ["Cable car fixed OPEX", (y, a) => nokM(-forecastOpex(a, y).cableFixed), "opex"],
-  ["Cable car variable OPEX", (y, a) => nokM(-forecastOpex(a, y).cableVariable), "opex"],
   ["F&B OPEX", (y, a) => nokM(-forecastOpex(a, y).fb), "opex"],
   ["Merchandise OPEX", (y, a) => nokM(-forecastOpex(a, y).merchandise), "opex"],
   ["EBITDA", (y) => nokM(y.ebitda)],

@@ -15,6 +15,13 @@
       "when": 1792322692747,
       "tag": "0001_latest_assumptions_view",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792329640688,
+      "tag": "0002_benchmarks",
+      "breakpoints": true
     }
   ]
 }

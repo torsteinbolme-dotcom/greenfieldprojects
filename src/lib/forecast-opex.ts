@@ -5,6 +5,7 @@ import { costIndex, merchOpexAt, type Assumptions, type YearResult } from "@/fin
 export function forecastOpex(a: Assumptions, row: YearResult) {
   return {
     cableFixed: a.cableFixedOpex * costIndex(a, "cable", row.year),
+    cableVariable: (a.cableVariableCostPerPassenger || 0) * row.passengers * costIndex(a, "cable", row.year),
     fb: fbOpexAt(a, row),
     merchandise: merchOpexAt(a, row.year, row.merchRevenue),
   };

@@ -3,7 +3,7 @@ import { calculate, type Assumptions } from '@/financialEngine';
 import { projectMountain } from '@/exampleProject';
 import { breakEven, DEFAULT_BREAK_EVEN_YEAR, evaluatePassengers } from '@/lib/break-even';
 import { type AssumptionsWithFb } from '@/lib/fb-benchmark';
-const base = (patch: Partial<Assumptions> = {}): Assumptions => ({ ...projectMountain, years: 5, exitYear: 5, initialPassengers: 1000, passengerGrowth: [0], priceGrowth: [0], ancillaryGrowth: [0], costInflation: 0, segments: [{ name: 'Adult roundtrip', share: 1, grossPrice: 100, vatRate: 0, commission: 0, boardingsPerGuest: 1 }], cableFixedOpex: 10000, fbRevenueYear1: 0, fbOpexYear1: 0, merchRevenueYear1: 0, merchOpexYear1: 0, capexItems: [{ name: 'Investment', quantity: 1, unitCost: 100000 }], contingencyRate: 0, debtShare: 0.5, interestRate: 0.1, loanYears: 5, depreciationYears: 10, taxRate: 0.25, ...patch });
+const base = (patch: Partial<Assumptions> = {}): Assumptions => ({ ...projectMountain, years: 5, exitYear: 5, initialPassengers: 1000, passengerGrowth: [0], priceGrowth: [0], ancillaryGrowth: [0], costInflation: 0, segments: [{ name: 'Adult roundtrip', share: 1, grossPrice: 100, vatRate: 0, commission: 0, boardingsPerGuest: 1 }], cableFixedOpex: 10000, fbRevenueYear1: 0, fbOpexYear1: 0, merchRevenueYear1: 0, merchOpexYear1: 0, capexItems: [{ name: 'Investment', quantity: 1, unitCost: 100000 }], contingencyRate: 0, debtShare: 0.5, interestRate: 0.1, loanYears: 5, depreciationYears: 10, taxRate: 0.25, maintenanceCapexRate: 0, ...patch });
 describe('engine-based annual break-even', () => {
   it('defaults to the third operating year excluding construction', () => {
     expect(DEFAULT_BREAK_EVEN_YEAR).toBe(3);

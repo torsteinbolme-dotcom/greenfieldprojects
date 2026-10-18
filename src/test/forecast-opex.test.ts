@@ -14,7 +14,7 @@ describe("forecast operating expenses", () => {
     const first = result.rows[0];
     const second = result.rows[1];
     if (!first || !second) throw new Error("Missing forecast years");
-    expect(forecastOpex(a, first)).toEqual({ cableFixed: 100000, fb: 30000, merchandise: 10000 });
+    expect(forecastOpex(a, first)).toEqual({ cableFixed: 100000, cableVariable: 0, fb: 30000, merchandise: 10000 });
     const costs = forecastOpex(a, second);
     expect(costs.cableFixed).toBeCloseTo(105000, 6);
     expect(costs.fb).toBeCloseTo(37800, 6);
@@ -29,10 +29,10 @@ describe("forecast operating expenses", () => {
     }
   });
 
-  it("does not itemize a cable car variable cost line", () => {
-    const a = { ...projectMountain };
+  it("itemizes the cable car variable cost line", () => {
+    const a = { ...projectMountain, cableVariableCostPerPassenger: 3 };
     const row = calculate(a).rows[0];
     if (!row) throw new Error("Missing forecast years");
-    expect(forecastOpex(a, row)).not.toHaveProperty("cableVariable");
+    expect(forecastOpex(a, row).cableVariable).toBeCloseTo(3 * row.passengers, 6);
   });
 });

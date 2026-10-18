@@ -44,11 +44,11 @@ describe("financial engine", () => {
     expect(r.exitEquityValue).toBeCloseTo(r.enterpriseValue - y8.closingDebt + y8.retainedCash - r.enterpriseValue * 0.01, 4);
   });
 
-  it("reconciles distributed and retained cash without double counting", () => {
+  it("reconciles distributed and retained cash with equity injections", () => {
     for (const distribute of [true, false]) {
       const r = calculate(base({ distributeCashAnnually: distribute }));
       const upTo = r.rows.slice(0, 8);
-      const cash = upTo.reduce((s, y) => s + y.cashAfterDebt, 0);
+      const cash = upTo.reduce((s, y) => s + y.cashAfterDebt + y.equityInjection, 0);
       const dist = upTo.reduce((s, y) => s + y.distribution, 0);
       expect(dist + upTo[7]!.retainedCash).toBeCloseTo(cash, 4);
     }
@@ -58,16 +58,6 @@ describe("financial engine", () => {
     expect(irr([-100, 110])!).toBeCloseTo(0.1, 6);
     expect(irr([-1000, 0, 0, 1331])!).toBeCloseTo(0.1, 6);
     expect(irr([100, 100])).toBeNull();
-  });
-
-  it("ignores variable cost per passenger and maintenance capex entirely", () => {
-    const a = calculate(base());
-    const b = calculate(base({ cableVariableCostPerPassenger: 100, maintenanceCapexRate: 0.5 }));
-    expect(b.rows[2]!.opex).toBeCloseTo(a.rows[2]!.opex, 6);
-    expect(b.rows[2]!.cashAfterDebt).toBeCloseTo(a.rows[2]!.cashAfterDebt, 6);
-    expect(b.rows[2]!.dscr).toBeCloseTo(a.rows[2]!.dscr!, 6);
-    expect(b.equityIrr).toBeCloseTo(a.equityIrr!, 6);
-    expect(b.rows[0]!.retainedCash).toBeCloseTo(a.rows[0]!.retainedCash, 6);
   });
 
   it("higher commission lowers realized price, EBITDA and IRR", () => {
@@ -120,5 +110,56 @@ describe("tax-loss carryforward", () => {
     // priceGrowth [.05,.05,.03]: year 2 applies index 0, year 3 applies index 1
     expect(r.rows[2]!.ticketNetPrice).toBeCloseTo(r.weightedTicket * 1.05 * 1.05, 6);
     expect(r.rows[2]!.ticketRevenue).toBeCloseTo(r.rows[2]!.passengers * r.rows[2]!.ticketNetPrice, 6);
+  });
+});
+
+describe("reliability update (mountain-v3)", () => {
+  const deficit = () => base({ cableFixedOpex: 200_000_000, years: 10, exitYear: 8 });
+
+  it("injects equity only when needed", () => {
+    const ok = calculate(base({ maintenanceCapexRate: 0 }));
+    expect(ok.rows.every((r) => r.equityInjection === 0 || r.cashAfterDebt + (ok.rows[r.year - 2]?.retainedCash ?? 0) < 0)).toBe(true);
+    const r = calculate(deficit());
+    expect(r.additionalEquity).toBeGreaterThan(0);
+  });
+
+  it("never lets closing cash go negative", () => {
+    const r = calculate(deficit());
+    for (const row of r.rows) expect(row.retainedCash).toBeGreaterThanOrEqual(-1e-6);
+  });
+
+  it("IRR cash flows include injections in their year and MOIC uses total equity", () => {
+    const r = calculate(deficit());
+    r.rows.slice(0, 8).forEach((row, i) => expect(r.cashflows[i + 1]! - (i === 7 ? r.exitEquityValue : 0)).toBeCloseTo(row.distribution - row.equityInjection, 4));
+    expect(r.totalEquityInvested).toBeCloseTo(r.equity + r.additionalEquity, 4);
+    const proceeds = r.rows.slice(0, 8).reduce((s, x) => s + x.distribution, 0) + r.exitEquityValue;
+    expect(r.equityMultiple!).toBeCloseTo(proceeds / r.totalEquityInvested, 6);
+  });
+
+  it("maintenance CAPEX reduces cash but not EBITDA", () => {
+    const a = calculate(base({ maintenanceCapexRate: 0 }));
+    const b = calculate(base({ maintenanceCapexRate: 0.01 }));
+    expect(b.rows[2]!.ebitda).toBeCloseTo(a.rows[2]!.ebitda, 6);
+    expect(b.rows[0]!.maintenanceCapex).toBeCloseTo(b.capex * 0.01, 4);
+    expect(b.rows[2]!.cashAfterDebt).toBeLessThan(a.rows[2]!.cashAfterDebt);
+    expect(b.equityIrr!).toBeLessThan(a.equityIrr!);
+  });
+
+  it("variable OPEX follows passengers", () => {
+    const a = calculate(base({ cableVariableCostPerPassenger: 10 }));
+    const b = calculate(base({ cableVariableCostPerPassenger: 10, initialPassengers: projectMountain.initialPassengers * 2 }));
+    const z = calculate(base({ cableVariableCostPerPassenger: 0 }));
+    expect(a.rows[0]!.opex - z.rows[0]!.opex).toBeCloseTo(10 * a.rows[0]!.passengers, 4);
+    expect(b.rows[0]!.opex - z.rows[0]!.opex).toBeCloseTo(20 * a.rows[0]!.passengers, 4);
+  });
+
+  it("EBITDA reconciles with revenue less OPEX", () => {
+    for (const row of calculate(base({ cableVariableCostPerPassenger: 5 })).rows) expect(row.ebitda).toBeCloseTo(row.revenue - row.opex, 6);
+  });
+
+  it("exit equity does not re-deduct funded deficits", () => {
+    const r = calculate(deficit());
+    const y8 = r.rows[7]!;
+    expect(r.exitEquityValue).toBeCloseTo(r.enterpriseValue * (1 - 0.01) - y8.closingDebt + y8.retainedCash, 4);
   });
 });

@@ -63,3 +63,4 @@
 - [x] Projects page: cover-card grid with one photo per project (generated starting photos, upload/replace from the card, private storage with short-lived signed URLs); verified in the signed-in preview.
 - [x] Capacity & seasonality tab (validation only)
 - [x] Portfolio: MOIC column after Scenario
+- [x] Engine reliability update: equity injections, maintenance CAPEX, variable cable OPEX

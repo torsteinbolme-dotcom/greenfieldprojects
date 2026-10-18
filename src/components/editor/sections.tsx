@@ -46,8 +46,9 @@ export function Limitations() {
         <li>Simplified tax: losses are carried forward indefinitely and offset later profits in full; no other tax adjustments.</li>
         <li>No construction-period interest; debt drawn in full at opening.</li>
         <li>No working capital movements.</li>
-        <li>No funding mechanism for negative cash; shortfalls reduce retained cash.</li>
-        <li>EBITDA is not treated as free cash flow: cash after debt deducts interest, principal and tax.</li>
+        <li>Cash shortfalls are funded by additional shareholder equity, keeping closing cash at zero.</li>
+        <li>Maintenance CAPEX is not depreciated for tax.</li>
+        <li>EBITDA is not treated as free cash flow: cash after debt deducts interest, principal, tax and maintenance CAPEX.</li>
       </ul>
     </div>
   );
@@ -221,6 +222,8 @@ export function RevenueOpexSection({ a, set, ro }: P) {
       <Card title="Operating costs" className="lg:col-span-2">
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
           <Field label="Cable car fixed OPEX year 1 (NOK)"><NumField value={a.cableFixedOpex} disabled={ro} onChange={(v) => set({ cableFixedOpex: v })} /></Field>
+          <Field label="Cable car variable OPEX per passenger (NOK)" hint="Year-1 price level; grows with cable car OPEX"><NumField value={a.cableVariableCostPerPassenger ?? 0} disabled={ro} onChange={(v) => set({ cableVariableCostPerPassenger: v })} /></Field>
+          <Field label="Annual maintenance CAPEX (% of initial CAPEX)" hint="Investing cash outflow, not OPEX; grows with cable car OPEX"><NumField percent value={a.maintenanceCapexRate ?? 0} disabled={ro} onChange={(v) => set({ maintenanceCapexRate: v })} /></Field>
           <Field label="F&B OPEX year 1 (NOK)" hint="Scales with F&B revenue"><NumField value={a.fbOpexYear1} disabled={ro || !!fbSel?.opex} onChange={(v) => set({ fbOpexYear1: v })} /></Field>
           <Field label="Merchandise OPEX (% of merchandise revenue)" hint="Always this share of merchandise revenue, every year"><NumField percent value={a.merchOpexRate ?? (a.merchRevenueYear1 > 0 ? a.merchOpexYear1 / a.merchRevenueYear1 : 0)} disabled={ro} onChange={(v) => set({ merchOpexRate: v, merchOpexYear1: v * a.merchRevenueYear1 })} /><span className="block text-xs text-muted-foreground">= {nok((a.merchOpexRate ?? (a.merchRevenueYear1 > 0 ? a.merchOpexYear1 / a.merchRevenueYear1 : 0)) * a.merchRevenueYear1)} NOK in year 1</span></Field>
         </div>
@@ -271,6 +274,7 @@ const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) =>
   ["Merchandise revenue", (y) => nokM(y.merchRevenue), "revenue"],
   ["Total OPEX", (y) => nokM(-y.opex)],
   ["Cable car fixed OPEX", (y, a) => nokM(-forecastOpex(a, y).cableFixed), "opex"],
+  ["Cable car variable OPEX", (y, a) => nokM(-forecastOpex(a, y).cableVariable), "opex"],
   ["F&B OPEX", (y, a) => nokM(-forecastOpex(a, y).fb), "opex"],
   ["Merchandise OPEX", (y, a) => nokM(-forecastOpex(a, y).merchandise), "opex"],
   ["EBITDA", (y) => nokM(y.ebitda)],
@@ -279,7 +283,9 @@ const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) =>
   ["Interest", (y) => nokM(-y.interest)],
   ["Principal", (y) => nokM(-y.principal)],
   ["Tax", (y) => nokM(-y.tax)],
+  ["Maintenance CAPEX", (y) => nokM(-y.maintenanceCapex)],
   ["Cash flow after debt service", (y) => nokM(y.cashAfterDebt)],
+  ["Additional equity injected", (y) => nokM(y.equityInjection)],
   ["Retained cash (cumulative)", (y) => nokM(y.retainedCash)],
   ["Closing debt", (y) => nokM(y.closingDebt)],
   ["DSCR", (y) => mult(y.dscr)],

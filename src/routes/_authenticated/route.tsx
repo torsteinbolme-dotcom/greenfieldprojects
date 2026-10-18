@@ -6,8 +6,10 @@ import { useMembership } from "@/lib/data";
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
-    const { data } = await supabase.auth.getUser();
-    if (!data.user) throw redirect({ to: "/auth" });
+    // Local session check: a transient network failure on the user lookup must not
+    // bounce a signed-in user back to /auth. Data access is still enforced by RLS.
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) throw redirect({ to: "/auth" });
   },
   component: Shell,
 });

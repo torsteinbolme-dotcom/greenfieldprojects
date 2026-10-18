@@ -10,7 +10,8 @@ export function useMembership() {
   return useQuery({
     queryKey: ["membership"],
     queryFn: async (): Promise<Membership> => {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: sess } = await supabase.auth.getSession();
+      const u = { user: sess.session?.user };
       if (!u.user) throw new Error("Not signed in");
       const { data, error } = await supabase
         .from("organization_members")
@@ -72,7 +73,7 @@ export function useLatestAssumptions() {
 }
 
 export async function logAudit(orgId: string, entity_type: string, entity_id: string | null, action: string, details?: object) {
-  const { data: u } = await supabase.auth.getUser();
+  const u = { user: (await supabase.auth.getSession()).data.session?.user };
   await supabase.from("audit_events").insert({
     organization_id: orgId, actor_id: (u.user?.id ?? null), entity_type, entity_id, action, details: (details ?? null) as never,
   });
@@ -83,7 +84,7 @@ export async function saveAssumptionVersion(orgId: string, scenarioId: string, a
     .from("scenario_assumptions").select("version").eq("scenario_id", scenarioId)
     .order("version", { ascending: false }).limit(1).maybeSingle();
   const version = (last?.version ?? 0) + 1;
-  const { data: u } = await supabase.auth.getUser();
+  const u = { user: (await supabase.auth.getSession()).data.session?.user };
   const { error } = await supabase.from("scenario_assumptions").insert({
     organization_id: orgId, scenario_id: scenarioId, version, assumptions: a as never,
     calculation_version: CALCULATION_VERSION, note: note ?? null, created_by: (u.user?.id ?? null),
@@ -102,7 +103,7 @@ export async function createScenario(orgId: string, projectId: string, name: str
 }
 
 export async function createProject(orgId: string, name: string, location: string | null, a: Assumptions, notes?: string) {
-  const { data: u } = await supabase.auth.getUser();
+  const u = { user: (await supabase.auth.getSession()).data.session?.user };
   const { data, error } = await supabase.from("projects")
     .insert({ organization_id: orgId, name, location, assumption_notes: notes ?? null, created_by: (u.user?.id ?? null) })
     .select().single();
@@ -113,7 +114,7 @@ export async function createProject(orgId: string, name: string, location: strin
 }
 
 export async function duplicateProject(orgId: string, p: ProjectRow) {
-  const { data: u } = await supabase.auth.getUser();
+  const u = { user: (await supabase.auth.getSession()).data.session?.user };
   const { data: np, error } = await supabase.from("projects").insert({
     organization_id: orgId, name: `${p.name} (copy)`, location: p.location, description: p.description,
     assumption_notes: p.assumption_notes, created_by: (u.user?.id ?? null),

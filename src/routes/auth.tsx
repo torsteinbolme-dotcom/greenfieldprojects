@@ -27,8 +27,10 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => { if (data.session) navigate({ to: "/portfolio" }); });
-    const { data } = supabase.auth.onAuthStateChange((_e, s) => { if (s) navigate({ to: "/portfolio" }); });
+    let done = false;
+    const go = () => { if (!done) { done = true; navigate({ to: "/portfolio" }); } };
+    supabase.auth.getSession().then(({ data }) => { if (data.session) go(); });
+    const { data } = supabase.auth.onAuthStateChange((e, s) => { if (s && (e === "SIGNED_IN" || e === "INITIAL_SESSION")) go(); });
     return () => data.subscription.unsubscribe();
   }, [navigate]);
 
@@ -55,7 +57,6 @@ function AuthPage() {
     const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
     if (r.error) { toast.error(r.error.message ?? "Google sign-in failed"); return; }
     if (r.redirected) return;
-    navigate({ to: "/portfolio" });
   }
 
   return (

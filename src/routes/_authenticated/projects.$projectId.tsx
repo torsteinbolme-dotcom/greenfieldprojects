@@ -236,7 +236,7 @@ type Ctx = { ro: boolean; project: ProjectRow; m: Membership; projectId: string 
               const path = `${m.organization_id}/${projectId}/${Date.now()}-${file.name.replace(/[^\w.\-]/g, "_")}`;
               const up = await supabase.storage.from("project-files").upload(path, file);
               if (up.error) throw up.error;
-              const { data: u } = await supabase.auth.getUser();
+              const u = { user: (await supabase.auth.getSession()).data.session?.user };
               const { error } = await supabase.from("project_files").insert({ organization_id: m.organization_id, project_id: projectId, storage_path: path, file_name: file.name, size_bytes: file.size, uploaded_by: (u.user?.id ?? null) });
               if (error) throw error;
               await logAudit(m.organization_id, "project_file", projectId, "uploaded", { file: file.name });

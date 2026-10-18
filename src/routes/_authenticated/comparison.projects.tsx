@@ -46,8 +46,8 @@ const fmt = (f: Fmt, v: number | null) => {
 };
 
 const METRICS: Metric[] = [
+  { key: "moic", label: "MOIC", group: "returns", fmt: "mult", get: (r) => r.result.equityMultiple },
   { key: "capex", label: "Total CAPEX (NOK m)", group: "investment", fmt: "nokM", get: (r) => r.result.capex },
-  { key: "capexPerPax", label: "CAPEX per Y3 passenger (NOK)", group: "investment", fmt: "nok", get: (r) => (r.y3?.passengers ? r.result.capex / r.y3.passengers : null) },
   { key: "equity", label: "Equity investment (NOK m)", group: "investment", fmt: "nokM", get: (r) => r.result.equity },
   { key: "debt", label: "Debt financing (NOK m)", group: "investment", fmt: "nokM", get: (r) => r.result.debt },
   { key: "equityPct", label: "Equity %", group: "investment", fmt: "pct", get: (r) => (r.result.capex ? r.result.equity / r.result.capex : null) },
@@ -62,7 +62,6 @@ const METRICS: Metric[] = [
   { key: "ebitdaPax", label: "EBITDA / passenger (NOK)", group: "operations", fmt: "nok", get: (r) => r.y3?.ebitdaPerPax ?? null },
   { key: "projectIrr", label: "Project IRR", group: "returns", fmt: "pct", get: (r) => r.ret.projectIrr },
   { key: "irr", label: "Equity IRR", group: "returns", fmt: "pct", get: (r) => r.result.equityIrr },
-  { key: "moic", label: "MOIC", group: "returns", fmt: "mult", get: (r) => r.result.equityMultiple },
   { key: "payback", label: "Payback period", group: "returns", fmt: "years", get: (r) => r.ret.payback },
   { key: "exitYear", label: "Exit year", group: "returns", fmt: "year", get: (r) => r.a.exitYear },
   { key: "exitEbitda", label: "Exit EBITDA (NOK m)", group: "returns", fmt: "nokM", get: (r) => r.result.rows[r.a.exitYear - 1]?.ebitda ?? null },
@@ -72,6 +71,17 @@ const METRICS: Metric[] = [
 ];
 const CHARTS = ["capex", "pax", "rev", "ebitda", "margin", "ebitdaPax", "irr", "moic"];
 const DEV = { passengers: "Passengers", revenue: "Revenue (NOK m)", ebitda: "EBITDA (NOK m)", fcf: "Free cash flow (NOK m)" } as const;
+
+/** Contiguous blocks of the same group, so the header spans match the column order. */
+function groupRuns(ms: Metric[]) {
+  const runs: { group: Group; metrics: Metric[] }[] = [];
+  for (const m of ms) {
+    const last = runs[runs.length - 1];
+    if (last && last.group === m.group) last.metrics.push(m);
+    else runs.push({ group: m.group, metrics: [m] });
+  }
+  return runs;
+}
 
 function ProjectVsProject() {
   const search = Route.useSearch();
@@ -134,7 +144,7 @@ function ProjectVsProject() {
           <div className="overflow-x-auto">
             <table className="fin-table fin-table-tight">
               <thead>
-                <tr><th /><th />{(Object.keys(GROUPS) as Group[]).filter((g) => !hidden.has(g)).map((g) => <th key={g} colSpan={METRICS.filter((m) => m.group === g).length} className="border-l text-center">{GROUPS[g]}</th>)}</tr>
+                <tr><th /><th />{groupRuns(visible).map((run, i) => <th key={`${run.group}-${i}`} colSpan={run.metrics.length} className="border-l text-center">{GROUPS[run.group]}</th>)}</tr>
                 <tr>
                   <th>#</th>
                   <SortTh k="name" label="Project" sort={sort} onSort={onSort} />

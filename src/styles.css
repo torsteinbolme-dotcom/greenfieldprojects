@@ -122,6 +122,9 @@
   .fin-table td {
     @apply border-b px-3 py-1.5 whitespace-nowrap;
   }
+  .fin-table-tight th, .fin-table-tight td {
+    padding-inline: 0.5rem;
+  }
   .fin-table tr:hover td {
     @apply bg-muted;
   }

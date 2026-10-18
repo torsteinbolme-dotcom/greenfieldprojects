@@ -34,7 +34,7 @@ export function InvestmentSummary({ a, r, name, location, onPerformanceYear, onE
       {r.rows.some(row => row.cashAfterDebt < 0) && <p className="text-sm text-destructive">This scenario has negative cash after debt service in at least one year. Review the funding requirement before relying on the displayed returns.</p>}
     </section>
     <BreakEvenPanel a={a} />
-    <div className="grid gap-6 lg:grid-cols-2"><DevelopmentChart title="Revenue and EBITDA development" data={development} lines={['Revenue', 'EBITDA']} /><DevelopmentChart title="Annual passengers" data={development} lines={['Passengers']} passengers /><DevelopmentChart title="Equity cash flow" data={cashflows} lines={['Equity cash flow']} bar /></div>
+    <div className="grid gap-6 lg:grid-cols-2"><DevelopmentChart title="Revenue and EBITDA development" data={development} lines={['Revenue', 'EBITDA']} /><DevelopmentChart title="Annual passengers" data={development} lines={['Passengers']} passengers /></div>
     <EbitdaBridge a={a} r={r} />
   </section>;
 }

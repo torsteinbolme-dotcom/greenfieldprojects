@@ -69,7 +69,7 @@ const METRICS: Metric[] = [
   { key: "exitEv", label: "Exit enterprise value (NOK m)", group: "returns", fmt: "nokM", get: (r) => r.result.enterpriseValue },
   { key: "exitEq", label: "Exit equity value (NOK m)", group: "returns", fmt: "nokM", get: (r) => r.result.exitEquityValue },
 ];
-const CHARTS = ["capex", "pax", "rev", "ebitda", "margin", "ebitdaPax", "irr", "moic"];
+const CHARTS = ["irr", "moic", "capex", "pax", "rev", "ebitda", "margin", "ebitdaPax"];
 const DEV = { passengers: "Passengers", revenue: "Revenue (NOK m)", ebitda: "EBITDA (NOK m)", fcf: "Free cash flow (NOK m)" } as const;
 
 /** Contiguous blocks of the same group, so the header spans match the column order. */

@@ -43,6 +43,6 @@ export function withDefaultProjectSegments(a: Assumptions): Assumptions {
   if (a.segments.some((s) => s.name.trim().toLowerCase() === "mice")) return a;
   return withLinkedTicketPrices({ ...a, segments: [...a.segments, {
     name: "MICE", share: 0, grossPrice: 0, vatRate: 0.12, commission: 0,
-    boardingsPerGuest: 2, roundTripAdultRatio: 0.6,
+    boardingsPerGuest: 2,
   }] });
 }

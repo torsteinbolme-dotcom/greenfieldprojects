@@ -63,7 +63,6 @@ const METRICS: Metric[] = [
   { key: "ebitdaPax", label: "EBITDA / passenger (NOK)", group: "operations", fmt: "nok", get: (r) => r.y3?.ebitdaPerPax ?? null },
   { key: "projectIrr", label: "Project IRR", group: "returns", fmt: "pct", get: (r) => r.ret.projectIrr },
   { key: "irr", label: "Equity IRR", group: "returns", fmt: "pct", get: (r) => r.result.equityIrr },
-  { key: "moic", label: "MOIC", group: "returns", fmt: "mult", get: (r) => r.result.equityMultiple },
   { key: "payback", label: "Payback period", group: "returns", fmt: "years", get: (r) => r.ret.payback },
   { key: "exitYear", label: "Exit year", group: "returns", fmt: "year", get: (r) => r.a.exitYear },
   { key: "exitEbitda", label: "Exit EBITDA (NOK m)", group: "returns", fmt: "nokM", get: (r) => r.result.rows[r.a.exitYear - 1]?.ebitda ?? null },

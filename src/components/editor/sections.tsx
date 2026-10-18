@@ -9,6 +9,8 @@ import { int, mult, nok, nokM, pct } from "@/lib/format";
 import { segmentNetPerGuest, shareSum, type ModelResult } from "@/lib/model";
 import { isAdultRoundTrip, segmentTicketRatio, type PricedSegment } from "@/lib/ticket-pricing";
 import { forecastOpex } from "@/lib/forecast-opex";
+import { FbBenchmarkPanel } from "./fb-benchmark";
+import type { AssumptionsWithFb } from "@/lib/fb-benchmark";
 import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
@@ -133,6 +135,7 @@ export function CapexSection({ a, set, ro, r }: P & { r: ModelResult | null }) {
 }
 
 export function RevenueOpexSection({ a, set, ro }: P) {
+  const fbSel = (a as AssumptionsWithFb).fbBenchmark;
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Card title="Passengers & pricing">
@@ -148,16 +151,17 @@ export function RevenueOpexSection({ a, set, ro }: P) {
       </Card>
       <Card title="Ancillary revenue">
         <div className="grid grid-cols-2 gap-4">
-          <Field label="F&B revenue year 1 (NOK, ex VAT)"><NumField value={a.fbRevenueYear1} disabled={ro} onChange={(v) => set({ fbRevenueYear1: v })} /></Field>
+          <Field label="F&B revenue year 1 (NOK, ex VAT)"><NumField value={a.fbRevenueYear1} disabled={ro || !!fbSel?.revenue} onChange={(v) => set({ fbRevenueYear1: v })} /></Field>
           <Field label="Merchandise revenue year 1 (NOK, ex VAT)"><NumField value={a.merchRevenueYear1} disabled={ro} onChange={(v) => set({ merchRevenueYear1: v })} /></Field>
         </div>
         <div className="mt-4"><Field label="Ancillary growth"><GrowthList values={a.ancillaryGrowth} disabled={ro} onChange={(v) => set({ ancillaryGrowth: v })} /></Field></div>
       </Card>
+      <Card title="F&B from restaurant benchmarks" className="lg:col-span-2"><FbBenchmarkPanel a={a} set={set} ro={ro} /></Card>
       <Card title="Operating costs" className="lg:col-span-2">
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
           <Field label="Cable car fixed OPEX year 1 (NOK)"><NumField value={a.cableFixedOpex} disabled={ro} onChange={(v) => set({ cableFixedOpex: v })} /></Field>
           <Field label="Cost inflation"><NumField percent value={a.costInflation} disabled={ro} onChange={(v) => set({ costInflation: v })} /></Field>
-          <Field label="F&B OPEX year 1 (NOK)" hint="Scales with F&B revenue"><NumField value={a.fbOpexYear1} disabled={ro} onChange={(v) => set({ fbOpexYear1: v })} /></Field>
+          <Field label="F&B OPEX year 1 (NOK)" hint="Scales with F&B revenue"><NumField value={a.fbOpexYear1} disabled={ro || !!fbSel?.opex} onChange={(v) => set({ fbOpexYear1: v })} /></Field>
           <Field label="Merchandise OPEX year 1 (NOK)" hint="Scales with merchandise revenue"><NumField value={a.merchOpexYear1} disabled={ro} onChange={(v) => set({ merchOpexYear1: v })} /></Field>
         </div>
       </Card>

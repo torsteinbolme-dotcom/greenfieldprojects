@@ -214,7 +214,6 @@ const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) =>
   ["Tax", (y) => nokM(-y.tax)],
   ["Maintenance capex", (y) => nokM(-y.maintenanceCapex)],
   ["Cash flow after debt service", (y) => nokM(y.cashAfterDebt)],
-  ["Distribution", (y) => nokM(y.distribution)],
   ["Retained cash (cumulative)", (y) => nokM(y.retainedCash)],
   ["Closing debt", (y) => nokM(y.closingDebt)],
   ["DSCR", (y) => mult(y.dscr)],

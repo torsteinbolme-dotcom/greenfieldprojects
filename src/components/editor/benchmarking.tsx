@@ -181,7 +181,7 @@ export function BenchmarkingSection({ projectId, config, a, r, ro, apply, scenar
               </tbody>
             </table>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">Project cable car figures are tickets plus merchandise and their costs; restaurant figures are F&B only, so nothing is counted twice. Restaurant benchmarks divide by the linked cable car's passengers.</p>
+          <p className="mt-3 text-xs text-muted-foreground">All figures are ex VAT: project ticket revenue is the price after removing VAT and commission, matching the benchmark accounts. Project cable car figures are tickets plus merchandise and their costs; restaurant figures are F&B only, so nothing is counted twice. Restaurant benchmarks divide by the linked cable car's passengers.</p>
         </Card>
 
         <Card title="Per passenger (NOK)">

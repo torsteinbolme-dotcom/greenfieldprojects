@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { calculate, type Assumptions } from "@/financialEngine";
 import { projectMountain } from "@/exampleProject";
 import { advancedOpex, buildBasis, defaultSettings, inflationFactor, linearEstimate } from "@/lib/benchmark-basis";
+import { withLinkedTicketPrices } from "@/lib/ticket-pricing";
 import type { BenchmarkAsset, BenchmarkRecord } from "@/lib/benchmarks";
 
 const a = projectMountain as Assumptions;
@@ -55,7 +56,7 @@ describe("scenario updates and reconciliation", () => {
     const s = { ...noInfl(), cableCost: { metric: "opexPerPax" as const, sources: { fj: 1 } } };
     const b = buildBasis(a, s, assets, records)!;
     expect(Object.keys(b.patch).sort()).toEqual(["benchmarkBasis", "cableFixedOpex"]);
-    expect(b.next.segments).toEqual(a.segments);
+    expect(b.next.segments).toEqual(withLinkedTicketPrices(a).segments);
     expect(b.next.initialPassengers).toBe(a.initialPassengers);
   });
   it("cable revenue per passenger sets ticket prices so Year 3 cable revenue matches", () => {

@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/comparison")({
 const COLORS = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--chart-5)"];
 const METRICS = { ebitda: "EBITDA", revenue: "Revenue", passengers: "Passengers", cashAfterDebt: "Cash after debt service" } as const;
 
-type SortKey = "name" | "equity" | "moic" | "capex" | "exit" | "irr" | "exitEquity";
+type SortKey = "name" | "equity" | "moic" | "capex" | "exit" | "exitYear" | "irr" | "exitEquity";
 type SortState = { key: SortKey; dir: "asc" | "desc" };
 const DEFAULT_SORT: SortState = { key: "moic", dir: "desc" };
 const SORT_LABELS: Record<SortKey, string> = {
@@ -28,6 +28,7 @@ const SORT_LABELS: Record<SortKey, string> = {
   moic: "MOIC",
   capex: "Investment (NOK m)",
   exit: "Exit",
+  exitYear: "Exit year",
   irr: "Equity IRR",
   exitEquity: "Exit equity (NOK m)",
 };
@@ -64,7 +65,8 @@ function ComparisonPage() {
       case "equity": return e.result.equity;
       case "moic": return e.result.equityMultiple;
       case "capex": return e.result.capex;
-      case "exit": return e.a.exitYear;
+      case "exit": return e.a.exitMultiple;
+      case "exitYear": return e.a.exitYear;
       case "irr": return e.result.equityIrr ?? 0;
       case "exitEquity": return e.result.exitEquityValue;
     }

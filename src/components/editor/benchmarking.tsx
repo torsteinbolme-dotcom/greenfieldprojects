@@ -25,7 +25,7 @@ type Props = { projectId: string; config: BenchmarkConfig; a: Assumptions; r: Re
   scenarios?: { id: string; name: string }[]; scenarioId?: string; onScenario?: (id: string) => void; basisOpen?: boolean; setBasisOpen?: (open: boolean) => void };
 
 const ROWS: { key: keyof Metrics; label: string; fmt: (v: number | null) => string; group: "cable" | "fnb" }[] = [
-  { key: "cableRevenuePerPax", label: "Revenue per passenger (NOK)", fmt: (v) => (v == null ? "—" : nok(Math.round(v) || 0)), group: "cable" },
+  { key: "cableRevenuePerPax", label: "Weighted net avg. ticket price (NOK)", fmt: (v) => (v == null ? "—" : nok(Math.round(v) || 0)), group: "cable" },
   { key: "cableOpexPerPax", label: "OPEX per passenger (NOK)", fmt: (v) => (v == null ? "—" : nok(Math.round(v) || 0)), group: "cable" },
   { key: "cableEbitdaPerPax", label: "EBITDA per passenger (NOK)", fmt: (v) => (v == null ? "—" : nok(Math.round(v) || 0)), group: "cable" },
   { key: "cableMargin", label: "EBITDA margin", fmt: (v) => pct(v), group: "cable" },

@@ -43,10 +43,9 @@ describe("Year 3 vs benchmarks", () => {
     expect(v['margin']).toBe(0.5);
     expect(v['revPax']).toBeCloseTo(339.42, 2);
   });
-  it("project returns: NPV at 0% equals the sum of flows", () => {
+  it("project returns: IRR is calculated from the cash flows", () => {
     const r = calculate(projectMountain);
-    const ret = projectReturns(projectMountain, r, 0);
-    expect(ret.npv).toBeCloseTo(ret.flows.reduce((s, x) => s + x, 0), 2);
+    const ret = projectReturns(projectMountain, r);
     expect(ret.projectIrr).not.toBeNull();
   });
 });

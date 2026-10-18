@@ -19,4 +19,4 @@
 
 ## Open
 - [x] Tax-loss carryforward in the model (engine change, tested).
-- [ ] Passengers-per-segment column in segment table (user requested 2026-10-18)
+- [x] Passengers-per-segment column in segment table (verified in preview).

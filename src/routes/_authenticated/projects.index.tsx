@@ -103,19 +103,19 @@ function ProjectsPage() {
                 <p className="text-xs text-primary-foreground/80">Updated {new Date(p.updated_at).toLocaleDateString()}</p>
               </div>
             </div>
-            <div className="flex flex-wrap items-center justify-end gap-1 p-3">
+            <div className="flex items-center justify-end p-2">
               {canEdit && m && (
-                <div className="flex flex-wrap justify-end gap-1">
-                  <Button size="sm" variant="ghost" asChild><Link to="/projects/$projectId" params={{ projectId: p.id }}>Open</Link></Button>
-                  <Button size="sm" variant="ghost" onClick={() => setRename(p)}>Rename</Button>
-                  <Button size="sm" variant="ghost" onClick={() => run(() => duplicateProject(m.organization_id, p), "Project duplicated")}>Duplicate</Button>
-                  <Button size="sm" variant="ghost" onClick={() => run(async () => {
+                <div className="flex flex-nowrap items-center justify-end gap-0 overflow-x-auto">
+                  <Button size="sm" variant="ghost" className="px-2 text-xs" asChild><Link to="/projects/$projectId" params={{ projectId: p.id }}>Open</Link></Button>
+                  <Button size="sm" variant="ghost" className="px-2 text-xs" onClick={() => setRename(p)}>Rename</Button>
+                  <Button size="sm" variant="ghost" className="px-2 text-xs" onClick={() => run(() => duplicateProject(m.organization_id, p), "Project duplicated")}>Duplicate</Button>
+                  <Button size="sm" variant="ghost" className="px-2 text-xs" onClick={() => run(async () => {
                     const status = p.status === "active" ? "archived" : "active";
                     const { error } = await supabase.from("projects").update({ status, updated_at: new Date().toISOString() }).eq("id", p.id);
                     if (error) throw error;
                     await logAudit(m.organization_id, "project", p.id, status);
                   }, p.status === "active" ? "Archived" : "Restored")}>{p.status === "active" ? "Archive" : "Unarchive"}</Button>
-                  <Button size="sm" variant="ghost" className="text-destructive" onClick={() => setConfirmDel(p)}>Delete</Button>
+                  <Button size="sm" variant="ghost" className="px-2 text-xs text-destructive" onClick={() => setConfirmDel(p)}>Delete</Button>
                 </div>
               )}
             </div>

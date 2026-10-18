@@ -106,7 +106,7 @@ export function SegmentsSection({ a, set, ro }: P) {
         </table>
       </div>
       {!ro && <Button size="sm" variant="outline" className="mt-3" onClick={() => set({ segments: [...a.segments, { name: "New segment", share: 0, grossPrice: 0, vatRate: 0.12, commission: 0, boardingsPerGuest: 1 }] })}>Add segment</Button>}
-      <p className="mt-3 text-xs text-muted-foreground">The adult round-trip gross price is the basis for every other fare — the other segments are set as % of it. Net realized revenue is per guest, excluding VAT and after commission.</p>
+      <p className="mt-3 text-xs text-muted-foreground">The base fare above is the basis for every other fare — the other segments are set as % of it. Net realized revenue is per guest, excluding VAT and after commission.</p>
     </Card>
   );
 }

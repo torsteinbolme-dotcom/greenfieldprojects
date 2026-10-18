@@ -1,0 +1,1 @@
+comment on column public.projects.cover_image_url is 'Storage object path in the project-covers bucket; the app signs a short-lived URL when displaying it. Null until a photo is added.';

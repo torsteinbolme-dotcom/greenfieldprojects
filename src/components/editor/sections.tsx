@@ -42,7 +42,7 @@ export function Limitations() {
         <li>No construction-period interest; debt drawn in full at opening.</li>
         <li>No working capital movements.</li>
         <li>No funding mechanism for negative cash; shortfalls reduce retained cash.</li>
-        <li>EBITDA is not treated as free cash flow: cash after debt deducts interest, principal, tax and maintenance capex.</li>
+        <li>EBITDA is not treated as free cash flow: cash after debt deducts interest, principal and tax.</li>
       </ul>
     </div>
   );
@@ -210,7 +210,6 @@ const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) =>
   ["Interest", (y) => nokM(-y.interest)],
   ["Principal", (y) => nokM(-y.principal)],
   ["Tax", (y) => nokM(-y.tax)],
-  ["Maintenance capex", (y) => nokM(-y.maintenanceCapex)],
   ["Cash flow after debt service", (y) => nokM(y.cashAfterDebt)],
   ["Retained cash (cumulative)", (y) => nokM(y.retainedCash)],
   ["Closing debt", (y) => nokM(y.closingDebt)],

@@ -14,3 +14,4 @@
 - [x] Test fare rules and verify changing and saving prices in the signed-in app.
 - [x] Remove the variable cost per passenger and maintenance capex inputs from the operating costs card; verify the Revenue tab.
 - [x] Display years without a thousands separator; verify the opening year displays, edits and saves as 2030.
+- [x] Take variable cost per passenger and maintenance capex out of the calculation itself; verify results and add an engine test.

@@ -60,6 +60,16 @@ describe("financial engine", () => {
     expect(irr([100, 100])).toBeNull();
   });
 
+  it("ignores variable cost per passenger and maintenance capex entirely", () => {
+    const a = calculate(base());
+    const b = calculate(base({ cableVariableCostPerPassenger: 100, maintenanceCapexRate: 0.5 }));
+    expect(b.rows[2]!.opex).toBeCloseTo(a.rows[2]!.opex, 6);
+    expect(b.rows[2]!.cashAfterDebt).toBeCloseTo(a.rows[2]!.cashAfterDebt, 6);
+    expect(b.rows[2]!.dscr).toBeCloseTo(a.rows[2]!.dscr!, 6);
+    expect(b.equityIrr).toBeCloseTo(a.equityIrr!, 6);
+    expect(b.rows[0]!.retainedCash).toBeCloseTo(a.rows[0]!.retainedCash, 6);
+  });
+
   it("higher commission lowers realized price, EBITDA and IRR", () => {
     const a = calculate(base());
     const segs = projectMountain.segments.map((s) => (s.name === "Cruise" ? { ...s, commission: 0.3 } : s));

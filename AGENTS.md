@@ -19,3 +19,4 @@
 - Use the scoped serial autosave controller for editable assumptions and text details; undo creates a new saved snapshot and never deletes version history. Why: edits during requests must survive and scenario histories stay isolated.
 - Comparison display years are derived through `comparisonYears` in `src/lib/portfolio.ts`, independently of full forecast lengths. Why: shortening comparison graphs must not change authoritative financial calculations.
 - Numeric displays and text-based numeric inputs share `src/lib/format.ts`; format presentation only and retain stored numeric precision. Why: consistent locale formatting must not rewrite signed-off calculations or historical assumptions.
+- Forecast expense detail is derived for presentation through `src/lib/forecast-opex.ts` from current assumptions and engine rows; retain the engine's authoritative total. Why: expose individual costs without modifying signed-off formulas or stored outputs.

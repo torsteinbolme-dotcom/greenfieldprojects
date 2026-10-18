@@ -27,7 +27,7 @@ function SettingsPage() {
           e.preventDefault();
           const name = String(new FormData(e.currentTarget).get("name") ?? "").trim();
           const { error } = await supabase.from("organizations").update({ name }).eq("id", m.organization_id);
-          if (error) return toast.error(error.message);
+          if (error) { toast.error(error.message); return; }
           toast.success("Saved"); qc.invalidateQueries({ queryKey: ["membership"] });
         }}>
           <Input name="name" defaultValue={m.org_name} disabled={!admin} />

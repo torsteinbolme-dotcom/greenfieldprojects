@@ -97,7 +97,7 @@ function EditorPage() {
           {!ro && scenario.kind !== "base" && <Button variant="ghost" className="text-destructive" onClick={async () => {
             if (!confirm(`Delete scenario ${scenario.name}?`)) return;
             const { error } = await supabase.from("scenarios").delete().eq("id", scenario.id);
-            if (error) return toast.error(error.message);
+            if (error) { toast.error(error.message); return; }
             await logAudit(m.organization_id, "scenario", scenario.id, "deleted");
             navigate({ search: (s) => ({ ...s, scenario: undefined }) });
             qc.invalidateQueries();
@@ -201,7 +201,7 @@ type Ctx = { ro: boolean; project: ProjectRow; m: Membership; projectId: string 
             location: String(f.get("location") ?? "") || null, description: String(f.get("description") ?? "") || null,
             assumption_notes: String(f.get("notes") ?? "") || null, updated_at: new Date().toISOString(),
           }).eq("id", p.id);
-          if (error) return toast.error(error.message);
+          if (error) { toast.error(error.message); return; }
           await logAudit(m.organization_id, "project", p.id, "details_updated");
           toast.success("Details saved"); qc.invalidateQueries({ queryKey: ["projects"] });
         }}>
@@ -252,7 +252,7 @@ type Ctx = { ro: boolean; project: ProjectRow; m: Membership; projectId: string 
               <span className="flex gap-1">
                 <Button size="sm" variant="ghost" onClick={async () => {
                   const { data, error } = await supabase.storage.from("project-files").createSignedUrl(f.storage_path, 60);
-                  if (error) return toast.error(error.message);
+                  if (error) { toast.error(error.message); return; }
                   window.open(data.signedUrl, "_blank");
                 }}>Download</Button>
                 {!ro && <Button size="sm" variant="ghost" className="text-destructive" onClick={async () => {

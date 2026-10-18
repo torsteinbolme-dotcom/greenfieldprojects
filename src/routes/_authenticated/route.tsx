@@ -18,7 +18,7 @@ const nav = [
   { to: "/portfolio", label: "Portfolio", icon: Briefcase },
   { to: "/projects", label: "Projects", icon: FolderKanban },
   { to: "/comparison", label: "Comparison", icon: BarChart3 },
-  { to: "/benchmarks", label: "Benchmarks", icon: Ruler, soon: true },
+  { to: "/benchmarks", label: "Benchmarks", icon: Ruler },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 

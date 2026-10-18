@@ -74,3 +74,4 @@
 - [x] Removed the maintenance legacy-rate warning banner from the project page; only the active percentage calculates maintenance.
 - [x] Projects page: clicking a card's photo opens that project (photo is a link with an "Open project" hover cue); the photo button still only uploads, verified in the signed-in preview.
 - [x] Comparison charts: Equity IRR Y8 and MOIC Y8 moved to the first two graphs; verified card order in the signed-in preview.
+- [ ] Comparison "Financial development" chart: add revenue per passenger and EBITDA per passenger options.

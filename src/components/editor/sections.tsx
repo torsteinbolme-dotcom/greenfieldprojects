@@ -176,8 +176,8 @@ export function RevenueOpexSection({ a, set, ro }: P) {
           <Field label="Merchandise OPEX (% of merchandise revenue)" hint="Always this share of merchandise revenue, every year"><NumField percent value={a.merchOpexRate ?? (a.merchRevenueYear1 > 0 ? a.merchOpexYear1 / a.merchRevenueYear1 : 0)} disabled={ro} onChange={(v) => set({ merchOpexRate: v, merchOpexYear1: v * a.merchRevenueYear1 })} /></Field>
         </div>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <Field label="Cable car OPEX growth"><GrowthList values={a.opexGrowth?.cable ?? [a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, cable: v } })} /></Field>
-          <Field label="F&B OPEX growth"><GrowthList values={a.opexGrowth?.fb ?? [a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, fb: v } })} /></Field>
+          <Field label="Cable car OPEX growth"><GrowthList values={a.opexGrowth?.cable ?? [a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, cable: v } })} /></Field>
+          <Field label="F&B OPEX growth"><GrowthList values={a.opexGrowth?.fb ?? [a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, fb: v } })} /></Field>
         </div>
       </Card>
     </div>

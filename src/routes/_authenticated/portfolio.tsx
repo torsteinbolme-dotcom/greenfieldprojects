@@ -1,19 +1,22 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { NumField } from "@/components/editor/inputs";
 import { Kpi } from "@/components/editor/sections";
 import { useLatestAssumptions, useProjects, useScenarios } from "@/lib/data";
-import { buildEntries, metricsAt } from "@/lib/portfolio";
+import { buildEntries, metricsAt, sortByMetric } from "@/lib/portfolio";
+import { ArrowDown, ArrowUp } from "lucide-react";
 import type { YearMode } from "@/lib/model";
-import { int, nokM, pct } from "@/lib/format";
+import { int, mult, nokM, pct } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/portfolio")({
   head: () => ({ meta: [{ title: "Portfolio — Cable Car Portfolio" }, { name: "description", content: "Portfolio overview of all cable car projects on a common year basis." }, { property: "og:title", content: "Portfolio — Cable Car Portfolio" }, { property: "og:description", content: "Compare cable car projects." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: PortfolioPage,
 });
+
+type SortKey = "project" | "scenario" | "capex" | "passengers" | "revenue" | "ebitda" | "margin" | "moic" | "irr" | "exitEquity";
 
 function PortfolioPage() {
   const navigate = useNavigate();
@@ -29,7 +32,16 @@ function PortfolioPage() {
     () => (latest ? buildEntries(projects.filter((p) => p.status === "active"), scenarios, latest, kind) : []),
     [projects, scenarios, latest, kind],
   );
-  const rows = entries.map((e) => ({ e, m: metricsAt(e, mode, year) }));
+  const [sort, setSort] = useState<{ key: SortKey; dir: "asc" | "desc" }>({ key: "moic", dir: "desc" });
+  const all = entries.map((e) => ({ e, m: metricsAt(e, mode, year) }));
+  const rows = sortByMetric(all, (r) => (sort.key === "project" ? r.e.project.name : sort.key === "scenario" ? r.e.scenario.name : r.m[sort.key] ?? -Infinity), sort.dir);
+  const Th = ({ k, children, right = true }: { k: SortKey; children: ReactNode; right?: boolean }) => (
+    <th className={right ? "text-right" : ""}>
+      <button className="inline-flex items-center gap-1 hover:underline" onClick={() => setSort((s) => ({ key: k, dir: s.key === k ? (s.dir === "desc" ? "asc" : "desc") : k === "project" || k === "scenario" ? "asc" : "desc" }))}>
+        {children}{sort.key === k && (sort.dir === "desc" ? <ArrowDown className="h-3 w-3" /> : <ArrowUp className="h-3 w-3" />)}
+      </button>
+    </th>
+  );
   const sum = (f: (x: (typeof rows)[number]["m"]) => number | null) => rows.reduce((s, r) => s + (f(r.m) ?? 0), 0);
   const label = mode === "operating" ? `Y${year}` : String(year);
 
@@ -65,13 +77,13 @@ function PortfolioPage() {
         <table className="fin-table">
           <thead>
             <tr>
-              <th /><th>Project</th><th>Scenario</th><th className="text-right">CAPEX (NOK m)</th><th className="text-right">Passengers {label}</th>
-              <th className="text-right">Revenue {label}</th><th className="text-right">EBITDA {label}</th><th className="text-right">Margin</th>
-              <th className="text-right">Equity IRR</th><th className="text-right">Exit equity (NOK m)</th>
+              <th /><Th k="project" right={false}>Project</Th><Th k="scenario" right={false}>Scenario</Th><Th k="capex">CAPEX (NOK m)</Th><Th k="passengers">Passengers {label}</Th>
+              <Th k="revenue">Revenue {label}</Th><Th k="ebitda">EBITDA {label}</Th><Th k="margin">Margin</Th>
+              <Th k="moic">MOIC</Th><Th k="irr">Equity IRR</Th><Th k="exitEquity">Exit equity (NOK m)</Th>
             </tr>
           </thead>
           <tbody>
-            {rows.length === 0 && <tr><td colSpan={10} className="text-muted-foreground">No active projects.</td></tr>}
+            {rows.length === 0 && <tr><td colSpan={11} className="text-muted-foreground">No active projects.</td></tr>}
             {rows.map(({ e, m }) => (
               <tr key={e.project.id}>
                 <td><Checkbox checked={selected.includes(e.project.id)} onCheckedChange={(c) => setSelected((s) => (c ? [...s, e.project.id] : s.filter((x) => x !== e.project.id)))} /></td>
@@ -81,7 +93,7 @@ function PortfolioPage() {
                 <td>{e.scenario.name}</td>
                 <td className="num text-right">{nokM(m.capex)}</td><td className="num text-right">{int(m.passengers)}</td>
                 <td className="num text-right">{nokM(m.revenue)}</td><td className="num text-right">{nokM(m.ebitda)}</td>
-                <td className="num text-right">{pct(m.margin)}</td><td className="num text-right">{pct(m.irr)}</td><td className="num text-right">{nokM(m.exitEquity)}</td>
+                <td className="num text-right">{pct(m.margin)}</td><td className="num text-right">{mult(m.moic)}</td><td className="num text-right">{pct(m.irr)}</td><td className="num text-right">{nokM(m.exitEquity)}</td>
               </tr>
             ))}
           </tbody>
@@ -89,7 +101,7 @@ function PortfolioPage() {
       </div>
       <div className="flex items-center gap-3">
         <Button disabled={selected.length < 2} onClick={() => navigate({ to: "/comparison/projects", search: { ids: selected.join(",") } })}>Compare selected ({selected.length})</Button>
-        <span className="text-xs text-muted-foreground">IRR and exit equity use each project's own exit year and multiple.</span>
+        <span className="text-xs text-muted-foreground">MOIC, IRR and exit equity use each project's own exit year and multiple.</span>
       </div>
     </div>
   );

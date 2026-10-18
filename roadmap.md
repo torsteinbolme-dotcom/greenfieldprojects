@@ -72,3 +72,4 @@
 - [x] Engine reliability update: equity injections, maintenance CAPEX, variable cable OPEX
 - [x] Capacity & financial update: maintenance opt-in for existing projects, cash-flow breakdown
 - [x] Removed the maintenance legacy-rate warning banner from the project page; only the active percentage calculates maintenance.
+- [x] Projects page: clicking a card's photo opens that project (photo is a link with an "Open project" hover cue); the photo button still only uploads, verified in the signed-in preview.

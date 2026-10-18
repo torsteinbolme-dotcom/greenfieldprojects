@@ -15,7 +15,7 @@
 - Every table has `organization_id`; RLS uses `is_org_member` / `can_edit_org` / `is_org_admin` (security definer). Why: one organization must never see another's data.
 - Scenario saves insert new versions; Base is separate and never overwritten by other scenarios. Why: isolation and version history.
 - New signups get their own organization plus a seeded Project Mountain (`handle_new_user` trigger). Why: every account starts with a working example.
-- Optional ticket percentages live in scenario JSON; apply `src/lib/ticket-pricing.ts` before editing, calculating and saving, without changing the engine or example. Why: fare relationships persist per version without rewriting history or formulas.
+- Ticket ratios live in scenario JSON; apply `src/lib/ticket-pricing.ts` for edits/calculations/saves. Apply `withDefaultProjectSegments` only to new templates. Why: preserve saved fares, history and the authoritative example.
 - Use the scoped serial autosave controller for editable assumptions and text details; undo creates a new saved snapshot and never deletes version history. Why: edits during requests must survive and scenario histories stay isolated.
 - Comparison display years are derived through `comparisonYears` in `src/lib/portfolio.ts`, independently of full forecast lengths. Why: shortening comparison graphs must not change authoritative financial calculations.
 - Numeric displays and text inputs share `src/lib/format.ts`; retain stored precision. Why: locale formatting must not rewrite calculations or historical assumptions.

@@ -8,7 +8,7 @@ export function ticketPriceRatio(name: string): number | null {
   switch (key) {
     case "roundtripadult": case "adultroundtrip": return 1;
     case "roundtripchild": case "childroundtrip": return 0.5;
-    case "onewayadult": case "adultoneway": return 0.6;
+    case "onewayadult": case "adultoneway": case "mice": return 0.6;
     case "onewaychild": case "childoneway": return 0.3;
     case "annualpassadult": case "adultannualpass": return 4;
     case "cruise": case "touroperators": case "touroperator": return 1;

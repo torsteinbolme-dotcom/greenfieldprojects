@@ -26,7 +26,7 @@ export const segmentNetPerGuest = (s: Assumptions["segments"][number]) =>
 export const shareSum = (a: Assumptions) => a.segments.reduce((s, x) => s + x.share, 0);
 
 export function blankAssumptions(name: string): Assumptions {
-  return {
+  return withDefaultProjectSegments({
     name, openingYear: new Date().getFullYear() + 3, years: 15, initialPassengers: 100000,
     segments: [{ name: "Adult roundtrip", share: 1, grossPrice: 500, vatRate: 0.12, commission: 0, boardingsPerGuest: 2 }],
     passengerGrowth: [0.05, 0.03, 0.02], priceGrowth: [0.03, 0.03, 0.025],
@@ -35,5 +35,14 @@ export function blankAssumptions(name: string): Assumptions {
     capexItems: [{ name: "Cable car", quantity: 1, unitCost: 200000000 }], contingencyRate: 0.15,
     debtShare: 0.6, interestRate: 0.06, loanYears: 15, taxRate: 0.22, depreciationYears: 25, maintenanceCapexRate: 0.01, maintenanceCapexPct: 0.01,
     exitYear: 8, exitMultiple: 15, exitTransactionCostRate: 0.01, distributeCashAnnually: false,
-  };
+  });
+}
+
+/** Add starter segments on creation only; preserve saved inputs. */
+export function withDefaultProjectSegments(a: Assumptions): Assumptions {
+  if (a.segments.some((s) => s.name.trim().toLowerCase() === "mice")) return a;
+  return withLinkedTicketPrices({ ...a, segments: [...a.segments, {
+    name: "MICE", share: 0, grossPrice: 0, vatRate: 0.12, commission: 0,
+    boardingsPerGuest: 2,
+  }] });
 }

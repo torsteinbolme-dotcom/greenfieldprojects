@@ -12,7 +12,7 @@ import { createProject, deleteProject, duplicateProject, logAudit, useMembership
 import { coverSrc } from "@/lib/covers";
 import { uploadCover, useCoverUrls } from "@/lib/covers-client";
 import { projectMountain } from "@/exampleProject";
-import { blankAssumptions } from "@/lib/model";
+import { blankAssumptions, withDefaultProjectSegments } from "@/lib/model";
 
 export const Route = createFileRoute("/_authenticated/projects/")({
   head: () => ({ meta: [{ title: "Projects — Cable Car Portfolio" }, { name: "description", content: "Create, duplicate, archive and edit cable car projects." }, { property: "og:title", content: "Projects — Cable Car Portfolio" }, { property: "og:description", content: "Manage cable car projects." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -124,7 +124,7 @@ function ProjectsPage() {
       </div>
 
       {m && <CreateDialog open={createOpen} onOpenChange={setCreateOpen} onCreate={(name, loc, tpl) => run(async () => {
-        const a = tpl === "mountain" ? { ...projectMountain, name } : blankAssumptions(name);
+        const a = tpl === "mountain" ? withDefaultProjectSegments({ ...projectMountain, name }) : blankAssumptions(name);
         const notes = tpl === "mountain" ? "Copied from the Project Mountain example; illustrative assumptions not from the original workbook must be verified." : null;
         await createProject(m.organization_id, name, loc || null, a, notes ?? undefined);
         setCreateOpen(false);
@@ -183,7 +183,7 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="mountain">Copy of Project Mountain example</SelectItem>
-                <SelectItem value="blank">Minimal starter (one segment, one CAPEX line)</SelectItem>
+                <SelectItem value="blank">Minimal starter</SelectItem>
               </SelectContent>
             </Select>
           </div>

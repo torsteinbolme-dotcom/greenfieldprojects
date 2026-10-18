@@ -1,4 +1,5 @@
 # Tasks
+- [x] Default MICE at an editable 60% adult fare in both new-project templates; preserve saved scenarios.
 - [x] Final refinements: explicit monthly distribution Save/Cancel and missing-capacity warnings; signed-in Save/reload/restore verified.
 - [x] Final refinements: audit canonical maintenance assumptions; flag ambiguous legacy values without overwriting history; no migration needed or safe.
 - [x] Final refinements: independent financial regression tests (141 passing), signed-in verification, automatic build OK and final validation report.

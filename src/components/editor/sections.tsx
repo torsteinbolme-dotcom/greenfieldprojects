@@ -136,7 +136,7 @@ export function RevenueOpexSection({ a, set, ro }: P) {
     <div className="grid gap-4 lg:grid-cols-2">
       <Card title="Passengers & pricing">
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Opening year"><NumField value={a.openingYear} disabled={ro} step="1" onChange={(v) => set({ openingYear: Math.round(v) })} /></Field>
+          <Field label="Opening year"><NumField plain value={a.openingYear} disabled={ro} step="1" onChange={(v) => set({ openingYear: Math.round(v) })} /></Field>
           <Field label="Model years"><NumField value={a.years} disabled={ro} step="1" onChange={(v) => set({ years: Math.round(v) })} /></Field>
           <Field label="Year-1 passengers (guests)"><NumField value={a.initialPassengers} disabled={ro} onChange={(v) => set({ initialPassengers: v })} /></Field>
         </div>
@@ -155,11 +155,9 @@ export function RevenueOpexSection({ a, set, ro }: P) {
       <Card title="Operating costs" className="lg:col-span-2">
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
           <Field label="Cable car fixed OPEX year 1 (NOK)"><NumField value={a.cableFixedOpex} disabled={ro} onChange={(v) => set({ cableFixedOpex: v })} /></Field>
-          <Field label="Variable cost per passenger (NOK)"><NumField value={a.cableVariableCostPerPassenger} disabled={ro} onChange={(v) => set({ cableVariableCostPerPassenger: v })} /></Field>
           <Field label="Cost inflation"><NumField percent value={a.costInflation} disabled={ro} onChange={(v) => set({ costInflation: v })} /></Field>
           <Field label="F&B OPEX year 1 (NOK)" hint="Scales with F&B revenue"><NumField value={a.fbOpexYear1} disabled={ro} onChange={(v) => set({ fbOpexYear1: v })} /></Field>
           <Field label="Merchandise OPEX year 1 (NOK)" hint="Scales with merchandise revenue"><NumField value={a.merchOpexYear1} disabled={ro} onChange={(v) => set({ merchOpexYear1: v })} /></Field>
-          <Field label="Maintenance capex (% of revenue)"><NumField percent value={a.maintenanceCapexRate} disabled={ro} onChange={(v) => set({ maintenanceCapexRate: v })} /></Field>
         </div>
       </Card>
     </div>

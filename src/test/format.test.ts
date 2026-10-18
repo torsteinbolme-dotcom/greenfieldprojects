@@ -30,4 +30,10 @@ describe("site number formatting", () => {
     expect(formatNumber(null)).toBe("—");
     expect(formatNumber(Infinity)).toBe("—");
   });
+  it("displays years without a thousands separator", () => {
+    expect(formatNumber(2029, 0, 2, false)).toBe("2029");
+    expect(formatNumberInput("2029", false)).toBe("2029");
+    expect(formatNumberInput("202", false)).toBe("202");
+    expect(parseNumberInput("2029")).toBe(2029);
+  });
 });

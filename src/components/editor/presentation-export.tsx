@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { COVER_BUCKET } from '@/lib/covers';
@@ -24,7 +23,6 @@ async function pngData(file: Blob): Promise<string> {
 export function PresentationExport({ input, coverPath }: { input: PresentationInput; coverPath: string | null }) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<PresentationOptions>({ ...DEFAULT_PRESENTATION_OPTIONS });
-  const [image, setImage] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState<{ blob: Blob; name: string } | null>(null);
   const invalidate = () => setReady(null);
@@ -32,8 +30,7 @@ export function PresentationExport({ input, coverPath }: { input: PresentationIn
     setBusy(true); setReady(null);
     try {
       let data: string | undefined;
-      if (image) data = await pngData(image);
-      else if (coverPath) {
+      if (coverPath) {
         const { data: photo, error } = await supabase.storage.from(COVER_BUCKET).download(coverPath);
         if (!error && photo) data = await pngData(photo);
         else toast.warning('The project photo is unavailable; the title will use text only.');
@@ -72,7 +69,6 @@ export function PresentationExport({ input, coverPath }: { input: PresentationIn
           <SelectItem value="detailed">Detailed Financial Review · 12–15 slides</SelectItem>
         </SelectContent></Select></div>
         <div className="space-y-3">{([['charts', 'Financial charts'], ['benchmarks', 'Benchmark comparisons'], ['notes', 'Presenter notes']] as const).map(([key, label]) => <Label key={key} className="flex items-center gap-3"><Checkbox disabled={busy} checked={options[key]} onCheckedChange={v => { setOptions(o => ({ ...o, [key]: v === true })); invalidate(); }} />{label}</Label>)}</div>
-        <div className="space-y-2"><Label htmlFor="presentation-image">Cover image (optional)</Label><Input id="presentation-image" type="file" accept="image/*" disabled={busy} onChange={e => { const file = e.target.files?.[0] ?? null; if (file && file.size > 20 * 1024 * 1024) { toast.error('Choose an image smaller than 20 MB.'); return; } setImage(file); invalidate(); }} /></div>
         <div className="flex justify-end gap-2"><Button disabled={busy} onClick={() => void generate()}>{busy && <LoaderCircle className="size-4 animate-spin" />}{busy ? 'Preparing…' : ready ? 'Regenerate' : 'Generate'}</Button>{ready && <Button onClick={download}><Download className="size-4" />Download .pptx</Button>}</div>
       </DialogContent>
     </Dialog>

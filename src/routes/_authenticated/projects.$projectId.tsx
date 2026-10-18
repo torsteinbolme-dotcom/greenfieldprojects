@@ -111,7 +111,7 @@ function EditorPage() {
 
       <Tabs value={search.tab ?? "overview"} onValueChange={(t) => navigate({ search: (s) => ({ ...s, tab: t }), replace: true })}>
         <TabsList className="flex-wrap">
-          {[["overview", "Overview"], ["segments", "Passenger segments"], ["capex", "CAPEX"], ["revenue", "Revenue & OPEX"], ["financing", "Financing"], ["forecast", "Forecast"], ["exit", "Exit analysis"], ["history", "Version history"]].map(([k, l]) => (
+          {([["overview", "Overview"], ["segments", "Passenger segments"], ["capex", "CAPEX"], ["revenue", "Revenue & OPEX"], ["financing", "Financing"], ["forecast", "Forecast"], ["exit", "Exit analysis"], ["history", "Version history"]] as const).map(([k, l]) => (
             <TabsTrigger key={k} value={k}>{l}</TabsTrigger>
           ))}
         </TabsList>

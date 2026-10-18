@@ -148,8 +148,8 @@ export function RevenueOpexSection({ a, set, ro }: P) {
       </Card>
       <Card title="Ancillary revenue">
         <div className="grid grid-cols-2 gap-4">
-          <Field label="F&B revenue year 1 (NOK)"><NumField value={a.fbRevenueYear1} disabled={ro} onChange={(v) => set({ fbRevenueYear1: v })} /></Field>
-          <Field label="Merchandise revenue year 1 (NOK)"><NumField value={a.merchRevenueYear1} disabled={ro} onChange={(v) => set({ merchRevenueYear1: v })} /></Field>
+          <Field label="F&B revenue year 1 (NOK, ex VAT)"><NumField value={a.fbRevenueYear1} disabled={ro} onChange={(v) => set({ fbRevenueYear1: v })} /></Field>
+          <Field label="Merchandise revenue year 1 (NOK, ex VAT)"><NumField value={a.merchRevenueYear1} disabled={ro} onChange={(v) => set({ merchRevenueYear1: v })} /></Field>
         </div>
         <div className="mt-4"><Field label="Ancillary growth"><GrowthList values={a.ancillaryGrowth} disabled={ro} onChange={(v) => set({ ancillaryGrowth: v })} /></Field></div>
       </Card>

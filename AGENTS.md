@@ -13,7 +13,7 @@
 - Keep authoritative `src/financialEngine.ts` and `src/exampleProject.ts` verbatim; ask before changing formulas. Why: the user signed off on these investment calculations.
 - All outputs are computed client-side from stored inputs (`scenario_assumptions` JSONB, append-only versions); never store outputs edited by hand. Why: results stay deterministic and every version can be audited.
 - Every table has `organization_id`; RLS uses `is_org_member` / `can_edit_org` / `is_org_admin` (security definer). Why: one organization must never see another's data.
-- Saving a scenario inserts a new version row; the Base scenario is a separate row, so edits elsewhere never overwrite it. Why: scenario isolation and version history.
+- Scenario saves insert new versions; Base is separate and never overwritten by other scenarios. Why: isolation and version history.
 - New signups get their own organization plus a seeded Project Mountain (`handle_new_user` trigger). Why: every account starts with a working example.
 - Optional ticket percentages live in scenario JSON; apply `src/lib/ticket-pricing.ts` before editing, calculating and saving, without changing the engine or example. Why: fare relationships persist per version without rewriting history or formulas.
 - Use the scoped serial autosave controller for editable assumptions and text details; undo creates a new saved snapshot and never deletes version history. Why: edits during requests must survive and scenario histories stay isolated.

@@ -55,6 +55,50 @@ export type Database = {
           },
         ]
       }
+      organization_invites: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          organization_id: string
+          role: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          organization_id: string
+          role?: string
+          token?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          organization_id?: string
+          role?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_invites_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           created_at: string
@@ -324,6 +368,7 @@ export type Database = {
       }
     }
     Functions: {
+      accept_invite: { Args: { _token: string }; Returns: string }
       can_edit_org: { Args: { _org: string; _user: string }; Returns: boolean }
       is_org_admin: { Args: { _org: string; _user: string }; Returns: boolean }
       is_org_member: { Args: { _org: string; _user: string }; Returns: boolean }

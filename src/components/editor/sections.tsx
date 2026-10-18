@@ -65,7 +65,7 @@ export function SegmentsSection({ a, set, ro }: P) {
       )}
       <div className="overflow-x-auto">
         <table className="fin-table [&_td]:min-w-24">
-          <thead><tr><th>Segment</th><th>Share</th><th className="text-right">Passengers year 1</th><th>% of adult round trip</th><th>Ticket gross incl VAT (NOK)</th><th>VAT</th><th>Commission</th><th className="text-right">Net realized / guest (NOK)</th><th /></tr></thead>
+          <thead><tr><th>Segment</th><th>Share</th><th className="text-right">Passengers year 1</th><th>% of adult round trip</th><th className="text-primary"><span className="font-semibold">Ticket gross incl VAT (NOK)</span><span className="block font-normal text-[11px]">Base fare — drives all other prices</span></th><th>VAT</th><th>Commission</th><th className="text-right">Net realized / guest (NOK)</th><th /></tr></thead>
           <tbody>
             {a.segments.map((s, i) => (
               <tr key={i}>
@@ -78,7 +78,7 @@ export function SegmentsSection({ a, set, ro }: P) {
                 <td className="w-32">
                   {adultFare && !isAdultRoundTrip(s.name) ? (
                     <span className="num block text-right">{nok(s.grossPrice, 2)}</span>
-                  ) : <NumField value={s.grossPrice} disabled={ro} onChange={(v) => upd(i, { grossPrice: v })} />}
+                  ) : <NumField value={s.grossPrice} disabled={ro} onChange={(v) => upd(i, { grossPrice: v })} className={cn("rounded-md", isAdultRoundTrip(s.name) && "ring-1 ring-primary [&_input]:font-semibold")} />}
                 </td>
                 <td className="w-24"><NumField percent value={s.vatRate} disabled={ro} onChange={(v) => upd(i, { vatRate: v })} /></td>
                 <td className="w-24"><NumField percent value={s.commission} disabled={ro} onChange={(v) => upd(i, { commission: v })} /></td>
@@ -94,7 +94,7 @@ export function SegmentsSection({ a, set, ro }: P) {
         </table>
       </div>
       {!ro && <Button size="sm" variant="outline" className="mt-3" onClick={() => set({ segments: [...a.segments, { name: "New segment", share: 0, grossPrice: 0, vatRate: 0.12, commission: 0, boardingsPerGuest: 1 }] })}>Add segment</Button>}
-      <p className="mt-3 text-xs text-muted-foreground">Net realized revenue is per guest, excluding VAT and after commission.</p>
+      <p className="mt-3 text-xs text-muted-foreground">The adult round-trip gross price is the basis for every other fare — the other segments are set as % of it. Net realized revenue is per guest, excluding VAT and after commission.</p>
     </Card>
   );
 }

@@ -114,4 +114,11 @@ describe("tax-loss carryforward", () => {
     expect(r2.rows[2]!.tax).toBe(0); // 50 000 offset, 150 000 loss remains
     expect(r2.rows[5]!.tax).toBe(0);
   });
+
+  it("carries the year-3 average ticket price the Investment Summary displays", () => {
+    const r = calculate(base());
+    // priceGrowth [.05,.05,.03]: year 2 applies index 0, year 3 applies index 1
+    expect(r.rows[2]!.ticketNetPrice).toBeCloseTo(r.weightedTicket * 1.05 * 1.05, 6);
+    expect(r.rows[2]!.ticketRevenue).toBeCloseTo(r.rows[2]!.passengers * r.rows[2]!.ticketNetPrice, 6);
+  });
 });

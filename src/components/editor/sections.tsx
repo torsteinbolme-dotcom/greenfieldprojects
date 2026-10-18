@@ -289,7 +289,6 @@ const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) =>
   ["Debt service (interest + principal)", (y) => nokM(-(y.interest + y.principal))],
   ["Cash flow after debt service", (y) => nokM(y.cashAfterDebt)],
   ["Additional equity contributions", (y) => nokM(y.equityInjection)],
-  ["Shareholder distributions", (y) => nokM(-y.distribution)],
   ["Exit proceeds to equity", (y, a) => (y.year === a.exitYear ? nokM(safeExit(a)) : "–")],
   ["Retained cash (cumulative)", (y) => nokM(y.retainedCash)],
   ["Closing debt", (y) => nokM(y.closingDebt)],

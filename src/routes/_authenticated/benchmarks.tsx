@@ -175,7 +175,7 @@ function BenchmarksPage() {
             <div className="h-64"><ResponsiveContainer>
               <BarChart data={cableRows.map((r) => ({ name: r.name, v: kpi.get(r) }))}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" /><YAxis tickFormatter={(v) => (kpi.key === "ebitdaMargin" ? pct(v, 0) : formatNumber(v, 0, 0))} />
+                <XAxis dataKey="name" /><YAxis width={72} tickFormatter={(v) => (kpi.key === "ebitdaMargin" ? pct(v, 0) : formatNumber(v, 0, 0))} />
                 <Tooltip formatter={(v: number) => kpi.fmt(v)} />
                 <Bar dataKey="v" name={kpi.label} fill="var(--color-primary)" radius={[4, 4, 0, 0]} />
               </BarChart>

@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 import { Download } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Card } from "@/components/editor/sections";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -167,11 +167,11 @@ function ProjectVsProject() {
           {CHARTS.map((k) => { const m = METRICS.find((x) => x.key === k)!; return (
             <Card key={k} title={m.key === "capex" ? m.label : m.group === "operations" ? `Year 3 ${/^[A-Z][a-z]/.test(m.label) ? m.label.charAt(0).toLowerCase() + m.label.slice(1) : m.label}` : m.label}>
               <div className="h-56"><ResponsiveContainer>
-                <BarChart data={sorted.map((r) => { const v = m.get(r); return { name: label(r), id: r.project.id, v: v == null ? null : m.fmt === "nokM" ? v / 1e6 : m.fmt === "pct" ? v * 100 : v }; })}>
+                <BarChart margin={{ top: 18, right: 12, left: 4, bottom: 0 }} data={sorted.map((r) => { const v = m.get(r); return { name: label(r), id: r.project.id, v: v == null ? null : m.fmt === "nokM" ? v / 1e6 : m.fmt === "pct" ? v * 100 : v }; })}>
                   <CartesianGrid stroke="var(--border)" vertical={false} />
-                  <XAxis dataKey="name" fontSize={11} /><YAxis fontSize={11} tickFormatter={(v) => formatNumber(Number(v), 0, 1)} unit={m.fmt === "pct" ? "%" : m.fmt === "mult" ? "x" : ""} />
+                  <XAxis dataKey="name" fontSize={11} /><YAxis fontSize={11} width={72} tickFormatter={(v) => formatNumber(Number(v), 0, 1)} unit={m.fmt === "pct" ? "%" : m.fmt === "mult" ? "x" : ""} />
                   <Tooltip formatter={(v) => (m.fmt === "pct" ? `${formatNumber(Number(v), 1, 1)}%` : m.fmt === "nokM" ? `${formatNumber(Number(v), 1, 1)} NOK m` : fmt(m.fmt, Number(v)))} />
-                  <Bar dataKey="v" name={m.label}>{sorted.map((r) => <Cell key={r.project.id} fill={colorFor(r.project.id)} />)}</Bar>
+                  <Bar dataKey="v" name={m.label}>{sorted.map((r) => <Cell key={r.project.id} fill={colorFor(r.project.id)} />)}<LabelList dataKey="v" position="top" fontSize={11} fill="var(--foreground)" formatter={(v: unknown) => v == null || !Number.isFinite(Number(v)) ? "" : m.fmt === "pct" ? `${formatNumber(Number(v), 1, 1)}%` : m.fmt === "mult" ? `${formatNumber(Number(v), 2, 2)}x` : m.fmt === "nokM" ? formatNumber(Number(v), 1, 1) : formatNumber(Number(v), 0, 0)} /></Bar>
                 </BarChart>
               </ResponsiveContainer></div>
             </Card>

@@ -2,6 +2,8 @@
 /** Project Mountain v1 financial engine. All amounts NOK, rates decimals. */
 export type Segment = {name:string;share:number;grossPrice:number;vatRate:number;commission:number;boardingsPerGuest:number};
 export type CapexItem = {name:string;quantity:number;unitCost:number};
+// cableVariableCostPerPassenger and maintenanceCapexRate are retained as stored inputs only:
+// they no longer enter any formula, but old saved versions and the example file still carry them.
 export type Assumptions = {
   name:string;openingYear:number;years:number;initialPassengers:number;
   segments:Segment[]; passengerGrowth:number[]; priceGrowth:number[];
@@ -14,7 +16,7 @@ export type Assumptions = {
   exitYear:number;exitMultiple:number;exitTransactionCostRate:number;
   distributeCashAnnually:boolean;
 };
-export type YearResult={year:number;calendarYear:number;passengers:number;ticketNetPrice:number;ticketRevenue:number;fbRevenue:number;merchRevenue:number;revenue:number;opex:number;ebitda:number;depreciation:number;ebit:number;openingDebt:number;interest:number;principal:number;closingDebt:number;tax:number;maintenanceCapex:number;cashAfterDebt:number;distribution:number;retainedCash:number;dscr:number|null};
+export type YearResult={year:number;calendarYear:number;passengers:number;ticketNetPrice:number;ticketRevenue:number;fbRevenue:number;merchRevenue:number;revenue:number;opex:number;ebitda:number;depreciation:number;ebit:number;openingDebt:number;interest:number;principal:number;closingDebt:number;tax:number;cashAfterDebt:number;distribution:number;retainedCash:number;dscr:number|null};
 const growth=(values:number[],year:number)=>values[Math.min(year-2,values.length-1)]??0;
 const safe=(v:number)=>Number.isFinite(v)?v:0;
 export function xnpv(rate:number,cashflows:number[]):number{return cashflows.reduce((sum,cf,i)=>sum+cf/Math.pow(1+rate,i),0)}
@@ -40,19 +42,18 @@ export function calculate(a:Assumptions){
     if(year>1){passengers*=1+growth(a.passengerGrowth,year);price*=1+growth(a.priceGrowth,year);fb*=1+growth(a.ancillaryGrowth,year);merch*=1+growth(a.ancillaryGrowth,year)}
     const ticketRevenue=passengers*price,revenue=ticketRevenue+fb+merch;
     const inflate=Math.pow(1+a.costInflation,year-1);
-    const opex=a.cableFixedOpex*inflate+a.cableVariableCostPerPassenger*passengers*inflate+
+    const opex=a.cableFixedOpex*inflate+
       (a.fbRevenueYear1>0? a.fbOpexYear1*fb/a.fbRevenueYear1:0)*inflate+
       (a.merchRevenueYear1>0?a.merchOpexYear1*merch/a.merchRevenueYear1:0)*inflate;
     const ebitda=revenue-opex,depreciation=capex/a.depreciationYears,ebit=ebitda-depreciation;
     const interest=openingDebt*a.interestRate,principal=year<=a.loanYears?Math.min(openingDebt,debt/a.loanYears):0;
     const closingDebt=Math.max(0,openingDebt-principal);
     const tax=Math.max(0,(ebit-interest)*a.taxRate); // simplified; no tax loss carryforwards
-    const maintenanceCapex=revenue*a.maintenanceCapexRate;
-    const cashAfterDebt=ebitda-interest-principal-tax-maintenanceCapex;
+    const cashAfterDebt=ebitda-interest-principal-tax;
     const distribution=a.distributeCashAnnually?Math.max(0,cashAfterDebt):0;
     retainedCash+=cashAfterDebt-distribution;
     const debtService=interest+principal;
-    rows.push({year,calendarYear:a.openingYear+year-1,passengers,ticketNetPrice:price,ticketRevenue,fbRevenue:fb,merchRevenue:merch,revenue,opex,ebitda,depreciation,ebit,openingDebt,interest,principal,closingDebt,tax,maintenanceCapex,cashAfterDebt,distribution,retainedCash,dscr:debtService>0?(ebitda-tax-maintenanceCapex)/debtService:null});
+    rows.push({year,calendarYear:a.openingYear+year-1,passengers,ticketNetPrice:price,ticketRevenue,fbRevenue:fb,merchRevenue:merch,revenue,opex,ebitda,depreciation,ebit,openingDebt,interest,principal,closingDebt,tax,cashAfterDebt,distribution,retainedCash,dscr:debtService>0?(ebitda-tax)/debtService:null});
     openingDebt=closingDebt;
   }
   const exit=rows[a.exitYear-1],enterpriseValue=exit.ebitda*a.exitMultiple;

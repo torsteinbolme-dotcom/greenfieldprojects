@@ -3,11 +3,11 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { formatNumber, formatNumberInput, parseNumberInput } from "@/lib/format";
 
-type Props = { value: number; onChange: (v: number) => void; percent?: boolean | undefined; disabled?: boolean | undefined; className?: string | undefined; step?: string | undefined };
+type Props = { value: number; onChange: (v: number) => void; percent?: boolean | undefined; disabled?: boolean | undefined; className?: string | undefined; step?: string | undefined; plain?: boolean | undefined };
 
-/** Numeric input. With `percent`, the stored value is a decimal (0.12) and shown as 12. */
-export function NumField({ value, onChange, percent, disabled, className, step }: Props) {
-  const toText = (v: number) => (Number.isFinite(v) ? formatNumber(percent ? v * 100 : v) : "");
+/** Numeric input. With `percent`, the stored value is a decimal (0.12) and shown as 12. With `plain`, thousands are not grouped (years). */
+export function NumField({ value, onChange, percent, disabled, className, step, plain }: Props) {
+  const toText = (v: number) => (Number.isFinite(v) ? formatNumber(percent ? v * 100 : v, 0, 2, !plain) : "");
   const [text, setText] = useState(toText(value));
   const [focused, setFocused] = useState(false);
   useEffect(() => { if (!focused) setText(toText(value)); }, [value, percent, focused]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -20,7 +20,7 @@ export function NumField({ value, onChange, percent, disabled, className, step }
         value={text}
         className={cn("num h-8 text-right", percent && "pr-6")}
         onChange={(e) => {
-          const next = formatNumberInput(e.target.value);
+          const next = formatNumberInput(e.target.value, !plain);
           if (next === null) return;
           setText(next);
           const n = parseNumberInput(next);

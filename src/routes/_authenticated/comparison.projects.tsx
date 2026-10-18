@@ -159,7 +159,7 @@ function ProjectVsProject() {
 
         <div className="grid gap-4 md:grid-cols-2">
           {CHARTS.map((k) => { const m = METRICS.find((x) => x.key === k)!; return (
-            <Card key={k} title={m.key === "capex" ? m.label : m.group === "operations" ? `Year 3 ${m.label.charAt(0).toLowerCase()}${m.label.slice(1)}` : m.label}>
+            <Card key={k} title={m.key === "capex" ? m.label : m.group === "operations" ? `Year 3 ${/^[A-Z][a-z]/.test(m.label) ? m.label.charAt(0).toLowerCase() + m.label.slice(1) : m.label}` : m.label}>
               <div className="h-56"><ResponsiveContainer>
                 <BarChart data={sorted.map((r) => { const v = m.get(r); return { name: label(r), id: r.project.id, v: v == null ? null : m.fmt === "nokM" ? v / 1e6 : m.fmt === "pct" ? v * 100 : v }; })}>
                   <CartesianGrid stroke="var(--border)" vertical={false} />

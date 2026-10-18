@@ -24,3 +24,4 @@
 
 - The engine carries tax losses forward indefinitely: negative taxable income (EBIT minus interest) accumulates and offsets later profits before tax is charged (added 2026-10-18 at user request).
 - Project benchmarking selections (comparables, weights, years, threshold) live in `projects.benchmark_config`; benchmark records stay in `benchmark_assets`/`benchmark_records`, and suggestions are applied only through the normal autosave as a new scenario version. Why: benchmarks stay separate from project assumptions and every applied change is versioned and undoable.
+- Comparison has two subpages (`/comparison/projects`, `/comparison/benchmarks`); `/comparison` redirects. Year 3 = engine row index 2 (third operating year), and Year 3 splits, project IRR/NPV/payback/FCF and benchmark statistics are presentation-only derivations in `src/lib/year3.ts` and `src/lib/year3-bench.ts`. Why: the signed-off engine stays untouched while comparisons update live from assumptions.

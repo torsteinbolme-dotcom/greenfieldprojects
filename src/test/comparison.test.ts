@@ -21,3 +21,24 @@ describe("comparison display horizon", () => {
     expect(comparisonYears([], "operating")).toEqual([]);
   });
 });
+
+describe("comparison table sorting", () => {
+  const rows = [
+    { name: "Project Mountain", moic: 2.4 },
+    { name: "Project Heaven", moic: 3.1 },
+    { name: "Alpha Ridge", moic: 1.05 },
+  ];
+  it("puts the highest MOIC first when sorted descending", () => {
+    expect(sortByMetric(rows, (r) => r.moic, "desc").map((r) => r.name))
+      .toEqual(["Project Heaven", "Project Mountain", "Alpha Ridge"]);
+  });
+  it("puts the lowest MOIC first when sorted ascending", () => {
+    expect(sortByMetric(rows, (r) => r.moic, "asc").map((r) => r.name))
+      .toEqual(["Alpha Ridge", "Project Mountain", "Project Heaven"]);
+  });
+  it("sorts text columns alphabetically without reordering the source rows", () => {
+    expect(sortByMetric(rows, (r) => r.name, "asc").map((r) => r.name))
+      .toEqual(["Alpha Ridge", "Project Heaven", "Project Mountain"]);
+    expect(rows.map((r) => r.name)).toEqual(["Project Mountain", "Project Heaven", "Alpha Ridge"]);
+  });
+});

@@ -63,7 +63,7 @@ function ComparisonPage() {
     switch (key) {
       case "name": return e.project.name;
       case "equity": return e.result.equity;
-      case "moic": return e.result.equityMultiple;
+      case "moic": return e.result.equityMultiple ?? 0;
       case "capex": return e.result.capex;
       case "exit": return e.a.exitMultiple;
       case "exitYear": return e.a.exitYear;

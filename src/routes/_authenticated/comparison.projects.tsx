@@ -70,7 +70,7 @@ const METRICS: Metric[] = [
   { key: "exitEq", label: "Exit equity value (NOK m)", group: "returns", fmt: "nokM", get: (r) => r.result.exitEquityValue },
 ];
 const CHARTS = ["irr", "moic", "capex", "pax", "rev", "ebitda", "margin", "ebitdaPax"];
-const DEV = { passengers: "Passengers", revenue: "Revenue (NOK m)", ebitda: "EBITDA (NOK m)", fcf: "Free cash flow (NOK m)" } as const;
+const DEV = { passengers: "Passengers", revenue: "Revenue (NOK m)", ebitda: "EBITDA (NOK m)", fcf: "Free cash flow (NOK m)", revPax: "Revenue / passenger (NOK)", ebitdaPax: "EBITDA / passenger (NOK)" } as const;
 
 /** Contiguous blocks of the same group, so the header spans match the column order. */
 function groupRuns(ms: Metric[]) {
@@ -119,7 +119,12 @@ function ProjectVsProject() {
     const pt: Record<string, number | string | null> = { year: `Y${y}` };
     for (const r of rows) {
       const row = r.result.rows[y - 1];
-      pt[label(r)] = !row ? null : dev === "passengers" ? row.passengers : dev === "fcf" ? (r.ret.fcf[y - 1] ?? 0) / 1e6 : row[dev] / 1e6;
+      pt[label(r)] = !row ? null
+        : dev === "passengers" ? row.passengers
+        : dev === "fcf" ? (r.ret.fcf[y - 1] ?? 0) / 1e6
+        : dev === "revPax" ? (row.passengers ? row.revenue / row.passengers : null)
+        : dev === "ebitdaPax" ? (row.passengers ? row.ebitda / row.passengers : null)
+        : row[dev] / 1e6;
     }
     return pt;
   });
@@ -183,7 +188,7 @@ function ProjectVsProject() {
         </div>
 
         <Card title={`Financial development — ${DEV[dev]} by operating year`}>
-          <div className="mb-3 flex flex-wrap gap-1">{(Object.keys(DEV) as (keyof typeof DEV)[]).map((k) => <Button key={k} size="sm" variant={k === dev ? "default" : "outline"} onClick={() => setDev(k)}>{DEV[k].replace(" (NOK m)", "")}</Button>)}</div>
+          <div className="mb-3 flex flex-wrap gap-1">{(Object.keys(DEV) as (keyof typeof DEV)[]).map((k) => <Button key={k} size="sm" variant={k === dev ? "default" : "outline"} onClick={() => setDev(k)}>{DEV[k].replace(" (NOK m)", "").replace(" (NOK)", "")}</Button>)}</div>
           <div className="h-80"><ResponsiveContainer>
             <LineChart data={devData}>
               <CartesianGrid stroke="var(--border)" vertical={false} />

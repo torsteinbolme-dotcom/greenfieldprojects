@@ -33,3 +33,4 @@
 - [ ] New accounts don't get the 2025 benchmark seed yet.
 - [x] Comparison split into Project vs. Project and Year 3 vs. Benchmarks with expandable sidebar menu; verified signed in.
 - [x] Display differences with an explicit sign and colour them: + green, - red, zero and missing neutral; verified in the signed-in preview.
+- [x] Use Benchmark as Project Basis (project tab + Year 3 comparison)

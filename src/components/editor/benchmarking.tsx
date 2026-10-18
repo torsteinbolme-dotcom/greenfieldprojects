@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useBenchmarks } from "@/lib/benchmarks";
+import { BenchmarkBasisDialog } from "@/components/editor/benchmark-basis-dialog";
 import { deltaClass, formatNumber, nok, pct, signedNum, signedPct } from "@/lib/format";
 import {
   benchmarkSuggestions, DEFAULT_STABILISED_YEAR, DEFAULT_THRESHOLD, deviation, equalWeights, projectMetrics,
@@ -20,7 +21,8 @@ import {
 } from "@/lib/project-benchmarks";
 
 type Result = ReturnType<typeof calculate>;
-type Props = { projectId: string; config: BenchmarkConfig; a: Assumptions; r: Result | null; ro: boolean; apply: (patch: Partial<Assumptions>) => void };
+type Props = { projectId: string; config: BenchmarkConfig; a: Assumptions; r: Result | null; ro: boolean; apply: (patch: Partial<Assumptions>) => void;
+  scenarios?: { id: string; name: string }[]; scenarioId?: string; onScenario?: (id: string) => void; basisOpen?: boolean; setBasisOpen?: (open: boolean) => void };
 
 const ROWS: { key: keyof Metrics; label: string; fmt: (v: number | null) => string; group: "cable" | "fnb" }[] = [
   { key: "cableRevenuePerPax", label: "Revenue per passenger (NOK)", fmt: (v) => (v == null ? "—" : nok(Math.round(v) || 0)), group: "cable" },
@@ -32,7 +34,7 @@ const ROWS: { key: keyof Metrics; label: string; fmt: (v: number | null) => stri
   { key: "restMargin", label: "Restaurant EBITDA margin", fmt: (v) => pct(v), group: "fnb" },
 ];
 
-export function BenchmarkingSection({ projectId, config, a, r, ro, apply }: Props) {
+export function BenchmarkingSection({ projectId, config, a, r, ro, apply, scenarios = [], scenarioId = "", onScenario = () => {}, basisOpen = false, setBasisOpen = () => {} }: Props) {
   const qc = useQueryClient();
   const { data } = useBenchmarks();
   const [cfg, setCfg] = useState<BenchmarkConfig>(config);
@@ -112,6 +114,13 @@ export function BenchmarkingSection({ projectId, config, a, r, ro, apply }: Prop
 
   return (
     <div className="space-y-6">
+      {!ro && <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border p-3">
+        <p className="text-sm text-muted-foreground">Build this scenario's revenue and cost assumptions from benchmark performance, with a before-and-after preview.</p>
+        <Button onClick={() => setBasisOpen(true)}>Use Benchmark as Project Basis</Button>
+      </div>}
+      {basisOpen && !ro && <BenchmarkBasisDialog a={a} assets={data.assets} records={data.records} years={years} scenarios={scenarios} scenarioId={scenarioId} onScenario={onScenario}
+        initialCable={cfg.cable} initialFnb={cfg.fnb} onClose={() => setBasisOpen(false)}
+        onApply={(patch) => { apply(patch); setBasisOpen(false); toast.success("Benchmark basis applied — saved as a new version; use Undo to reverse"); }} />}
       <div className="grid gap-4 md:grid-cols-2">
         <Picker group="cable" title="Comparable cable cars" />
         <Picker group="fnb" title="Comparable restaurants" />

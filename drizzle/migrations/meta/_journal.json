@@ -29,6 +29,13 @@
       "when": 1792329912349,
       "tag": "0003_project_benchmark_config",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792330223794,
+      "tag": "0004_benchmark_forecast_status",
+      "breakpoints": true
     }
   ]
 }

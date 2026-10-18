@@ -1,5 +1,5 @@
 import { fbOpexAt } from "@/lib/fb-opex";
-import { irr, type Assumptions, type YearResult } from "@/financialEngine";
+import { irr, merchOpexAt, type Assumptions, type YearResult } from "@/financialEngine";
 import type { ModelResult } from "./model";
 
 /** "Year 3" = third full operating year after opening (engine row index 2; rows start at opening). */

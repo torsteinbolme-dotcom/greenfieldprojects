@@ -1,4 +1,4 @@
-import type { Assumptions } from "@/financialEngine";
+import { costIndex, type Assumptions } from "@/financialEngine";
 import type { BenchmarkAsset, BenchmarkRecord } from "./benchmarks";
 
 /**

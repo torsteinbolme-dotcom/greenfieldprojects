@@ -11,7 +11,7 @@ export type BenchmarkConfig = {
   threshold?: number; // relative deviation, e.g. 0.2
 };
 export const DEFAULT_THRESHOLD = 0.2;
-export const DEFAULT_STABILISED_YEAR = 4;
+export const DEFAULT_STABILISED_YEAR = 3;
 
 export const weightSum = (w: Record<string, number> | undefined) => Object.values(w ?? {}).reduce((s, x) => s + x, 0);
 export const weightsValid = (w: Record<string, number> | undefined) => Object.keys(w ?? {}).length === 0 || Math.abs(weightSum(w) - 1) < 1e-6;

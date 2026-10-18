@@ -20,7 +20,7 @@ import { int, mult, nokM, pct } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
   validateSearch: z.object({ scenario: z.string().optional(), tab: z.string().optional() }),
-  head: () => ({ meta: [{ title: "Project editor — Cable Car Portfolio" }, { name: "description", content: "Edit project assumptions, forecast and exit analysis." }, { property: "og:title", content: "Project editor" }, { property: "og:description", content: "Cable car project model." }] }),
+  head: () => ({ meta: [{ title: "Project editor — Cable Car Portfolio" }, { name: "description", content: "Edit project assumptions, forecast and exit analysis." }, { property: "og:title", content: "Project editor — Cable Car Portfolio" }, { property: "og:description", content: "Cable car project model." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: EditorPage,
 });
 

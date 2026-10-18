@@ -13,7 +13,7 @@ import { projectMountain } from "@/exampleProject";
 import { blankAssumptions } from "@/lib/model";
 
 export const Route = createFileRoute("/_authenticated/projects/")({
-  head: () => ({ meta: [{ title: "Projects — Cable Car Portfolio" }, { name: "description", content: "Create, duplicate, archive and edit cable car projects." }, { property: "og:title", content: "Projects" }, { property: "og:description", content: "Manage cable car projects." }] }),
+  head: () => ({ meta: [{ title: "Projects — Cable Car Portfolio" }, { name: "description", content: "Create, duplicate, archive and edit cable car projects." }, { property: "og:title", content: "Projects — Cable Car Portfolio" }, { property: "og:description", content: "Manage cable car projects." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: ProjectsPage,
 });
 

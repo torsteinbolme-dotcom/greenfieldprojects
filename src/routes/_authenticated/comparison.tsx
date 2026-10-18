@@ -12,7 +12,7 @@ import { mult, nokM, pct } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/comparison")({
   validateSearch: z.object({ ids: z.string().optional(), mode: z.enum(["operating", "calendar"]).optional() }),
-  head: () => ({ meta: [{ title: "Comparison — Cable Car Portfolio" }, { name: "description", content: "Side-by-side comparison of cable car projects on aligned years." }, { property: "og:title", content: "Comparison" }, { property: "og:description", content: "Compare projects side by side." }] }),
+  head: () => ({ meta: [{ title: "Comparison — Cable Car Portfolio" }, { name: "description", content: "Side-by-side comparison of cable car projects on aligned years." }, { property: "og:title", content: "Comparison — Cable Car Portfolio" }, { property: "og:description", content: "Compare projects side by side." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: ComparisonPage,
 });
 

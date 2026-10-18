@@ -8,7 +8,7 @@ import { Card } from "@/components/editor/sections";
 import { useMembership } from "@/lib/data";
 
 export const Route = createFileRoute("/_authenticated/settings")({
-  head: () => ({ meta: [{ title: "Settings — Cable Car Portfolio" }, { name: "description", content: "Organization, members and activity log." }, { property: "og:title", content: "Settings" }, { property: "og:description", content: "Organization settings." }] }),
+  head: () => ({ meta: [{ title: "Settings — Cable Car Portfolio" }, { name: "description", content: "Organization, members and activity log." }, { property: "og:title", content: "Settings — Cable Car Portfolio" }, { property: "og:description", content: "Organization settings." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: SettingsPage,
 });
 

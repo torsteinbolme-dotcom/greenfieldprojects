@@ -6,6 +6,7 @@ import { projectMountain } from '@/exampleProject';
 import { safeCalculate } from '@/lib/model';
 import { presentationData, DEFAULT_PRESENTATION_OPTIONS, type PresentationType } from '@/lib/presentation-data';
 import { buildPresentation } from '@/lib/presentation-pptx';
+import { presentationBytes } from '@/lib/presentation-file';
 
 function fixture(a = projectMountain) {
   const { result } = safeCalculate(a);
@@ -33,7 +34,7 @@ describe('presentation export', () => {
   });
   it.each([['executive', 5], ['investment', 10], ['detailed', 14]] as const)('generates editable %s slides and chart data with no benchmark fabrication', async (type, count) => {
     const d = fixture();
-    const bytes = await buildPresentation(d, { ...DEFAULT_PRESENTATION_OPTIONS, type }).write({ outputType: 'arraybuffer' });
+    const bytes = await presentationBytes(buildPresentation(d, { ...DEFAULT_PRESENTATION_OPTIONS, type }));
     const zip = await JSZip.loadAsync(bytes);
     const slides = Object.keys(zip.files).filter(x => /^ppt\/slides\/slide\d+\.xml$/.test(x));
     expect(slides).toHaveLength(count);
@@ -44,7 +45,7 @@ describe('presentation export', () => {
     const charts = (await Promise.all(chartFiles.map(x => zip.file(x)?.async('string')))).join('');
     expect(charts).toContain(String((d.result.rows[0]?.revenue ?? 0) / 1e6));
     await mkdir('/tmp/presentation-qa', { recursive: true });
-    await writeFile(`/tmp/presentation-qa/${type}.pptx`, new Uint8Array(bytes as ArrayBuffer));
+    await writeFile(`/tmp/presentation-qa/${type}.pptx`, bytes);
   });
   it.each([['executive', 4], ['investment', 9], ['detailed', 13]] as [PresentationType, number][])('omits optional content for %s', async (type, count) => {
     const bytes = await buildPresentation(fixture(), { type, charts: false, benchmarks: false, notes: false }).write({ outputType: 'arraybuffer' });

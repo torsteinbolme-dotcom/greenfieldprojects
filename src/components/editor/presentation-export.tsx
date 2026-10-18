@@ -39,10 +39,11 @@ export function PresentationExport({ input, coverPath }: { input: PresentationIn
         else toast.warning('The project photo is unavailable; the title will use text only.');
       }
       const { buildPresentation } = await import('@/lib/presentation-pptx');
+      const { presentationBytes } = await import('@/lib/presentation-file');
       const snapshot = presentationData(structuredClone(input));
       const pptx = buildPresentation(snapshot, options, data);
-      const output = await pptx.write({ outputType: 'blob', compression: true });
-      if (!(output instanceof Blob)) throw Error('Presentation could not be prepared.');
+      const bytes = await presentationBytes(pptx);
+      const output = new Blob([new Uint8Array(bytes)], { type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
       const clean = (s: string) => s.replace(/[^\p{L}\p{N} _-]/gu, '').slice(0, 70) || 'Project';
       setReady({ blob: output, name: `${clean(input.project.name)}-${clean(input.scenario.name)}-${options.type}.pptx` });
     } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not generate the presentation.'); }

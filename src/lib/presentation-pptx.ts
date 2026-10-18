@@ -49,7 +49,7 @@ export function buildPresentation(d: PresentationData, options: PresentationOpti
         [{ name: 'Revenue · MNOK', labels: rows.map(x => `Y${x.year}`), values: rows.map(x => x.revenue / 1e6) }, { name: 'EBITDA · MNOK', labels: rows.map(x => `Y${x.year}`), values: rows.map(x => x.ebitda / 1e6) }],
         { x: .6, y: 1.85, w: 12.1, h: 4.7, showLegend: kind !== 'passengers', legendPos: 'b',
           chartColors: [C.blue, C.gold], showValue: false, catAxisLabelFontSize: 12,
-          valAxisLabelFontSize: 14, valAxisNumFmt: kind === 'passengers' ? '# ##0' : '0.0',
+          valAxisLabelFontSize: 14, valAxisLabelFormatCode: kind === 'passengers' ? '#,##0' : '0.0',
           valGridLine: { color: C.grey, size: .5 }, lineSize: 2, showMarker: false,
           showTitle: false, showBorder: false });
     } else {

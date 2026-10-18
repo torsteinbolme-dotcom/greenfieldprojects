@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { calculate } from "@/financialEngine";
 import { projectMountain } from "@/exampleProject";
-import { deviationFromMedian, normalize, position, ppDifference, projectReturns, range, splitYear, year3Row } from "@/lib/year3";
+import { deviationFromMedian, normalize, performanceYearOf, position, ppDifference, projectReturns, range, splitYear, year3Row } from "@/lib/year3";
 import { normalizeValues, CABLE } from "@/lib/year3-bench";
 
 describe("Year 3 vs benchmarks", () => {

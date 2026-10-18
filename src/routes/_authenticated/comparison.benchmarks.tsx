@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { encodeSc, ProjectPicker, useSelection } from "@/components/comparison/selection";
 import { useBenchmarks, type BenchmarkRecord, type DataStatus } from "@/lib/benchmarks";
-import { formatNumber, nok, nokM, pct } from "@/lib/format";
+import { deltaClass, formatNumber, nok, nokM, pct, signedPct } from "@/lib/format";
 import { deviationFromMedian, position, POSITION_LABEL, ppDifference, range, splitYear, year3Row, type Range, type YearSplit } from "@/lib/year3";
 import {
   assetsOf, benchCable, benchCombined, benchRest, CABLE, COMBINED, HINTS, normalizeValues, pickRecord,
@@ -42,8 +42,8 @@ const show = (m: MetricDef, v: number | null | undefined) => {
   return `${nokM(v)} m`;
 };
 const devText = (m: MetricDef, p: number | null | undefined, med: number | null | undefined) => {
-  if (m.kind === "ratio") { const pp = ppDifference(p, med); return pp == null ? null : { text: `${pp >= 0 ? "+" : ""}${formatNumber(pp, 1, 1)} pp`, material: Math.abs(pp) > MATERIAL_PP }; }
-  const dv = deviationFromMedian(p, med); return dv == null ? null : { text: `${dv >= 0 ? "+" : ""}${pct(dv)}`, material: Math.abs(dv) > MATERIAL };
+  if (m.kind === "ratio") { const pp = ppDifference(p, med); if (pp == null) return null; const text = `${pp > 0 ? "+" : ""}${formatNumber(pp, 1, 1)} pp`; return { text, className: deltaClass(text), material: Math.abs(pp) > MATERIAL_PP }; }
+  const dv = deviationFromMedian(p, med); if (dv == null) return null; const text = signedPct(dv); return { text, className: deltaClass(text), material: Math.abs(dv) > MATERIAL };
 };
 
 type BenchRow = { id: string; name: string; values: Values; record: BenchmarkRecord };
@@ -128,7 +128,7 @@ function Year3VsBenchmarks() {
                       <p className="eyebrow">{m.label}</p>
                       <p className="mt-1 text-2xl font-semibold tabular-nums">{show(m, pv[k])}</p>
                       <p className="mt-1 text-xs text-muted-foreground">Benchmark median: {show(m, med)}</p>
-                      <p className={`text-sm font-medium ${dv?.material ? "text-destructive" : ""}`}>{dv?.text ?? "N/A"}</p>
+                      <p className={`text-sm font-medium ${dv?.className ?? "text-muted-foreground"}${dv?.material ? " font-semibold" : ""}`}>{dv?.text ?? "N/A"}</p>
                     </div>
                   ); })}
                 </div>
@@ -178,7 +178,7 @@ function Year3VsBenchmarks() {
                           <dt className="text-muted-foreground">{m.label}</dt>
                           <dd className="font-medium tabular-nums">{show(m, pv[k])}</dd>
                           <dd className="text-xs text-muted-foreground">Benchmark median: {show(m, med)}</dd>
-                          {k !== "passengers" && <dd className={`text-xs ${dv?.material ? "text-destructive" : ""}`}>Deviation: {dv?.text.replace(" pp", " percentage points") ?? "N/A"}</dd>}
+                          {k !== "passengers" && <dd className={`text-xs ${dv?.className ?? "text-muted-foreground"}${dv?.material ? " font-semibold" : ""}`}>Deviation: {dv?.text.replace(" pp", " percentage points") ?? "N/A"}</dd>}
                         </div>
                       ); })}
                     </dl>
@@ -237,7 +237,7 @@ function Section({ title, note, defs, projRows, bench, norm, benchLabel }: {
                   {defs.map((m) => { const r = prg[m.key] ?? null; const dv = devText(m, p.values[m.key], r?.median); const pos = position(p.values[m.key], r); return (
                     <td key={m.key} className="num whitespace-nowrap text-right align-top">
                       {show(m, p.values[m.key])}
-                      {dv && <div className={`text-xs ${dv.material ? "font-semibold text-destructive" : "text-muted-foreground"}`}>{dv.text}</div>}
+                      {dv && <div className={`text-xs ${dv.className}${dv.material ? " font-semibold" : ""}`}>{dv.text}</div>}
                       {pos && <div className="text-[10px] text-muted-foreground">{POSITION_LABEL[pos]}</div>}
                     </td>
                   ); })}
@@ -263,7 +263,7 @@ function Section({ title, note, defs, projRows, bench, norm, benchLabel }: {
           </tbody>
         </table>
       </div>
-      <p className="mt-3 text-xs text-muted-foreground">{note} Medians and ranges are taken over the individual assets' ratios, not pooled totals. Deviation = project ÷ median − 1; margins in percentage points. Hover a median for its range.</p>
+      <p className="mt-3 text-xs text-muted-foreground">{note} Medians and ranges are taken over the individual assets' ratios, not pooled totals. Deviation = project ÷ median − 1; margins in percentage points. Deviations are green above the median and red below. Hover a median for its range.</p>
     </Card>
   );
 }

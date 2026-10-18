@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useBenchmarks } from "@/lib/benchmarks";
-import { formatNumber, nok, pct } from "@/lib/format";
+import { deltaClass, formatNumber, nok, pct, signedNum, signedPct } from "@/lib/format";
 import {
   benchmarkSuggestions, DEFAULT_STABILISED_YEAR, DEFAULT_THRESHOLD, deviation, equalWeights, projectMetrics,
   weightedBenchmark, weightSum, weightsValid, type BenchmarkConfig, type Metrics, type Suggestion,
@@ -156,13 +156,15 @@ export function BenchmarkingSection({ projectId, config, a, r, ro, apply }: Prop
                   const pv = proj?.[x.key] ?? null, bv = bench[x.key];
                   const d = deviation(pv, bv, threshold);
                   const isPct = x.key.endsWith("Margin");
+                  const diffText = d.diff == null ? "—" : isPct ? `${signedNum(d.diff * 100, 1)} pp` : signedNum(d.diff, 0);
+                  const relText = d.rel == null ? "—" : signedPct(d.rel);
                   return (
                     <tr key={x.key} className={d.flagged ? "bg-destructive/10" : ""}>
                       <td>{x.label}</td>
                       <td className="text-right tabular-nums">{x.fmt(pv)}</td>
                       <td className="text-right tabular-nums">{x.fmt(bv)}</td>
-                      <td className="text-right tabular-nums">{d.diff == null ? "—" : isPct ? `${formatNumber(d.diff * 100, 1, 1)} pp` : nok(d.diff)}</td>
-                      <td className="text-right tabular-nums">{d.rel == null ? "—" : pct(d.rel)}</td>
+                      <td className={`text-right tabular-nums ${deltaClass(diffText)}`}>{diffText}</td>
+                      <td className={`text-right tabular-nums ${deltaClass(relText)}`}>{relText}</td>
                       <td className="text-right">{d.flagged && <AlertTriangle aria-label="Material deviation" className="inline h-4 w-4 text-destructive" />}</td>
                     </tr>
                   );

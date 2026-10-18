@@ -46,6 +46,7 @@ const fmt = (f: Fmt, v: number | null) => {
 };
 
 const METRICS: Metric[] = [
+  { key: "moic", label: "MOIC", group: "returns", fmt: "mult", get: (r) => r.result.equityMultiple },
   { key: "capex", label: "Total CAPEX (NOK m)", group: "investment", fmt: "nokM", get: (r) => r.result.capex },
   { key: "capexPerPax", label: "CAPEX per Y3 passenger (NOK)", group: "investment", fmt: "nok", get: (r) => (r.y3?.passengers ? r.result.capex / r.y3.passengers : null) },
   { key: "equity", label: "Equity investment (NOK m)", group: "investment", fmt: "nokM", get: (r) => r.result.equity },

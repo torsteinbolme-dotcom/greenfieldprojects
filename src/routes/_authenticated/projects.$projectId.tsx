@@ -20,6 +20,8 @@ import { int, mult, nok, nokM, pct } from "@/lib/format";
 import { BenchmarkingSection } from "@/components/editor/benchmarking";
 import type { BenchmarkConfig } from "@/lib/project-benchmarks";
 import { useAutosave } from "@/hooks/use-autosave";
+import { useBenchmarks } from "@/lib/benchmarks";
+import { withFbBenchmark, type AssumptionsWithFb } from "@/lib/fb-benchmark";
 import { SaveControls } from "@/components/editor/save-controls";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
@@ -75,6 +77,13 @@ function EditorPage() {
     }
     controller?.edit(withLinkedTicketPrices({ ...draft, ...patch }), action);
   };
+  const bench = useBenchmarks();
+  // Benchmark-based F&B inputs follow project passengers; unavailable sources keep their last value.
+  useEffect(() => {
+    if (!draft || ro || !bench.data || !(draft as AssumptionsWithFb).fbBenchmark) return;
+    const next = withFbBenchmark(draft as AssumptionsWithFb, bench.data.assets, bench.data.records);
+    if (next.fbRevenueYear1 !== draft.fbRevenueYear1 || next.fbOpexYear1 !== draft.fbOpexYear1) controller?.edit(next, "fbBenchmark:passengers");
+  }, [draft, bench.data, ro, controller]);
   const [newScenOpen, setNewScenOpen] = useState(false);
 
   if (!project || !m) return <p className="text-muted-foreground">Loading project…</p>;

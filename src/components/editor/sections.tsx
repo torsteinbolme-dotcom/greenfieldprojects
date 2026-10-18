@@ -109,7 +109,41 @@ export function SegmentsSection({ a, set, ro }: P) {
       </div>
       {!ro && <Button size="sm" variant="outline" className="mt-3" onClick={() => set({ segments: [...a.segments, { name: "New segment", share: 0, grossPrice: 0, vatRate: 0.12, commission: 0, boardingsPerGuest: 1 }] })}>Add segment</Button>}
       <p className="mt-3 text-xs text-muted-foreground">The base fare above is the basis for every other fare — the other segments are set as % of it. Net realized revenue is per guest, excluding VAT and after commission.</p>
+      <SegmentBridge a={a} />
     </Card>
+  );
+}
+
+function SegmentBridge({ a }: { a: Assumptions }) {
+  const rows = segmentRows(a);
+  const steps = buildWaterfall(rows);
+  const total = rows.reduce((s, r) => s + r.passengers, 0);
+  const revTotal = rows.reduce((s, r) => s + r.netRevenue, 0);
+  return (
+    <div className="mt-6 border-t pt-5" aria-label="Segment bridge">
+      <h4 className="mb-3 font-semibold">Segment bridge · year 1 passengers</h4>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <WaterfallChart steps={steps} format={v => int(v)} />
+        <div className="overflow-x-auto">
+          <table className="fin-table">
+            <thead><tr><th>Segment</th><th className="text-right">Passengers</th><th className="text-right">Net / guest (NOK)</th><th className="text-right">Net revenue (NOK)</th><th className="text-right">Share</th></tr></thead>
+            <tbody>
+              {rows.map(r => (
+                <tr key={r.name}>
+                  <td>{r.name}</td>
+                  <td className="num text-right">{int(r.passengers)}</td>
+                  <td className="num text-right">{nok(r.netPerGuest, 2)}</td>
+                  <td className="num text-right">{nok(r.netRevenue)}</td>
+                  <td className="num text-right">{pct(total ? r.passengers / total : null, 1)}</td>
+                </tr>
+              ))}
+              <tr className="font-semibold"><td>Total</td><td className="num text-right">{int(total)}</td><td /><td className="num text-right">{nok(revTotal)}</td><td className="num text-right">{pct(1, 1)}</td></tr>
+            </tbody>
+          </table>
+          <p className="mt-2 text-xs text-muted-foreground">Net revenue is per guest excluding VAT and after commission, at year-1 prices before growth.</p>
+        </div>
+      </div>
+    </div>
   );
 }
 

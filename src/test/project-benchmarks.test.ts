@@ -24,7 +24,7 @@ describe("project benchmarking", () => {
   });
   it("project split does not double count restaurant revenue or costs", () => {
     const r = calculate(exampleProject);
-    const row = r.rows[0];
+    const row = r.rows[0]!;
     const m = projectMetrics(exampleProject, row);
     const cableEbitda = (m.cableEbitdaPerPax ?? 0) * row.passengers;
     const restEbitda = (m.restEbitdaPerPax ?? 0) * row.passengers;

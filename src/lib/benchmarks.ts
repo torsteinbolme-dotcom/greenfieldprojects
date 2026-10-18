@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export type BusinessType = "cable_car" | "fnb";
-export type DataStatus = "actual" | "budget" | "estimate";
+export type DataStatus = "actual" | "budget" | "forecast" | "estimate";
 export type BenchmarkAsset = { id: string; organization_id: string; name: string; business_type: BusinessType; parent_asset_id: string | null; location: string | null };
 export type BenchmarkRecord = {
   id: string; organization_id: string; asset_id: string; financial_year: number;

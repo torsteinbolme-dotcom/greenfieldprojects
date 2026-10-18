@@ -58,3 +58,4 @@
 - [x] Segment bridge on the Passenger segments tab: waterfall of year-1 passengers per segment plus table (net/guest, net revenue, share); verified.
 - [x] CAPEX bridge on the CAPEX tab: waterfall of line items + contingency + total investment; verified.
 - [x] Investment Summary: removed the Equity cash flow chart; verified the other two charts remain.
+- [ ] Comparison charts: show the actual metric value on each bar in every graph; fix axis labels wrapping (160 000 split over two lines).

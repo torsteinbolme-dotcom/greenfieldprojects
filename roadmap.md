@@ -68,3 +68,4 @@
 - [x] Portfolio: MOIC column after Scenario
 - [x] Engine reliability update: equity injections, maintenance CAPEX, variable cable OPEX
 - [x] Capacity & financial update: maintenance opt-in for existing projects, cash-flow breakdown
+- [x] Removed the maintenance legacy-rate warning banner from the project page; only the active percentage calculates maintenance.

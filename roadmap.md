@@ -1,4 +1,7 @@
 # Tasks
+- [ ] Stage 2: engine-based operating and cash passenger break-even with annual selection and comparison chart.
+- [ ] Stage 2: Investment Summary tab and executive charts, preserving engine and Stage 1.
+- [ ] Stage 2: financial tests, signed-in verification and explicit unsupported-funding disclosure.
 - [x] Stage 1: independent F&B scaling, frozen snapshots and confirmed refresh; preserve legacy/manual scenarios.
 - [x] Stage 1: Year 3 revenue/OPEX/EBITDA bridge with year and business filters; reconcile to engine.
 - [x] Stage 1: automated tests and signed-in verification; no Stage 2 work.

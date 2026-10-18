@@ -20,9 +20,9 @@ export const Route = createFileRoute("/")({
 function Index() {
   const navigate = useNavigate();
   useEffect(() => {
-    // Returning from Google sign-in lands here; send signed-in users straight to their portfolio.
-    supabase.auth.getSession().then(({ data }) => { if (data.session) navigate({ to: "/portfolio" }); });
-    const { data } = supabase.auth.onAuthStateChange((e, s) => { if (s && e === "SIGNED_IN") navigate({ to: "/portfolio" }); });
+    // Returning from Google sign-in lands here; send signed-in users straight to their projects.
+    supabase.auth.getSession().then(({ data }) => { if (data.session) navigate({ to: "/projects" }); });
+    const { data } = supabase.auth.onAuthStateChange((e, s) => { if (s && e === "SIGNED_IN") navigate({ to: "/projects" }); });
     return () => data.subscription.unsubscribe();
   }, [navigate]);
   return (

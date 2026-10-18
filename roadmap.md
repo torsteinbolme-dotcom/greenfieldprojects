@@ -77,3 +77,4 @@
 - [x] Comparison "Financial development" chart: added revenue per passenger and EBITDA per passenger options; verified buttons, axis units and NOK-per-guest values in the signed-in preview.
 - [x] Comparison table: removed the Project IRR column (and its "Rank by" entry); footnote now describes payback only.
 - [x] Sidebar: Projects is now the first item, with Comparison directly beneath it; verified order in the signed-in preview.
+- [x] Sign-in now lands on Projects instead of Portfolio (password sign-in, Google return, email confirmation); verified in the signed-in preview.

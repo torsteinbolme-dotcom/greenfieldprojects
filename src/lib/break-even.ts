@@ -26,7 +26,7 @@ export function evaluatePassengers(input: Assumptions, year: number, annualPasse
     if (!(a.initialPassengers > 0)) throw Error('Set a positive year-1 passenger basis for passenger-linked manual F&B.');
     next.fbRevenueYear1 = a.fbRevenueYear1 * initialPassengers / a.initialPassengers;
   }
-  if (a.fbFollowsPassengers && !sel?.opex) {
+  if (a.fbFollowsPassengers && !sel?.opex && !a.opexGrowth?.fb?.length) {
     if (!(a.initialPassengers > 0)) throw Error('Set a positive year-1 passenger basis for passenger-linked manual F&B.');
     next.fbOpexYear1 = a.fbOpexYear1 * initialPassengers / a.initialPassengers;
   }

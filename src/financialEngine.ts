@@ -55,7 +55,7 @@ export function calculate(a:Assumptions){
     if(fbRevenueLinked)fb=a.fbRevenueYear1*paxIndex*priceIndex;
     const ticketRevenue=passengers*price,revenue=ticketRevenue+fb+merch;
     const opex=(a.cableFixedOpex+(a.cableVariableCostPerPassenger||0)*passengers)*costIndex(a,'cable',year)+
-      (a.fbBenchmark?.opex ? a.fbOpexYear1*(fbOpexLinked?paxIndex:1) : (fbOpexLinked? a.fbOpexYear1*paxIndex:(a.fbRevenueYear1>0? a.fbOpexYear1*fb/a.fbRevenueYear1:0)))*costIndex(a,'fb',year)+
+      (a.fbBenchmark?.opex ? a.fbOpexYear1*(fbOpexLinked?paxIndex:1) : (a.opexGrowth?.fb?.length ? a.fbOpexYear1 : (fbOpexLinked? a.fbOpexYear1*paxIndex:(a.fbRevenueYear1>0? a.fbOpexYear1*fb/a.fbRevenueYear1:0))))*costIndex(a,'fb',year)+
       merchOpexAt(a,year,merch);
     const ebitda=revenue-opex,depreciation=capex/a.depreciationYears,ebit=ebitda-depreciation;
     const interest=openingDebt*a.interestRate,principal=year<=a.loanYears?Math.min(openingDebt,debt/a.loanYears):0;

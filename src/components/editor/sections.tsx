@@ -38,7 +38,7 @@ export function Limitations() {
     <div className="rounded-md border border-warning-foreground/30 bg-warning p-4 text-sm text-warning-foreground">
       <p className="font-medium">V1 model simplifications — improve before production investment decisions</p>
       <ul className="mt-2 list-disc space-y-0.5 pl-5">
-        <li>Simplified tax: no tax-loss carryforward (tax floored at zero each year).</li>
+        <li>Simplified tax: losses are carried forward indefinitely and offset later profits in full; no other tax adjustments.</li>
         <li>No construction-period interest; debt drawn in full at opening.</li>
         <li>No working capital movements.</li>
         <li>No funding mechanism for negative cash; shortfalls reduce retained cash.</li>
@@ -85,7 +85,7 @@ export function SegmentsSection({ a, set, ro }: P) {
               </tr>
             ))}
             <tr className="font-medium">
-              <td>Total / weighted</td><td className="num text-right">{pct(sum, 2)}</td><td colSpan={4} />
+              <td>Total / weighted</td><td className="num text-right">{pct(sum, 2)}</td><td className="num text-right">{int(a.initialPassengers)}</td><td colSpan={4} />
               <td className="num text-right">{nok(weighted, 2)}</td><td />
             </tr>
           </tbody>

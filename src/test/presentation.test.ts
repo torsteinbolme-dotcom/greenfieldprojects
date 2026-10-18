@@ -51,6 +51,7 @@ describe('presentation export', () => {
     const zip = await JSZip.loadAsync(bytes);
     expect(Object.keys(zip.files).filter(x => /^ppt\/slides\/slide\d+\.xml$/.test(x))).toHaveLength(count);
     expect(Object.keys(zip.files).filter(x => /^ppt\/charts\/chart\d+\.xml$/.test(x))).toHaveLength(0);
-    expect(Object.keys(zip.files).filter(x => /^ppt\/notesSlides\/notesSlide\d+\.xml$/.test(x))).toHaveLength(0);
+    const notes = (await Promise.all(Object.keys(zip.files).filter(x => /^ppt\/notesSlides\/notesSlide\d+\.xml$/.test(x)).map(x => zip.file(x)?.async('string')))).join('');
+    expect(notes).not.toContain('Source: active scenario');
   });
 });

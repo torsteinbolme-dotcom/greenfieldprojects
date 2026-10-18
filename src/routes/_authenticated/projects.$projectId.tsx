@@ -15,6 +15,7 @@ import { Field } from "@/components/editor/inputs";
 import { Card, CapexSection, ExitSection, FinancingSection, ForecastSection, Kpi, Limitations, RevenueOpexSection, SegmentsSection } from "@/components/editor/sections";
 import { createScenario, logAudit, saveAssumptionVersion, useMembership, useProjects, useScenarios, type Membership, type ProjectRow } from "@/lib/data";
 import { safeCalculate } from "@/lib/model";
+import { withLinkedTicketPrices } from "@/lib/ticket-pricing";
 import { int, mult, nokM, pct } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
@@ -51,14 +52,14 @@ function EditorPage() {
   const [loadedKey, setLoadedKey] = useState<string | null>(null);
   useEffect(() => {
     if (latest && loadedKey !== `${scenario?.id}:${latest.version}`) {
-      setDraft(latest.assumptions as unknown as Assumptions);
+      setDraft(withLinkedTicketPrices(latest.assumptions as unknown as Assumptions));
       setLoadedKey(`${scenario?.id}:${latest.version}`);
     }
   }, [latest, scenario?.id, loadedKey]);
 
   const dirty = !!draft && !!latest && JSON.stringify(draft) !== JSON.stringify(latest.assumptions);
   const { result: r, error } = useMemo(() => (draft ? safeCalculate(draft) : { result: null, error: null }), [draft]);
-  const set = (patch: Partial<Assumptions>) => setDraft((d) => (d ? { ...d, ...patch } : d));
+  const set = (patch: Partial<Assumptions>) => setDraft((d) => (d ? withLinkedTicketPrices({ ...d, ...patch }) : d));
   const [newScenOpen, setNewScenOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -102,7 +103,7 @@ function EditorPage() {
             navigate({ search: (s) => ({ ...s, scenario: undefined }) });
             qc.invalidateQueries();
           }}>Delete scenario</Button>}
-          {dirty && <Button variant="ghost" onClick={() => setDraft(latest!.assumptions as unknown as Assumptions)}>Discard</Button>}
+          {dirty && latest && <Button variant="ghost" onClick={() => setDraft(withLinkedTicketPrices(latest.assumptions as unknown as Assumptions))}>Discard</Button>}
           {!ro && <Button onClick={save} disabled={!dirty || saving}>{saving ? "Saving…" : dirty ? "Save new version" : `Saved · v${latest?.version}`}</Button>}
         </div>
       </div>
@@ -147,7 +148,7 @@ function EditorPage() {
                 {versions.data?.map((v) => (
                   <tr key={v.id}>
                     <td className="num">v{v.version}</td><td>{new Date(v.created_at).toLocaleString()}</td><td>{v.note ?? "—"}</td><td className="num">{v.calculation_version}</td>
-                    <td className="text-right">{!ro && v.version !== latest?.version && <Button size="sm" variant="ghost" onClick={() => { setDraft(v.assumptions as unknown as Assumptions); toast.info(`Loaded v${v.version} — save to restore it as a new version`); }}>Load</Button>}</td>
+                    <td className="text-right">{!ro && v.version !== latest?.version && <Button size="sm" variant="ghost" onClick={() => { setDraft(withLinkedTicketPrices(v.assumptions as unknown as Assumptions)); toast.info(`Loaded v${v.version} — save to restore it as a new version`); }}>Load</Button>}</td>
                   </tr>
                 ))}
               </tbody>

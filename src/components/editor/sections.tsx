@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Field, GrowthList, NumField } from "./inputs";
 import { int, mult, nok, nokM, pct } from "@/lib/format";
 import { segmentNetPerGuest, shareSum, type ModelResult } from "@/lib/model";
+import { isAdultRoundTrip, ticketPriceRatio } from "@/lib/ticket-pricing";
 
 type P = { a: Assumptions; set: (patch: Partial<Assumptions>) => void; ro: boolean };
 
@@ -46,6 +47,7 @@ export function Limitations() {
 
 export function SegmentsSection({ a, set, ro }: P) {
   const sum = shareSum(a);
+  const hasAdultFare = a.segments.some((s) => isAdultRoundTrip(s.name));
   const upd = (i: number, patch: Partial<Assumptions["segments"][number]>) =>
     set({ segments: a.segments.map((s, j) => (j === i ? { ...s, ...patch } : s)) });
   const weighted = a.segments.reduce((s, x) => s + x.share * segmentNetPerGuest(x), 0);
@@ -64,7 +66,11 @@ export function SegmentsSection({ a, set, ro }: P) {
               <tr key={i}>
                 <td><Input className="h-8 min-w-40" value={s.name} disabled={ro} onChange={(e) => upd(i, { name: e.target.value })} /></td>
                 <td className="w-24"><NumField percent value={s.share} disabled={ro} onChange={(v) => upd(i, { share: v })} /></td>
-                <td className="w-32"><NumField value={s.grossPrice} disabled={ro} onChange={(v) => upd(i, { grossPrice: v })} /></td>
+                <td className="w-32">
+                  {hasAdultFare && !isAdultRoundTrip(s.name) && ticketPriceRatio(s.name) !== null ? (
+                    <div className="text-right"><span className="num">{nok(s.grossPrice, 2)}</span><span className="block text-xs text-muted-foreground">{pct(ticketPriceRatio(s.name), 0)} × adult round trip</span></div>
+                  ) : <NumField value={s.grossPrice} disabled={ro} onChange={(v) => upd(i, { grossPrice: v })} />}
+                </td>
                 <td className="w-24"><NumField percent value={s.vatRate} disabled={ro} onChange={(v) => upd(i, { vatRate: v })} /></td>
                 <td className="w-24"><NumField percent value={s.commission} disabled={ro} onChange={(v) => upd(i, { commission: v })} /></td>
                 <td className="w-24"><NumField value={s.boardingsPerGuest} disabled={ro} onChange={(v) => upd(i, { boardingsPerGuest: v })} /></td>

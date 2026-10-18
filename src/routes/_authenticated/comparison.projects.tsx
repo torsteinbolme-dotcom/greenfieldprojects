@@ -141,7 +141,7 @@ function ProjectVsProject() {
             <div><Label className="text-xs">Rank by</Label>
               <Select value={sort.key} onValueChange={(v) => setSort({ key: v, dir: "desc" })}>
                 <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
-                <SelectContent>{METRICS.map((m) => <SelectItem key={m.key} value={m.key}>{m.label}</SelectItem>)}</SelectContent>
+                <SelectContent>{METRICS.map((m) => <SelectItem key={m.key} value={m.key}>{metricLabel(m)}</SelectItem>)}</SelectContent>
               </Select></div>
             <Button variant="outline" className="ml-auto" onClick={exportCsv}><Download className="mr-1 h-4 w-4" />Export CSV</Button>
           </div>
@@ -175,7 +175,7 @@ function ProjectVsProject() {
                   <CartesianGrid stroke="var(--border)" vertical={false} />
                   <XAxis dataKey="name" fontSize={11} /><YAxis fontSize={11} width={72} tickFormatter={(v) => formatNumber(Number(v), 0, 1)} unit={m.fmt === "pct" ? "%" : m.fmt === "mult" ? "x" : ""} />
                   <Tooltip formatter={(v) => (m.fmt === "pct" ? `${formatNumber(Number(v), 1, 1)}%` : m.fmt === "nokM" ? `${formatNumber(Number(v), 1, 1)} NOK m` : fmt(m.fmt, Number(v)))} />
-                  <Bar dataKey="v" name={m.label}>{sorted.map((r) => <Cell key={r.project.id} fill={colorFor(r.project.id)} />)}<LabelList dataKey="v" position="top" fontSize={11} fill="var(--foreground)" formatter={(v: unknown) => v == null || !Number.isFinite(Number(v)) ? "" : m.fmt === "pct" ? `${formatNumber(Number(v), 1, 1)}%` : m.fmt === "mult" ? `${formatNumber(Number(v), 2, 2)}x` : m.fmt === "nokM" ? formatNumber(Number(v), 1, 1) : formatNumber(Number(v), 0, 0)} /></Bar>
+                  <Bar dataKey="v" name={metricLabel(m)}>{sorted.map((r) => <Cell key={r.project.id} fill={colorFor(r.project.id)} />)}<LabelList dataKey="v" position="top" fontSize={11} fill="var(--foreground)" formatter={(v: unknown) => v == null || !Number.isFinite(Number(v)) ? "" : m.fmt === "pct" ? `${formatNumber(Number(v), 1, 1)}%` : m.fmt === "mult" ? `${formatNumber(Number(v), 2, 2)}x` : m.fmt === "nokM" ? formatNumber(Number(v), 1, 1) : formatNumber(Number(v), 0, 0)} /></Bar>
                 </BarChart>
               </ResponsiveContainer></div>
             </Card>

@@ -34,7 +34,7 @@ export type YearSplit = ReturnType<typeof splitYear>;
  * Unlevered project cash flows derived for presentation from engine rows (engine untouched):
  * FCF = EBITDA − tax on EBIT (losses carried forward); investment at year 0; exit EV net of transaction costs in the exit year.
  */
-export function projectReturns(a: Assumptions, r: ModelResult, discountRate: number) {
+export function projectReturns(a: Assumptions, r: ModelResult) {
   let carry = 0;
   const fcf = r.rows.map((row) => {
     let taxable = row.ebit;
@@ -44,14 +44,13 @@ export function projectReturns(a: Assumptions, r: ModelResult, discountRate: num
   const exitEv = r.enterpriseValue * (1 - a.exitTransactionCostRate);
   const flows = [-r.capex, ...fcf.slice(0, a.exitYear)];
   flows[a.exitYear] = (flows[a.exitYear] ?? 0) + exitEv;
-  const npv = flows.reduce((s, cf, i) => s + cf / Math.pow(1 + discountRate, i), 0);
   let cum = -r.capex, payback: number | null = null;
   for (let i = 0; i < fcf.length; i++) {
     const v = fcf[i] ?? 0;
     if (cum + v >= 0 && v > 0) { payback = i + -cum / v; break; }
     cum += v;
   }
-  return { fcf, projectIrr: irr(flows), npv, payback, flows };
+  return { fcf, projectIrr: irr(flows), payback, flows };
 }
 
 // ---------- Benchmark statistics ----------

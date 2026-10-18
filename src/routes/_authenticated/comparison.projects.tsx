@@ -63,7 +63,6 @@ const METRICS: Metric[] = [
   { key: "projectIrr", label: "Project IRR", group: "returns", fmt: "pct", get: (r) => r.ret.projectIrr },
   { key: "irr", label: "Equity IRR", group: "returns", fmt: "pct", get: (r) => r.result.equityIrr },
   { key: "moic", label: "MOIC", group: "returns", fmt: "mult", get: (r) => r.result.equityMultiple },
-  { key: "npv", label: "NPV (NOK m)", group: "returns", fmt: "nokM", get: (r) => r.ret.npv },
   { key: "payback", label: "Payback period", group: "returns", fmt: "years", get: (r) => r.ret.payback },
   { key: "exitYear", label: "Exit year", group: "returns", fmt: "year", get: (r) => r.a.exitYear },
   { key: "exitEbitda", label: "Exit EBITDA (NOK m)", group: "returns", fmt: "nokM", get: (r) => r.result.rows[r.a.exitYear - 1]?.ebitda ?? null },
@@ -79,12 +78,11 @@ function ProjectVsProject() {
   const navigate = useNavigate({ from: Route.fullPath });
   const ids = search.ids ? search.ids.split(",") : [];
   const { projects, scenarios, entries, scMap } = useSelection(ids, search.sc);
-  const [rate, setRate] = useState(0.08);
   const [sort, setSort] = useState<{ key: string; dir: "asc" | "desc" }>({ key: "moic", dir: "desc" });
   const [hidden, setHidden] = useState<Set<Group>>(new Set());
   const [dev, setDev] = useState<keyof typeof DEV>("revenue");
 
-  const rows: Row[] = useMemo(() => entries.map((e) => { const r3 = year3Row(e.result); return { ...e, y3: r3 ? splitYear(e.a, r3) : null, ret: projectReturns(e.a, e.result, rate) }; }), [entries, rate]);
+  const rows: Row[] = useMemo(() => entries.map((e) => { const r3 = year3Row(e.result); return { ...e, y3: r3 ? splitYear(e.a, r3) : null, ret: projectReturns(e.a, e.result) }; }), [entries]);
   const sortMetric = METRICS.find((m) => m.key === sort.key);
   const sorted = sort.key === "name" ? sortByMetric(rows, (r) => r.project.name, sort.dir) : sortByMetric(rows, (r) => sortMetric?.get(r) ?? -Infinity, sort.dir);
   const colorFor = (id: string) => COLORS[Math.max(0, projects.findIndex((p) => p.id === id)) % COLORS.length];
@@ -131,8 +129,6 @@ function ProjectVsProject() {
                 <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
                 <SelectContent>{METRICS.map((m) => <SelectItem key={m.key} value={m.key}>{m.label}</SelectItem>)}</SelectContent>
               </Select></div>
-            <div><Label className="text-xs">NPV discount rate</Label>
-              <div className="flex items-center gap-1"><Input key={rate} className="w-20 text-right" defaultValue={formatNumber(rate * 100, 0, 2, false)} onBlur={(e) => { const v = Number(e.target.value.replace(",", ".")); if (Number.isFinite(v)) setRate(v / 100); }} aria-label="NPV discount rate" /><span className="text-sm">%</span></div></div>
             <Button variant="outline" className="ml-auto" onClick={exportCsv}><Download className="mr-1 h-4 w-4" />Export CSV</Button>
           </div>
           <div className="overflow-x-auto">
@@ -154,7 +150,7 @@ function ProjectVsProject() {
               ))}</tbody>
             </table>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">Year 3 = third full operating year after opening. Project IRR, NPV and payback use unlevered free cash flow (EBITDA minus tax on operating profit, losses carried forward) against total CAPEX, with the exit value net of transaction costs; payback ignores the exit.</p>
+          <p className="mt-3 text-xs text-muted-foreground">Year 3 = third full operating year after opening. Project IRR and payback use unlevered free cash flow (EBITDA minus tax on operating profit, losses carried forward) against total CAPEX, with the exit value net of transaction costs; payback ignores the exit.</p>
         </Card>
 
         <div className="grid gap-4 md:grid-cols-2">

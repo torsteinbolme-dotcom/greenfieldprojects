@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field } from "@/components/editor/inputs";
 import { Card, CapexSection, ExitSection, FinancingSection, ForecastSection, Kpi, Limitations, RevenueOpexSection, SegmentsSection } from "@/components/editor/sections";
-import { createScenario, logAudit, saveAssumptionVersion, useMembership, useProjects, useScenarios } from "@/lib/data";
+import { createScenario, logAudit, saveAssumptionVersion, useMembership, useProjects, useScenarios, type Membership, type ProjectRow } from "@/lib/data";
 import { safeCalculate } from "@/lib/model";
 import { int, mult, nokM, pct } from "@/lib/format";
 
@@ -128,8 +128,8 @@ function EditorPage() {
             </div>
           )}
           <div className="grid gap-4 lg:grid-cols-2">
-            <ProjectDetails ro={ro} />
-            <FilesCard ro={ro} />
+            <ProjectDetails ro={ro} project={project} m={m} projectId={projectId} />
+            <FilesCard ro={ro} project={project} m={m} projectId={projectId} />
           </div>
           <Limitations />
         </TabsContent>
@@ -186,9 +186,12 @@ function EditorPage() {
       </Dialog>
     </div>
   );
+}
 
-  function ProjectDetails({ ro }: { ro: boolean }) {
-    const p = project!;
+type Ctx = { ro: boolean; project: ProjectRow; m: Membership; projectId: string };
+  function ProjectDetails({ ro, project, m }: Ctx) {
+    const qc = useQueryClient();
+    const p = project;
     return (
       <Card title="Project details">
         <form className="space-y-3" onSubmit={async (e) => {
@@ -199,7 +202,7 @@ function EditorPage() {
             assumption_notes: String(f.get("notes") ?? "") || null, updated_at: new Date().toISOString(),
           }).eq("id", p.id);
           if (error) return toast.error(error.message);
-          await logAudit(m!.organization_id, "project", p.id, "details_updated");
+          await logAudit(m.organization_id, "project", p.id, "details_updated");
           toast.success("Details saved"); qc.invalidateQueries({ queryKey: ["projects"] });
         }}>
           <Field label="Location"><Input name="location" defaultValue={p.location ?? ""} disabled={ro} /></Field>
@@ -211,7 +214,7 @@ function EditorPage() {
     );
   }
 
-  function FilesCard({ ro }: { ro: boolean }) {
+  function FilesCard({ ro, m, projectId }: Ctx) {
     const files = useQuery({
       queryKey: ["files", projectId],
       queryFn: async () => {
@@ -230,13 +233,13 @@ function EditorPage() {
             if (!file) return;
             setBusy(true);
             try {
-              const path = `${m!.organization_id}/${projectId}/${Date.now()}-${file.name.replace(/[^\w.\-]/g, "_")}`;
+              const path = `${m.organization_id}/${projectId}/${Date.now()}-${file.name.replace(/[^\w.\-]/g, "_")}`;
               const up = await supabase.storage.from("project-files").upload(path, file);
               if (up.error) throw up.error;
               const { data: u } = await supabase.auth.getUser();
-              const { error } = await supabase.from("project_files").insert({ organization_id: m!.organization_id, project_id: projectId, storage_path: path, file_name: file.name, size_bytes: file.size, uploaded_by: u.user?.id });
+              const { error } = await supabase.from("project_files").insert({ organization_id: m.organization_id, project_id: projectId, storage_path: path, file_name: file.name, size_bytes: file.size, uploaded_by: u.user?.id });
               if (error) throw error;
-              await logAudit(m!.organization_id, "project_file", projectId, "uploaded", { file: file.name });
+              await logAudit(m.organization_id, "project_file", projectId, "uploaded", { file: file.name });
               toast.success("File uploaded"); files.refetch();
             } catch (err) { toast.error(err instanceof Error ? err.message : "Upload failed"); } finally { setBusy(false); e.target.value = ""; }
           }} />
@@ -264,4 +267,4 @@ function EditorPage() {
       </Card>
     );
   }
-}
+

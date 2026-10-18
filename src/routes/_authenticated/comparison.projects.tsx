@@ -96,6 +96,10 @@ function ProjectVsProject() {
   const sortMetric = METRICS.find((m) => m.key === sort.key);
   const sorted = sort.key === "name" ? sortByMetric(rows, (r) => r.project.name, sort.dir) : sortByMetric(rows, (r) => sortMetric?.get(r) ?? -Infinity, sort.dir);
   const colorFor = (id: string) => COLORS[Math.max(0, projects.findIndex((p) => p.id === id)) % COLORS.length];
+  // Equity IRR and MOIC are evaluated at each scenario's exit year; show Y{n} when the selection shares one exit year.
+  const exitYears = new Set(rows.map((r) => r.a.exitYear));
+  const metricLabel = (m: Metric) =>
+    (m.key === "irr" || m.key === "moic") && rows.length > 0 && exitYears.size === 1 ? `${m.label} Y${[...exitYears][0]}` : m.label;
   const visible = METRICS.filter((m) => !hidden.has(m.group));
   const onSort = (key: string) => setSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: key === "name" ? "asc" : "desc" }));
   const label = (r: Row) => `${r.project.name}${r.scenario.kind === "base" ? "" : ` (${r.scenario.name})`}`;

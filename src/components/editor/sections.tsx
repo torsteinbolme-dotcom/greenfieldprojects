@@ -177,8 +177,21 @@ export function CapexSection({ a, set, ro, r }: P & { r: ModelResult | null }) {
         </table>
       </div>
       {!ro && <Button size="sm" variant="outline" className="mt-3" onClick={() => set({ capexItems: [...a.capexItems, { name: "New item", quantity: 1, unitCost: 0 }] })}>Add item</Button>}
+      <CapexBridge a={a} />
       {r && <p className="mt-3 text-sm text-muted-foreground">Funded by debt NOK {nokM(r.debt)} m and equity NOK {nokM(r.equity)} m.</p>}
     </Card>
+  );
+}
+
+function CapexBridge({ a }: { a: Assumptions }) {
+  const rows = capexRows(a);
+  const base = rows.reduce((s, r) => s + r.value, 0);
+  const steps = buildWaterfall(rows, [{ name: "Contingency", value: base * a.contingencyRate }], "Total investment");
+  return (
+    <div className="mt-6 border-t pt-5" aria-label="CAPEX bridge">
+      <h4 className="mb-3 font-semibold">CAPEX bridge · NOK m</h4>
+      <WaterfallChart steps={steps} format={v => nokM(v)} height="h-64" />
+    </div>
   );
 }
 

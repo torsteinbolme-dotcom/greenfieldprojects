@@ -10,6 +10,8 @@ import { int, mult, nok, nokM, pct } from "@/lib/format";
 import { segmentNetPerGuest, shareSum, type ModelResult } from "@/lib/model";
 import { isAdultRoundTrip, segmentTicketRatio, type PricedSegment } from "@/lib/ticket-pricing";
 import { forecastOpex } from "@/lib/forecast-opex";
+import { buildWaterfall, capexRows, segmentRows } from "@/lib/bridges";
+import { WaterfallChart } from "./waterfall";
 import { FbBenchmarkPanel } from "./fb-benchmark";
 import type { AssumptionsWithFb } from "@/lib/fb-benchmark";
 import { useState } from "react";

@@ -67,8 +67,8 @@ function Year3VsBenchmarks() {
   const { assets, records } = data;
   const years = [...new Set(records.map((r) => r.financial_year))].sort((a, b) => b - a);
   const year = yearSel ?? years[0] ?? new Date().getFullYear() - 1;
-  const cableIds = cableSel ?? assetsOf(assets, "cable_car").map((a) => a.id);
-  const restIds = restSel ?? assetsOf(assets, "fnb").map((a) => a.id);
+  const cableIds = cableSel ?? [];
+  const restIds = restSel ?? [];
   const focus = projRows.find((p) => p.e.project.id === focusId) ?? projRows[0];
   const targetYear = (s: YearSplit) => s.calendarYear;
 
@@ -113,7 +113,7 @@ function Year3VsBenchmarks() {
           <span className="ml-auto self-center rounded bg-secondary px-2 py-1 text-xs font-medium uppercase tracking-wide">{STATUS_LABEL[status]} data</span>
         </div>
 
-        {projRows.length === 0 ? <p className="text-muted-foreground">Select one or more projects. Each uses its Base Case unless you pick another scenario.</p> : cableBench.length + restBench.length === 0 ? <p className="text-muted-foreground">No {STATUS_LABEL[status].toLowerCase()} benchmark data for {year} with the current selection.</p> : (<>
+        {projRows.length === 0 ? <p className="text-muted-foreground">Select one or more projects. Each uses its Base Case unless you pick another scenario.</p> : cableIds.length + restIds.length === 0 ? <p className="text-muted-foreground">Select one or more cable car or restaurant benchmarks above to compare against.</p> : cableBench.length + restBench.length === 0 ? <p className="text-muted-foreground">No {STATUS_LABEL[status].toLowerCase()} benchmark data for {year} with the current selection.</p> : (<>
           {focus && (() => {
             const cb = norm(cableBench, CABLE, focusTo); const rg = ranges(cb, CABLE); const pv = projectCable(focus.s);
             return (

@@ -16,3 +16,7 @@
 - [x] Display years without a thousands separator; verify the opening year displays, edits and saves as 2030.
 - [x] Take variable cost per passenger and maintenance capex out of the calculation itself; verify results and add an engine test.
 - [x] Default the model horizon to 15 years everywhere (new projects, example, new-account sample) and set the open project's Base scenario to 15; verify it saves and reloads.
+
+## Open
+- [x] Tax-loss carryforward in the model (engine change, tested).
+- [x] Passengers-per-segment column in segment table (verified in preview).

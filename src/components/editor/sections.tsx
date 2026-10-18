@@ -38,7 +38,7 @@ export function Limitations() {
     <div className="rounded-md border border-warning-foreground/30 bg-warning p-4 text-sm text-warning-foreground">
       <p className="font-medium">V1 model simplifications — improve before production investment decisions</p>
       <ul className="mt-2 list-disc space-y-0.5 pl-5">
-        <li>Simplified tax: no tax-loss carryforward (tax floored at zero each year).</li>
+        <li>Simplified tax: losses are carried forward indefinitely and offset later profits in full; no other tax adjustments.</li>
         <li>No construction-period interest; debt drawn in full at opening.</li>
         <li>No working capital movements.</li>
         <li>No funding mechanism for negative cash; shortfalls reduce retained cash.</li>
@@ -63,12 +63,13 @@ export function SegmentsSection({ a, set, ro }: P) {
       )}
       <div className="overflow-x-auto">
         <table className="fin-table [&_td]:min-w-24">
-          <thead><tr><th>Segment</th><th>Share</th><th>% of adult round trip</th><th>Ticket gross incl VAT (NOK)</th><th>VAT</th><th>Commission</th><th className="text-right">Net realized / guest (NOK)</th><th /></tr></thead>
+          <thead><tr><th>Segment</th><th>Share</th><th className="text-right">Passengers year 1</th><th>% of adult round trip</th><th>Ticket gross incl VAT (NOK)</th><th>VAT</th><th>Commission</th><th className="text-right">Net realized / guest (NOK)</th><th /></tr></thead>
           <tbody>
             {a.segments.map((s, i) => (
               <tr key={i}>
                 <td><Input className="h-8 min-w-40" value={s.name} disabled={ro} onChange={(e) => upd(i, { name: e.target.value })} /></td>
                 <td className="w-24"><NumField percent value={s.share} disabled={ro} onChange={(v) => upd(i, { share: v })} /></td>
+                <td className="num text-right">{int(s.share * a.initialPassengers)}</td>
                 <td className="w-28">
                   {adultFare ? (isAdultRoundTrip(s.name) ? <span className="num block text-right">100%</span> : <NumField percent value={segmentTicketRatio(s, adultFare.grossPrice)} disabled={ro} onChange={(v) => upd(i, { roundTripAdultRatio: v })} />) : <span className="block text-right text-muted-foreground">—</span>}
                 </td>
@@ -84,7 +85,7 @@ export function SegmentsSection({ a, set, ro }: P) {
               </tr>
             ))}
             <tr className="font-medium">
-              <td>Total / weighted</td><td className="num text-right">{pct(sum, 2)}</td><td colSpan={4} />
+              <td>Total / weighted</td><td className="num text-right">{pct(sum, 2)}</td><td className="num text-right">{int(a.initialPassengers)}</td><td colSpan={4} />
               <td className="num text-right">{nok(weighted, 2)}</td><td />
             </tr>
           </tbody>

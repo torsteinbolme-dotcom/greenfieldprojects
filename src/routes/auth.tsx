@@ -29,8 +29,23 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    const urlToken = new URLSearchParams(window.location.search).get("invite");
+    if (urlToken) { sessionStorage.setItem("invite_token", urlToken); setMode("signup"); }
     let done = false;
-    const go = () => { if (!done) { done = true; navigate({ to: "/portfolio" }); } };
+    const go = () => {
+      if (done) return;
+      done = true;
+      const token = sessionStorage.getItem("invite_token");
+      if (token) {
+        sessionStorage.removeItem("invite_token");
+        void supabase.rpc("accept_invite", { _token: token }).then(({ data }) => {
+          if (data === "ok") toast.success("You have joined the organization you were invited to.");
+          else if (data === "email_mismatch") toast.error("This invite was sent to a different email address.");
+          else if (data === "invalid") toast.error("This invite link has expired or was already used.");
+        });
+      }
+      navigate({ to: "/portfolio" });
+    };
     supabase.auth.getSession().then(({ data }) => { if (data.session) go(); });
     const { data } = supabase.auth.onAuthStateChange((e, s) => { if (s && (e === "SIGNED_IN" || e === "INITIAL_SESSION")) go(); });
     return () => data.subscription.unsubscribe();
@@ -44,7 +59,8 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       } else {
-        const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + "/portfolio" } });
+        const inviteToken = sessionStorage.getItem("invite_token");
+        const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + "/portfolio", ...(inviteToken ? { data: { invite_token: inviteToken } } : {}) } });
         if (error) throw error;
         if (!data.session) toast.success("Check your email to confirm your account.");
       }

@@ -37,7 +37,7 @@ export function calculate(a:Assumptions){
   const baseCapex=a.capexItems.reduce((s,c)=>s+c.quantity*c.unitCost,0);
   const capex=baseCapex*(1+a.contingencyRate),debt=capex*a.debtShare,equity=capex-debt;
   const weightedTicket=a.segments.reduce((s,x)=>s+x.share*(x.grossPrice/(1+x.vatRate))*(1-x.commission),0);
-  const rows:YearResult[]=[];let passengers=a.initialPassengers,price=weightedTicket,fb=a.fbRevenueYear1,merch=a.merchRevenueYear1,openingDebt=debt,retainedCash=0;
+  const rows:YearResult[]=[];let passengers=a.initialPassengers,price=weightedTicket,fb=a.fbRevenueYear1,merch=a.merchRevenueYear1,openingDebt=debt,retainedCash=0,lossCarryforward=0;
   for(let year=1;year<=a.years;year++){
     if(year>1){passengers*=1+growth(a.passengerGrowth,year);price*=1+growth(a.priceGrowth,year);fb*=1+growth(a.ancillaryGrowth,year);merch*=1+growth(a.ancillaryGrowth,year)}
     const ticketRevenue=passengers*price,revenue=ticketRevenue+fb+merch;
@@ -48,7 +48,10 @@ export function calculate(a:Assumptions){
     const ebitda=revenue-opex,depreciation=capex/a.depreciationYears,ebit=ebitda-depreciation;
     const interest=openingDebt*a.interestRate,principal=year<=a.loanYears?Math.min(openingDebt,debt/a.loanYears):0;
     const closingDebt=Math.max(0,openingDebt-principal);
-    const tax=Math.max(0,(ebit-interest)*a.taxRate); // simplified; no tax loss carryforwards
+    const taxableIncome=ebit-interest;
+    let tax=0;
+    if(taxableIncome<0){lossCarryforward+=-taxableIncome;}
+    else{const offset=Math.min(lossCarryforward,taxableIncome);lossCarryforward-=offset;tax=(taxableIncome-offset)*a.taxRate;}
     const cashAfterDebt=ebitda-interest-principal-tax;
     const distribution=a.distributeCashAnnually?Math.max(0,cashAfterDebt):0;
     retainedCash+=cashAfterDebt-distribution;

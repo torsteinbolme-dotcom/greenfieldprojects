@@ -10,7 +10,8 @@ export function useMembership() {
   return useQuery({
     queryKey: ["membership"],
     queryFn: async (): Promise<Membership> => {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: sess } = await supabase.auth.getSession();
+      const u = { user: sess.session?.user };
       if (!u.user) throw new Error("Not signed in");
       const { data, error } = await supabase
         .from("organization_members")

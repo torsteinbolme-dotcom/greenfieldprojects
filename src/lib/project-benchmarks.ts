@@ -1,3 +1,4 @@
+import { fbOpexAt } from "@/lib/fb-opex";
 import type { Assumptions, YearResult } from "@/financialEngine";
 import { cableMetrics, restaurantMetrics, ebitdaOf, type BenchmarkAsset, type BenchmarkRecord } from "./benchmarks";
 
@@ -61,7 +62,7 @@ export function weightedBenchmark(cfg: BenchmarkConfig, assets: BenchmarkAsset[]
  */
 export function projectMetrics(a: Assumptions, row: YearResult): Metrics {
   const inflate = Math.pow(1 + a.costInflation, row.year - 1);
-  const fbOpex = (a.fbRevenueYear1 > 0 ? (a.fbOpexYear1 * row.fbRevenue) / a.fbRevenueYear1 : 0) * inflate;
+  const fbOpex = fbOpexAt(a, row);
   const cableRevenue = row.ticketRevenue + row.merchRevenue;
   const cableOpex = row.opex - fbOpex;
   const cableEbitda = cableRevenue - cableOpex;

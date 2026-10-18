@@ -1,3 +1,4 @@
+import { fbOpexAt } from "@/lib/fb-opex";
 import { irr, type Assumptions, type YearResult } from "@/financialEngine";
 import type { ModelResult } from "./model";
 
@@ -8,7 +9,7 @@ export const year3Row = (r: ModelResult): YearResult | null => r.rows[YEAR3 - 1]
 /** Splits one forecast year into cable car, restaurant (F&B) and other (merchandise) parts; parts sum to the engine totals. */
 export function splitYear(a: Assumptions, row: YearResult) {
   const inflate = Math.pow(1 + a.costInflation, row.year - 1);
-  const fbOpex = (a.fbRevenueYear1 > 0 ? (a.fbOpexYear1 * row.fbRevenue) / a.fbRevenueYear1 : 0) * inflate;
+  const fbOpex = fbOpexAt(a, row);
   const otherOpex = (a.merchRevenueYear1 > 0 ? (a.merchOpexYear1 * row.merchRevenue) / a.merchRevenueYear1 : 0) * inflate;
   const cableOpex = row.opex - fbOpex - otherOpex;
   const d = (x: number, y: number) => (y ? x / y : null);

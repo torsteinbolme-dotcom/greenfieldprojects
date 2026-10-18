@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/editor/sections";
 import { useLatestAssumptions, useProjects, useScenarios } from "@/lib/data";
-import { buildEntries, comparisonYears } from "@/lib/portfolio";
+import { buildEntries, comparisonYears, sortByMetric } from "@/lib/portfolio";
 import { rowAt, type YearMode } from "@/lib/model";
 import { formatNumber, mult, nokM, pct } from "@/lib/format";
 
@@ -19,6 +19,31 @@ export const Route = createFileRoute("/_authenticated/comparison")({
 const COLORS = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--chart-5)"];
 const METRICS = { ebitda: "EBITDA", revenue: "Revenue", passengers: "Passengers", cashAfterDebt: "Cash after debt service" } as const;
 
+type SortKey = "name" | "equity" | "moic" | "capex" | "exit" | "irr" | "exitEquity";
+type SortState = { key: SortKey; dir: "asc" | "desc" };
+const DEFAULT_SORT: SortState = { key: "moic", dir: "desc" };
+const SORT_LABELS: Record<SortKey, string> = {
+  name: "Project",
+  equity: "Invested equity (NOK m)",
+  moic: "MOIC",
+  capex: "Investment (NOK m)",
+  exit: "Exit",
+  irr: "Equity IRR",
+  exitEquity: "Exit equity (NOK m)",
+};
+
+function SortHeader({ k, sort, onSort, right = false }: { k: SortKey; sort: SortState; onSort: (k: SortKey) => void; right?: boolean }) {
+  const active = sort.key === k;
+  return (
+    <th className={right ? "text-right" : undefined} aria-sort={active ? (sort.dir === "asc" ? "ascending" : "descending") : "none"}>
+      <button type="button" onClick={() => onSort(k)} className="inline-flex items-center gap-1 uppercase tracking-wide hover:text-foreground">
+        {SORT_LABELS[k]}
+        <span aria-hidden="true" className="text-[9px] leading-none opacity-70">{active ? (sort.dir === "asc" ? "▲" : "▼") : "⇅"}</span>
+      </button>
+    </th>
+  );
+}
+
 function ComparisonPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
@@ -28,14 +53,32 @@ function ComparisonPage() {
   const mode: YearMode = search.mode ?? "operating";
   const ids = search.ids ? search.ids.split(",") : [];
   const [metric, setMetric] = useState<keyof typeof METRICS>("revenue");
+  const [sort, setSort] = useState<SortState>(DEFAULT_SORT);
   const all = useMemo(() => (latest ? buildEntries(projects.filter((p) => p.status === "active"), scenarios, latest) : []), [projects, scenarios, latest]);
   const chosen = all.flatMap((e) => ids.includes(e.project.id) && e.result ? [{ ...e, result: e.result }] : []);
+  type Row = (typeof chosen)[number];
 
-  const years = comparisonYears(chosen.map((e) => e.result), mode);
+  const sortValue = (e: Row, key: SortKey): number | string => {
+    switch (key) {
+      case "name": return e.project.name;
+      case "equity": return e.result.equity;
+      case "moic": return e.result.equityMultiple;
+      case "capex": return e.result.capex;
+      case "exit": return e.a.exitYear;
+      case "irr": return e.result.equityIrr ?? 0;
+      case "exitEquity": return e.result.exitEquityValue;
+    }
+  };
+
+  const rows = sortByMetric(chosen, (e) => sortValue(e, sort.key), sort.dir);
+  const colorFor = (id: string) => COLORS[Math.max(0, all.findIndex((e) => e.project.id === id)) % COLORS.length];
+  const onSort = (key: SortKey) => setSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: key === "name" ? "asc" : "desc" }));
+
+  const years = comparisonYears(rows.map((e) => e.result), mode);
 
   const chartData = (selectedMetric: keyof typeof METRICS) => years.map((y) => {
     const point: Record<string, number | string | null> = { year: mode === "operating" ? `Y${y}` : String(y) };
-    for (const e of chosen) {
+    for (const e of rows) {
       const r = rowAt(e.result, mode, y);
       point[e.project.name] = r ? (selectedMetric === "passengers" ? r.passengers : r[selectedMetric] / 1e6) : null;
     }
@@ -71,16 +114,24 @@ function ComparisonPage() {
           <Card title="Returns">
             <div className="h-64 overflow-hidden">
               <ResponsiveContainer>
-                <BarChart data={chosen.map((e) => ({ name: e.project.name, IRR: (e.result.equityIrr ?? 0) * 100 }))}>
+                <BarChart data={rows.map((e) => ({ name: e.project.name, IRR: (e.result.equityIrr ?? 0) * 100 }))}>
                   <CartesianGrid stroke="var(--border)" vertical={false} />
                   <XAxis dataKey="name" fontSize={11} /><YAxis unit="%" fontSize={11} tickFormatter={(v) => formatNumber(Number(v))} /><Tooltip formatter={(v) => `${formatNumber(Number(v))}%`} />
-                  <Bar dataKey="IRR" fill="var(--chart-2)" />
+                  {rows.map((e) => <Bar key={e.project.id} dataKey="IRR" fill={colorFor(e.project.id)} />)}
                 </BarChart>
               </ResponsiveContainer>
             </div>
             <div className="overflow-x-auto"><table className="fin-table mt-4">
-              <thead><tr><th>Project</th><th className="text-right">Invested equity (NOK m)</th><th className="text-right">MOIC</th><th className="text-right">Investment (NOK m)</th><th className="text-right">Exit</th><th className="text-right">Equity IRR</th><th className="text-right">Exit equity (NOK m)</th></tr></thead>
-              <tbody>{chosen.map((e) => (
+              <thead><tr>
+                <SortHeader k="name" sort={sort} onSort={onSort} />
+                <SortHeader k="equity" sort={sort} onSort={onSort} right />
+                <SortHeader k="moic" sort={sort} onSort={onSort} right />
+                <SortHeader k="capex" sort={sort} onSort={onSort} right />
+                <SortHeader k="exit" sort={sort} onSort={onSort} right />
+                <SortHeader k="irr" sort={sort} onSort={onSort} right />
+                <SortHeader k="exitEquity" sort={sort} onSort={onSort} right />
+              </tr></thead>
+              <tbody>{rows.map((e) => (
                 <tr key={e.project.id}><td>{e.project.name}</td><td className="num text-right">{nokM(e.result.equity)}</td><td className="num text-right">{mult(e.result.equityMultiple)}</td><td className="num text-right">{nokM(e.result.capex)}</td><td className="num text-right">Y{e.a.exitYear} @ {mult(e.a.exitMultiple)}</td>
                   <td className="num text-right">{pct(e.result.equityIrr)}</td><td className="num text-right">{nokM(e.result.exitEquityValue)}</td></tr>
               ))}</tbody>
@@ -93,7 +144,7 @@ function ComparisonPage() {
                   <CartesianGrid stroke="var(--border)" vertical={false} />
                   <XAxis dataKey="year" fontSize={11} /><YAxis fontSize={11} tickFormatter={(v) => formatNumber(Number(v))} />
                   <Tooltip formatter={(v) => formatNumber(Number(v))} /><Legend />
-                  {chosen.map((e, i) => <Line key={e.project.id} dataKey={e.project.name} stroke={COLORS[i % 5]} strokeWidth={2} dot={false} connectNulls={false} />)}
+                  {rows.map((e) => <Line key={e.project.id} dataKey={e.project.name} stroke={colorFor(e.project.id)} strokeWidth={2} dot={false} connectNulls={false} />)}
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -105,7 +156,7 @@ function ComparisonPage() {
                   <CartesianGrid stroke="var(--border)" vertical={false} />
                   <XAxis dataKey="year" fontSize={11} /><YAxis fontSize={11} tickFormatter={(v) => formatNumber(Number(v))} />
                   <Tooltip formatter={(v) => formatNumber(Number(v))} /><Legend />
-                  {chosen.map((e, i) => <Line key={e.project.id} dataKey={e.project.name} stroke={COLORS[i % COLORS.length]} strokeWidth={2} dot={false} connectNulls={false} />)}
+                  {rows.map((e) => <Line key={e.project.id} dataKey={e.project.name} stroke={colorFor(e.project.id)} strokeWidth={2} dot={false} connectNulls={false} />)}
                 </LineChart>
               </ResponsiveContainer>
             </div>

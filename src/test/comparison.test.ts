@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { comparisonYears } from "@/lib/portfolio";
+import { comparisonYears, sortByMetric } from "@/lib/portfolio";
 
 const forecast = (start: number, length: number) => ({
   rows: Array.from({ length }, (_, i) => ({ calendarYear: start + i })),

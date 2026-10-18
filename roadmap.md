@@ -1,4 +1,5 @@
 # Tasks
+- [ ] Format all numbers with spaced thousands, decimal commas and no more than two decimals, including editable fields and graphs.
 - [ ] Limit side-by-side comparisons to 15 years and add an EBITDA graph below the first graph.
 - [ ] Apply Outfit and the selected blue, white and supplemental colours throughout the site.
 - [ ] Test the comparison horizon and verify graphs and styling in the signed-in app.

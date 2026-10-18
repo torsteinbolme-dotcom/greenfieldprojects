@@ -169,7 +169,7 @@ function ProjectVsProject() {
               <div className="h-56"><ResponsiveContainer>
                 <BarChart data={sorted.map((r) => { const v = m.get(r); return { name: label(r), id: r.project.id, v: v == null ? null : m.fmt === "nokM" ? v / 1e6 : m.fmt === "pct" ? v * 100 : v }; })}>
                   <CartesianGrid stroke="var(--border)" vertical={false} />
-                  <XAxis dataKey="name" fontSize={11} /><YAxis fontSize={11} tickFormatter={(v) => formatNumber(Number(v), 0, 1)} unit={m.fmt === "pct" ? "%" : m.fmt === "mult" ? "x" : ""} />
+                  <XAxis dataKey="name" fontSize={11} /><YAxis fontSize={11} width={72} tickFormatter={(v) => formatNumber(Number(v), 0, 1)} unit={m.fmt === "pct" ? "%" : m.fmt === "mult" ? "x" : ""} />
                   <Tooltip formatter={(v) => (m.fmt === "pct" ? `${formatNumber(Number(v), 1, 1)}%` : m.fmt === "nokM" ? `${formatNumber(Number(v), 1, 1)} NOK m` : fmt(m.fmt, Number(v)))} />
                   <Bar dataKey="v" name={m.label}>{sorted.map((r) => <Cell key={r.project.id} fill={colorFor(r.project.id)} />)}</Bar>
                 </BarChart>

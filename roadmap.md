@@ -51,3 +51,5 @@
 
 - [x] OPEX yearly growth list
 - [x] Merchandise OPEX as % of merchandise revenue field
+- [x] Comparison table: MOIC moved to the first column after Project; verified header spans stay aligned.
+- [x] Comparison table: removed the CAPEX per Y3 passenger column.

@@ -16,8 +16,8 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 const nav = [
-  { to: "/portfolio", label: "Portfolio", icon: Briefcase },
   { to: "/projects", label: "Projects", icon: FolderKanban },
+  { to: "/portfolio", label: "Portfolio", icon: Briefcase },
   { to: "/benchmarks", label: "Benchmarks", icon: Ruler },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
@@ -64,7 +64,7 @@ function Shell() {
               <n.icon className="h-4 w-4" />
               <span className="flex-1">{n.label}</span>
             </Link>
-            {i === 1 && <div className="mt-1"><ComparisonMenu /></div>}
+            {i === 0 && <div className="mt-1"><ComparisonMenu /></div>}
           </div>))}
         </nav>
         <div className="border-t border-sidebar-border px-5 py-4 text-xs">

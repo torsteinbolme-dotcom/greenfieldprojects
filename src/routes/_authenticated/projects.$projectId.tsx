@@ -22,6 +22,7 @@ import type { BenchmarkConfig } from "@/lib/project-benchmarks";
 import { useAutosave } from "@/hooks/use-autosave";
 import { useBenchmarks } from "@/lib/benchmarks";
 import { withFbBenchmark, type AssumptionsWithFb } from "@/lib/fb-benchmark";
+import { EbitdaBridge } from "@/components/editor/ebitda-bridge";
 import { SaveControls } from "@/components/editor/save-controls";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
@@ -82,7 +83,7 @@ function EditorPage() {
   useEffect(() => {
     if (!draft || ro || !bench.data || !(draft as AssumptionsWithFb).fbBenchmark) return;
     const next = withFbBenchmark(draft as AssumptionsWithFb, bench.data.assets, bench.data.records);
-    if (next.fbRevenueYear1 !== draft.fbRevenueYear1 || next.fbOpexYear1 !== draft.fbOpexYear1 || next.fbFollowsPassengers !== draft.fbFollowsPassengers || next.fbBenchmark?.adjust !== (draft as AssumptionsWithFb).fbBenchmark?.adjust) controller?.edit(next, "fbBenchmark:passengers");
+    if (JSON.stringify(next) !== JSON.stringify(draft)) controller?.edit(next, "fbBenchmark:passengers");
   }, [draft, bench.data, ro, controller]);
   const [newScenOpen, setNewScenOpen] = useState(false);
 
@@ -140,6 +141,7 @@ function EditorPage() {
               <Kpi label="Exit equity" value={nokM(r.exitEquityValue)} sub="NOK m" />
             </div>
           )}
+          {r && <EbitdaBridge key={scenario.id} a={draft} r={r} />}
           <div className="grid gap-4 lg:grid-cols-2">
             <ProjectDetails ro={ro} project={project} m={m} projectId={projectId} />
             <FilesCard ro={ro} project={project} m={m} projectId={projectId} />

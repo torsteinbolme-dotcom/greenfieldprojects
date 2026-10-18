@@ -9,7 +9,13 @@ import type { BenchmarkAsset, BenchmarkRecord } from "./benchmarks";
  */
 export const FB_BASIS_YEAR = 1;
 
-export type FbSource = { assetId: string; year: number };
+export type FbSnapshot = {
+  assetId: string; name: string; year: number; historicalAmount: number;
+  cableCarId: string | null; cableCarName: string | null; cableCarPassengers: number | null;
+  costInflation: number; priceGrowth: number[]; ancillaryGrowth: number[];
+  adjust: boolean; manualAdjustment: number;
+};
+export type FbSource = { assetId: string; year: number; adjust?: boolean; snapshot?: FbSnapshot };
 export type FbBenchmark = { revenue?: FbSource | null; opex?: FbSource | null; adjust: boolean };
 export type AssumptionsWithFb = Assumptions & { fbBenchmark?: FbBenchmark };
 
@@ -56,28 +62,51 @@ export const latestYear = (records: BenchmarkRecord[], assetId: string) =>
 
 /** Adjusted = benchmark × (project year-1 passengers / passengers of that restaurant's own cable car). */
 export function fbLine(kind: "revenue" | "opex", source: FbSource, adjust: boolean, projectYearPassengers: number, assets: BenchmarkAsset[], records: BenchmarkRecord[]): FbLine {
-  const asset = assets.find((x) => x.id === source.assetId) ?? null;
-  const parent = asset ? assets.find((x) => x.id === asset.parent_asset_id) ?? null : null;
+  const saved = source.snapshot;
+  const asset = saved ? { id: saved.assetId, name: saved.name } as BenchmarkAsset : assets.find((x) => x.id === source.assetId) ?? null;
+  const parent = saved ? (saved.cableCarId ? { id: saved.cableCarId, name: saved.cableCarName } as BenchmarkAsset : null) : asset ? assets.find((x) => x.id === asset.parent_asset_id) ?? null : null;
   const rec = pick(records, source.assetId, source.year);
-  const original = rec?.[kind] ?? null;
-  const benchPassengers = parent ? pick(records, parent.id, source.year)?.passengers ?? null : null;
+  const original = saved?.historicalAmount ?? rec?.[kind] ?? null;
+  const benchPassengers = saved ? saved.cableCarPassengers : parent ? pick(records, parent.id, source.year)?.passengers ?? null : null;
   let warning: string | null = null;
   if (!asset) warning = "This benchmark has been deleted. The last applied value is kept.";
   else if (original == null) warning = `${asset.name} has no ${kind === "revenue" ? "revenue" : "OPEX"} figure for ${source.year}. The last applied value is kept.`;
   else if (adjust && !parent) warning = `${asset.name} is not linked to a cable car, so it can't be adjusted to passengers. The last applied value is kept.`;
   else if (adjust && !benchPassengers) warning = `${parent?.name} has no passenger figure for ${source.year}. The last applied value is kept.`;
-  const adjusted = warning ? null : adjust ? (original as number) * (projectYearPassengers / (benchPassengers as number)) : (original as number);
+  const adjusted = warning ? null : (adjust ? (original as number) * (projectYearPassengers / (benchPassengers as number)) : (original as number)) * (1 + (saved?.manualAdjustment ?? 0));
   return { source, asset, parent, original, benchPassengers, adjusted, warning };
 }
 
-/** Re-derive the F&B year-1 inputs from the stored selection; unavailable sources keep their current value. */
+/** Freeze live source data when selected or explicitly refreshed. */
+export function snapshotSource(a: Assumptions, kind: "revenue" | "opex", source: FbSource, adjust: boolean, assets: BenchmarkAsset[], records: BenchmarkRecord[]): FbSource {
+  const l = fbLine(kind, { ...source, snapshot: undefined }, false, a.initialPassengers, assets, records);
+  if (l.original == null || !l.asset) return { ...source, adjust };
+  return { ...source, adjust, snapshot: {
+    assetId: source.assetId, name: l.asset.name, year: source.year, historicalAmount: l.original,
+    cableCarId: l.parent?.id ?? null, cableCarName: l.parent?.name ?? null, cableCarPassengers: l.benchPassengers,
+    costInflation: a.costInflation, priceGrowth: [...a.priceGrowth], ancillaryGrowth: [...a.ancillaryGrowth],
+    adjust, manualAdjustment: source.snapshot?.manualAdjustment ?? 0,
+  } };
+}
+
+export const sourceAdjust = (sel: FbBenchmark, source: FbSource) => source.adjust ?? sel.adjust;
+
+/** Normalize legacy selections once, then derive only from frozen snapshots. */
 export function withFbBenchmark<T extends AssumptionsWithFb>(a: T, assets: BenchmarkAsset[], records: BenchmarkRecord[]): T {
   const sel = a.fbBenchmark;
-  if (!sel) return a;
-  if (!sel.revenue && !sel.opex) return a;
-  const next = { ...a, fbBenchmark: { ...sel, adjust: true }, fbFollowsPassengers: true };
-  const paxBasis = passengersAt(a, FB_BASIS_YEAR);
-  if (sel.revenue) { const l = fbLine("revenue", sel.revenue, true, paxBasis, assets, records); if (l.adjusted != null) next.fbRevenueYear1 = Math.round(l.adjusted); }
-  if (sel.opex) { const l = fbLine("opex", sel.opex, true, paxBasis, assets, records); if (l.adjusted != null) next.fbOpexYear1 = Math.round(l.adjusted); }
+  if (!sel || (!sel.revenue && !sel.opex)) return a;
+  const next = { ...a, fbBenchmark: { ...sel } };
+  for (const kind of ["revenue", "opex"] as const) {
+    const source = sel[kind];
+    if (!source) continue;
+    const adjust = sourceAdjust(sel, source);
+    const frozen = source.snapshot ? source : snapshotSource(a, kind, source, adjust, assets, records);
+    next.fbBenchmark[kind] = frozen;
+    const l = fbLine(kind, frozen, adjust, a.initialPassengers, assets, records);
+    if (l.adjusted != null) {
+      if (kind === "revenue") next.fbRevenueYear1 = l.adjusted;
+      else next.fbOpexYear1 = l.adjusted;
+    }
+  }
   return next;
 }

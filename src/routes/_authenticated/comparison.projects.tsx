@@ -117,15 +117,7 @@ function ProjectVsProject() {
   const years = Array.from({ length: Math.min(40, Math.max(0, ...rows.map((r) => r.result.rows.length))) }, (_, i) => i + 1);
   const devData = years.map((y) => {
     const pt: Record<string, number | string | null> = { year: `Y${y}` };
-    for (const r of rows) {
-      const row = r.result.rows[y - 1];
-      pt[label(r)] = !row ? null
-        : dev === "passengers" ? row.passengers
-        : dev === "fcf" ? (r.ret.fcf[y - 1] ?? 0) / 1e6
-        : dev === "revPax" ? (row.passengers ? row.revenue / row.passengers : null)
-        : dev === "ebitdaPax" ? (row.passengers ? row.ebitda / row.passengers : null)
-        : row[dev] / 1e6;
-    }
+    for (const r of rows) pt[label(r)] = devValue(dev, r.result.rows[y - 1], r.ret.fcf[y - 1]);
     return pt;
   });
 

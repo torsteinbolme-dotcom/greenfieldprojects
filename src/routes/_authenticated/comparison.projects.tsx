@@ -145,7 +145,7 @@ function ProjectVsProject() {
           <div className="overflow-x-auto">
             <table className="fin-table fin-table-tight">
               <thead>
-                <tr><th /><th />{(Object.keys(GROUPS) as Group[]).filter((g) => !hidden.has(g)).map((g) => <th key={g} colSpan={METRICS.filter((m) => m.group === g).length} className="border-l text-center">{GROUPS[g]}</th>)}</tr>
+                <tr><th /><th />{groupRuns(visible).map((run, i) => <th key={`${run.group}-${i}`} colSpan={run.metrics.length} className="border-l text-center">{GROUPS[run.group]}</th>)}</tr>
                 <tr>
                   <th>#</th>
                   <SortTh k="name" label="Project" sort={sort} onSort={onSort} />

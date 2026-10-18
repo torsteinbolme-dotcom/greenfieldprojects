@@ -28,7 +28,7 @@ export function buildPresentation(d: PresentationData, options: PresentationOpti
   function table(s: PptxGenJS.Slide, rows: string[][], headers: string[], y = 1.9) {
     s.addTable([headers, ...rows].map(row => row.map(text => ({ text }))), { x: .6, y, w: 12.1, colW: headers.map(() => 12.1 / headers.length),
       fontFace: 'Outfit', fontSize: 18, color: C.ink, fill: { color: C.white }, border: { type: 'solid', color: C.grey, pt: .5 },
-      margin: .12, rowH: .43, bold: false, autoPage: false,
+      margin: .07, rowH: .4, bold: false, autoPage: false,
       });
   }
   function stats(s: PptxGenJS.Slide, pairs: Pair[]) {
@@ -50,6 +50,7 @@ export function buildPresentation(d: PresentationData, options: PresentationOpti
         { x: .6, y: 1.85, w: 12.1, h: 4.7, showLegend: kind !== 'passengers', legendPos: 'b',
           chartColors: [C.blue, C.gold], showValue: false, catAxisLabelFontSize: 12,
           valAxisLabelFontSize: 14, valAxisLabelFormatCode: kind === 'passengers' ? '#,##0' : '0.0',
+          showValAxisTitle: true, valAxisTitle: kind === 'passengers' ? 'Passengers' : 'MNOK', valAxisTitleFontSize: 14,
           valGridLine: { color: C.grey, size: .5 }, lineSize: 2,
           showTitle: false });
     } else {

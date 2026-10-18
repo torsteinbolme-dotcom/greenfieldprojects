@@ -14,7 +14,7 @@ import { DEFAULT_PRESENTATION_OPTIONS, presentationData, type PresentationInput,
 async function pngData(file: Blob): Promise<string> {
   const image = await createImageBitmap(file);
   const canvas = document.createElement('canvas');
-  const ratio = Math.min(1600 / image.width, 476 / image.height);
+  const ratio = Math.max(1600 / image.width, 476 / image.height);
   canvas.width = 1600; canvas.height = 476;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw Error('Cannot prepare the cover image.');

@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { calculate } from "@/financialEngine";
 import { projectMountain as exampleProject } from "@/exampleProject";
-import { benchmarkSuggestions, deviation, equalWeights, projectMetrics, weightedBenchmark, weightsValid } from "@/lib/project-benchmarks";
+import { benchmarkSuggestions, DEFAULT_STABILISED_YEAR, deviation, equalWeights, projectMetrics, weightedBenchmark, weightsValid } from "@/lib/project-benchmarks";
+import { DEFAULT_TARGET_YEAR } from "@/lib/benchmark-basis";
+import { YEAR3 } from "@/lib/year3";
 import type { BenchmarkAsset, BenchmarkRecord } from "@/lib/benchmarks";
 
 const asset = (id: string, t: "cable_car" | "fnb", parent: string | null = null): BenchmarkAsset => ({ id, organization_id: "o", name: id, business_type: t, parent_asset_id: parent, location: null });
@@ -42,5 +44,13 @@ describe("project benchmarking", () => {
     const fbRev = s.find((x) => x.key === "fbRevenueYear1")!.suggested;
     expect(fbRev).toBe(Math.round(50 * exampleProject.initialPassengers));
     expect(s.find((x) => x.key === "fbOpexYear1")!.suggested).toBe(Math.round(fbRev * 0.8));
+  });
+});
+
+describe("benchmark year defaults", () => {
+  it("defaults the comparison to operating year 3 everywhere", () => {
+    expect(DEFAULT_STABILISED_YEAR).toBe(3);
+    expect(DEFAULT_TARGET_YEAR).toBe(DEFAULT_STABILISED_YEAR);
+    expect(YEAR3).toBe(DEFAULT_STABILISED_YEAR);
   });
 });

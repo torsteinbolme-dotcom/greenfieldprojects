@@ -34,7 +34,7 @@ export function useMembership() {
 
 export type ProjectRow = {
   id: string; organization_id: string; name: string; location: string | null; description: string | null;
-  status: string; assumption_notes: string | null; created_at: string; updated_at: string;
+  status: string; assumption_notes: string | null; benchmark_config?: unknown; created_at: string; updated_at: string;
 };
 export type ScenarioRow = { id: string; project_id: string; organization_id: string; name: string; kind: string; created_at: string };
 

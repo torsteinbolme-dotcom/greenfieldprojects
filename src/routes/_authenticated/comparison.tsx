@@ -68,6 +68,24 @@ function ComparisonPage() {
       </div>
       {chosen.length === 0 ? <p className="text-muted-foreground">Select at least one project to compare.</p> : (
         <>
+          <Card title="Returns">
+            <div className="h-64 overflow-hidden">
+              <ResponsiveContainer>
+                <BarChart data={chosen.map((e) => ({ name: e.project.name, IRR: (e.result.equityIrr ?? 0) * 100 }))}>
+                  <CartesianGrid stroke="var(--border)" vertical={false} />
+                  <XAxis dataKey="name" fontSize={11} /><YAxis unit="%" fontSize={11} tickFormatter={(v) => formatNumber(Number(v))} /><Tooltip formatter={(v) => `${formatNumber(Number(v))}%`} />
+                  <Bar dataKey="IRR" fill="var(--chart-2)" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="overflow-x-auto"><table className="fin-table mt-4">
+              <thead><tr><th>Project</th><th className="text-right">Invested equity (NOK m)</th><th className="text-right">MOIC</th><th className="text-right">Investment (NOK m)</th><th className="text-right">Exit</th><th className="text-right">Equity IRR</th><th className="text-right">Exit equity (NOK m)</th></tr></thead>
+              <tbody>{chosen.map((e) => (
+                <tr key={e.project.id}><td>{e.project.name}</td><td className="num text-right">{nokM(e.result.equity)}</td><td className="num text-right">{mult(e.result.equityMultiple)}</td><td className="num text-right">{nokM(e.result.capex)}</td><td className="num text-right">Y{e.a.exitYear} @ {mult(e.a.exitMultiple)}</td>
+                  <td className="num text-right">{pct(e.result.equityIrr)}</td><td className="num text-right">{nokM(e.result.exitEquityValue)}</td></tr>
+              ))}</tbody>
+            </table></div>
+          </Card>
           <Card title={`${METRICS[metric]}${metric === "passengers" ? "" : " (NOK m)"} by ${mode} year`}>
             <div className="h-80 overflow-hidden">
               <ResponsiveContainer>
@@ -91,24 +109,6 @@ function ComparisonPage() {
                 </LineChart>
               </ResponsiveContainer>
             </div>
-          </Card>
-          <Card title="Returns">
-            <div className="h-64 overflow-hidden">
-              <ResponsiveContainer>
-                <BarChart data={chosen.map((e) => ({ name: e.project.name, IRR: (e.result.equityIrr ?? 0) * 100 }))}>
-                  <CartesianGrid stroke="var(--border)" vertical={false} />
-                  <XAxis dataKey="name" fontSize={11} /><YAxis unit="%" fontSize={11} tickFormatter={(v) => formatNumber(Number(v))} /><Tooltip formatter={(v) => `${formatNumber(Number(v))}%`} />
-                  <Bar dataKey="IRR" fill="var(--chart-2)" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="overflow-x-auto"><table className="fin-table mt-4">
-              <thead><tr><th>Project</th><th className="text-right">Invested equity (NOK m)</th><th className="text-right">Investment (NOK m)</th><th className="text-right">Exit</th><th className="text-right">Equity IRR</th><th className="text-right">MOIC</th><th className="text-right">Exit equity (NOK m)</th></tr></thead>
-              <tbody>{chosen.map((e) => (
-                <tr key={e.project.id}><td>{e.project.name}</td><td className="num text-right">{nokM(e.result.equity)}</td><td className="num text-right">{nokM(e.result.capex)}</td><td className="num text-right">Y{e.a.exitYear} @ {mult(e.a.exitMultiple)}</td>
-                  <td className="num text-right">{pct(e.result.equityIrr)}</td><td className="num text-right">{mult(e.result.equityMultiple)}</td><td className="num text-right">{nokM(e.result.exitEquityValue)}</td></tr>
-              ))}</tbody>
-            </table></div>
           </Card>
         </>
       )}

@@ -36,3 +36,4 @@
 - [x] Use Benchmark as Project Basis (project tab + Year 3 comparison)
 - [x] F&B revenue/OPEX "Use Benchmark" selectors with passenger adjustment
 - [x] F&B following annual passengers in every year
+- [x] Default the Benchmarking comparison to operating year 3 (stabilised), matching Year 3 everywhere; verified in the signed-in preview.

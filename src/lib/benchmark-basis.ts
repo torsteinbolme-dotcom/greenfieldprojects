@@ -1,7 +1,7 @@
 import { calculate, type Assumptions } from "@/financialEngine";
 import type { BenchmarkAsset, BenchmarkRecord } from "./benchmarks";
 import { weightedBenchmark, type Metrics } from "./project-benchmarks";
-import { linkedTicketSegments, type PricedSegment } from "./ticket-pricing";
+import { linkedTicketSegments, withLinkedTicketPrices, type PricedSegment } from "./ticket-pricing";
 
 /**
  * "Use Benchmark as Project Basis": converts benchmark metrics into the project's existing inputs
@@ -107,7 +107,8 @@ function statement(a: Assumptions, year: number): Statement | null {
   };
 }
 
-export function buildBasis(a: Assumptions, s: BasisSettings, assets: BenchmarkAsset[], records: BenchmarkRecord[], now = new Date()): BasisResult | null {
+export function buildBasis(input: Assumptions, s: BasisSettings, assets: BenchmarkAsset[], records: BenchmarkRecord[], now = new Date()): BasisResult | null {
+  const a = withLinkedTicketPrices(input); // fares are always linked in the app
   let base: ReturnType<typeof calculate>;
   try { base = calculate(a); } catch { return null; }
   const t = Math.min(Math.max(1, Math.round(s.targetYear)), a.years);

@@ -25,27 +25,24 @@ describe("F&B from restaurant benchmarks (year-1 basis)", () => {
     const a: AssumptionsWithFb = { ...base, fbBenchmark: { adjust: true, revenue: { assetId: "hoven", year: 2025 }, opex: { assetId: "eggen", year: 2025 } } };
     const n = withFbBenchmark(a, assets, records);
     const rev1 = 26368000 * pax1 / 190000, opex1 = 17583879 * pax1 / 116505;
-    expect(n.fbRevenueYear1).toBe(Math.round(rev1 / fbEscalator(n, "revenue")));
-    expect(n.fbOpexYear1).toBe(Math.round(opex1 / fbEscalator(n, "opex")));
+    expect(n.fbRevenueYear1).toBeCloseTo(rev1 / fbEscalator(n, "revenue"));
+    expect(n.fbOpexYear1).toBeCloseTo(opex1 / fbEscalator(n, "opex"));
   });
-  it("always scales a selected restaurant's revenue per passenger, including previously unadjusted selections", () => {
+  it("unadjusted selections retain historical amounts", () => {
     const n = withFbBenchmark({ ...base, fbBenchmark: { adjust: false, revenue: { assetId: "hoven", year: 2025 } } } as AssumptionsWithFb, assets, records);
-    expect(n.fbBenchmark?.adjust).toBe(true);
-    expect(n.fbFollowsPassengers).toBe(true);
-    expect(calculate(n).rows[0]?.fbRevenue).toBeCloseTo(26368000 / 190000 * 250000, -1);
+    expect(n.fbRevenueYear1).toBe(26368000);
+    expect(n.fbBenchmark?.revenue?.adjust).toBe(false);
   });
-  it("always scales a selected restaurant's OPEX per passenger to project year-1 passengers", () => {
+  it("unadjusted OPEX retains historical costs", () => {
     const n = withFbBenchmark({ ...base, fbBenchmark: { adjust: false, opex: { assetId: "eggen", year: 2025 } } } as AssumptionsWithFb, assets, records);
-    const row = calculate(n).rows[0];
-    if (!row) throw new Error("Missing forecast year");
-    expect(fbOpexAt(n, row)).toBeCloseTo(17583879 / 116505 * 250000, -1);
+    expect(n.fbOpexYear1).toBe(17583879);
   });
   it("follows project passengers when they change", () => {
     const sel = { adjust: true, revenue: { assetId: "hoven", year: 2025 } };
     const a: AssumptionsWithFb = { ...base, initialPassengers: 380000, fbBenchmark: sel };
     const n = withFbBenchmark(a, assets, records);
     const target = 26368000 * passengersAt(a, FB_BASIS_YEAR) / 190000;
-    expect(n.fbRevenueYear1).toBe(Math.round(target / fbEscalator(n, "revenue")));
+    expect(n.fbRevenueYear1).toBeCloseTo(target / fbEscalator(n, "revenue"));
   });
   it("keeps the last value and warns when the benchmark is deleted", () => {
     const a = { ...base, fbBenchmark: { adjust: true, revenue: { assetId: "gone", year: 2025 } } } as AssumptionsWithFb;
@@ -58,7 +55,7 @@ describe("F&B from restaurant benchmarks (year-1 basis)", () => {
 });
 
 describe("F&B benchmark lands on the year-1 amount in the engine", () => {
-  const a = { ...projectMountain, initialPassengers: 250000, fbBenchmark: { adjust: false, revenue: { assetId: "hoven", year: 2025 }, opex: { assetId: "eggen", year: 2025 } } } as AssumptionsWithFb;
+  const a = { ...projectMountain, initialPassengers: 250000, fbBenchmark: { adjust: true, revenue: { assetId: "hoven", year: 2025 }, opex: { assetId: "eggen", year: 2025 } } } as AssumptionsWithFb;
   const n = withFbBenchmark(a, assets, records);
   const row = calculate(n).rows[0];
   it("uses year 1 as the passenger basis", () => {
@@ -66,11 +63,11 @@ describe("F&B benchmark lands on the year-1 amount in the engine", () => {
     expect(passengersAt(a, FB_BASIS_YEAR)).toBe(250000);
   });
   it("year-1 F&B revenue equals Hoven revenue per passenger times project passengers", () => {
-    expect(row?.fbRevenue).toBe(Math.round(26368000 / 190000 * 250000));
+    expect(row?.fbRevenue).toBeCloseTo(26368000 / 190000 * 250000);
   });
   it("year-1 F&B OPEX equals Eggen OPEX per passenger times project passengers", () => {
     if (!row) throw new Error("Missing year 1");
-    expect(fbOpexAt(n, row)).toBe(Math.round(17583879 / 116505 * 250000));
+    expect(fbOpexAt(n, row)).toBeCloseTo(17583879 / 116505 * 250000);
   });
 });
 

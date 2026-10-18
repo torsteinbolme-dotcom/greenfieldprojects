@@ -15,7 +15,7 @@ export type FbSnapshot = {
   costInflation: number; priceGrowth: number[]; ancillaryGrowth: number[];
   adjust: boolean; manualAdjustment: number;
 };
-export type FbSource = { assetId: string; year: number; adjust?: boolean; snapshot?: FbSnapshot };
+export type FbSource = { assetId: string; year: number; adjust?: boolean; snapshot?: FbSnapshot | undefined };
 export type FbBenchmark = { revenue?: FbSource | null; opex?: FbSource | null; adjust: boolean };
 export type AssumptionsWithFb = Assumptions & { fbBenchmark?: FbBenchmark };
 
@@ -31,16 +31,18 @@ export function passengersAt(a: Pick<Assumptions, "initialPassengers" | "passeng
 
 /** Multiplier that takes a year-1 F&B amount to its year-N level inside the engine. */
 export function fbEscalator(a: Assumptions, kind: "revenue" | "opex", year = FB_BASIS_YEAR): number {
-  let pax = 1, other = 1;
+  let pax = 1, ancillary = 1, price = 1;
   for (let y = 2; y <= year; y++) {
     pax *= 1 + g(a.passengerGrowth, y);
-    other *= a.fbFollowsPassengers
-      ? kind === "revenue" ? 1 + g(a.priceGrowth, y) : 1 + a.costInflation
-      : 1 + g(a.ancillaryGrowth, y);
+    ancillary *= 1 + g(a.ancillaryGrowth, y);
+    price *= 1 + g(a.priceGrowth, y);
   }
-  // With the follower off, OPEX additionally tracks revenue growth and cost inflation.
-  if (!a.fbFollowsPassengers && kind === "opex") other *= Math.pow(1 + a.costInflation, year - 1);
-  return pax * other;
+  const sel = (a as AssumptionsWithFb).fbBenchmark;
+  const revenueLinked = sel?.revenue ? sourceAdjust(sel, sel.revenue) : a.fbFollowsPassengers;
+  const revenue = revenueLinked ? pax * price : ancillary;
+  if (kind === "revenue") return revenue;
+  const opex = sel?.opex ? (sourceAdjust(sel, sel.opex) ? pax : 1) : a.fbFollowsPassengers ? pax : revenue;
+  return opex * Math.pow(1 + a.costInflation, year - 1);
 }
 
 export type FbLine = {

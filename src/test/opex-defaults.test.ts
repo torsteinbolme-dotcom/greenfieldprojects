@@ -5,6 +5,15 @@ import { calculate } from '@/financialEngine';
 import { forecastOpex } from '@/lib/forecast-opex';
 
 describe('Independent F&B OPEX defaults for every project', () => {
+  it('keeps Mountain starting costs and applies OPEX growth only with benchmark revenue retained', () => {
+    const a = { ...projectMountain, fbOpexYear1: 29030921.052631576,
+      opexGrowth: { fb: [0.2, 0.15, 0.03] },
+      fbBenchmark: { adjust: true, revenue: { assetId: 'hoven', year: 2025, adjust: true }, opex: null } };
+    const y2 = calculate(a).rows[1], y3 = calculate(a).rows[2];
+    if (!y2 || !y3) throw new Error('Missing forecast');
+    expect(forecastOpex(a, y2).fb).toBeCloseTo(34837105.26315789, 5);
+    expect(forecastOpex(a, y3).fb).toBeCloseTo(40062671.05263157, 5);
+  });
   it('keeps Heaven costs at their existing base with 20%, 15%, 3% growth, independent of benchmark revenue', () => {
     const a = { ...projectMountain, fbOpexYear1: 22639215.913480107,
       opexGrowth: { fb: [0.2, 0.15, 0.03] },

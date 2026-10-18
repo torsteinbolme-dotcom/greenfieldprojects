@@ -37,7 +37,7 @@ const kr = (v: number | null) => (v == null ? "—" : nok(v));
 const m = (v: number | null) => (v == null ? "—" : nokM(v));
 const p = (v: number | null) => pct(v);
 
-function SortTable<T>({ rows, cols, initial, onEdit }: { rows: (T & { id: string; name: string })[]; cols: Col<T>[]; initial: string; onEdit?: (id: string) => void }) {
+function SortTable<T>({ rows, cols, initial, onEdit }: { rows: (T & { id: string; name: string })[]; cols: Col<T>[]; initial: string; onEdit?: ((id: string) => void) | undefined }) {
   const [sort, setSort] = useState({ key: initial, dir: -1 });
   const sorted = useMemo(() => {
     if (sort.key === "name") return [...rows].sort((a, b) => sort.dir * b.name.localeCompare(a.name, "nb"));
@@ -78,7 +78,7 @@ function BenchmarksPage() {
   const [yearSel, setYear] = useState<number | null>(null);
   const [status, setStatus] = useState<DataStatus | "all">("all");
   const year = yearSel ?? years[0] ?? new Date().getFullYear();
-  const [editing, setEditing] = useState<{ record?: BenchmarkRecord; asset?: BenchmarkAsset } | null>(null);
+  const [editing, setEditing] = useState<{ record?: BenchmarkRecord | undefined; asset?: BenchmarkAsset | undefined } | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [cableKpi, setCableKpi] = useState("ebitdaPerPax");
 
@@ -151,7 +151,7 @@ function BenchmarksPage() {
           <div><Label className="text-xs">Data status</Label>
             <Select value={status} onValueChange={(v) => setStatus(v as DataStatus | "all")}>
               <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
-              <SelectContent>{["all", "actual", "budget", "estimate"].map((s) => <SelectItem key={s} value={s}>{s[0].toUpperCase() + s.slice(1)}</SelectItem>)}</SelectContent>
+              <SelectContent>{["all", "actual", "budget", "estimate"].map((s) => <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>)}</SelectContent>
             </Select></div>
           {canEdit && <>
             <Button variant="outline" onClick={() => setImportOpen(true)}><Upload className="mr-1 h-4 w-4" />Import Excel</Button>
@@ -229,7 +229,7 @@ function NumInput({ label, value, onChange }: { label: string; value: number | n
   return <div><Label className="text-xs">{label}</Label><Input inputMode="decimal" value={text} onChange={(e) => setText(e.target.value)} onBlur={() => { const v = parseNumberInput(text); onChange(v); setText(v == null ? "" : formatNumber(v)); }} /></div>;
 }
 
-function RecordDialog({ orgId, assets, init, onClose }: { orgId: string; assets: BenchmarkAsset[]; init: { record?: BenchmarkRecord; asset?: BenchmarkAsset }; onClose: () => void }) {
+function RecordDialog({ orgId, assets, init, onClose }: { orgId: string; assets: BenchmarkAsset[]; init: { record?: BenchmarkRecord | undefined; asset?: BenchmarkAsset | undefined }; onClose: () => void }) {
   const qc = useQueryClient();
   const r = init.record;
   const [f, setF] = useState({
@@ -243,7 +243,7 @@ function RecordDialog({ orgId, assets, init, onClose }: { orgId: string; assets:
   const isNewYear = r && (f.year !== r.financial_year || f.status !== r.data_status);
 
   async function save() {
-    if (!f.name.trim()) return toast.error("Asset name is required");
+    if (!f.name.trim()) { toast.error("Asset name is required"); return; }
     setBusy(true);
     try {
       let assetId = init.asset?.id;
@@ -278,7 +278,7 @@ function RecordDialog({ orgId, assets, init, onClose }: { orgId: string; assets:
           <div><Label className="text-xs">Financial year</Label><Input inputMode="numeric" value={f.year} onChange={(e) => set("year", Number(e.target.value) || f.year)} /></div>
           <div><Label className="text-xs">Data status</Label>
             <Select value={f.status} onValueChange={(v) => set("status", v as DataStatus)}><SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{["actual", "budget", "estimate"].map((s) => <SelectItem key={s} value={s}>{s[0].toUpperCase() + s.slice(1)}</SelectItem>)}</SelectContent></Select></div>
+              <SelectContent>{["actual", "budget", "estimate"].map((s) => <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>)}</SelectContent></Select></div>
           <NumInput label="Revenue (NOK)" value={f.revenue} onChange={(v) => set("revenue", v)} />
           <NumInput label="OPEX (NOK)" value={f.opex} onChange={(v) => set("opex", v)} />
           <NumInput label="EBITDA (NOK, blank = revenue − OPEX)" value={f.ebitda} onChange={(v) => set("ebitda", v)} />
@@ -303,7 +303,7 @@ function ImportDialog({ orgId, assets, onClose }: { orgId: string; assets: Bench
   async function onFile(file: File) {
     const XLSX = await import("xlsx");
     const wb = XLSX.read(await file.arrayBuffer());
-    const parsed = parseWideSheet(XLSX.utils.sheet_to_json<unknown[]>(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: null }));
+    const parsed = parseWideSheet(XLSX.utils.sheet_to_json<unknown[]>(wb.Sheets[wb.SheetNames[0] ?? ""]!, { header: 1, defval: null }));
     const y = file.name.match(/20\d\d/); if (y) setYear(Number(y[0]));
     setSource(file.name);
     if (!parsed.length) toast.error("No benchmark columns found. Expected a CABLE CARS / F&B header row followed by asset names.");

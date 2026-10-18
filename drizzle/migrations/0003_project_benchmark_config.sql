@@ -1,0 +1,1 @@
+ALTER TABLE public.projects ADD COLUMN benchmark_config jsonb NOT NULL DEFAULT '{}'::jsonb;

@@ -17,6 +17,8 @@ import { createScenario, logAudit, saveAssumptionVersion, useMembership, useProj
 import { safeCalculate } from "@/lib/model";
 import { withLinkedTicketPrices } from "@/lib/ticket-pricing";
 import { int, mult, nok, nokM, pct } from "@/lib/format";
+import { BenchmarkingSection } from "@/components/editor/benchmarking";
+import type { BenchmarkConfig } from "@/lib/project-benchmarks";
 import { useAutosave } from "@/hooks/use-autosave";
 import { SaveControls } from "@/components/editor/save-controls";
 
@@ -113,7 +115,7 @@ function EditorPage() {
 
       <Tabs value={search.tab ?? "overview"} onValueChange={(t) => navigate({ search: (s) => ({ ...s, tab: t }), replace: true })}>
         <TabsList className="h-auto flex-wrap">
-          {([["overview", "Overview"], ["segments", "Passenger segments"], ["capex", "CAPEX"], ["revenue", "Revenue & OPEX"], ["financing", "Financing"], ["forecast", "Forecast"], ["exit", "Exit analysis"], ["history", "Version history"]] as const).map(([k, l]) => (
+          {([["overview", "Overview"], ["segments", "Passenger segments"], ["capex", "CAPEX"], ["revenue", "Revenue & OPEX"], ["financing", "Financing"], ["forecast", "Forecast"], ["exit", "Exit analysis"], ["benchmarking", "Benchmarking"], ["history", "Version history"]] as const).map(([k, l]) => (
             <TabsTrigger key={k} value={k}>{l}</TabsTrigger>
           ))}
         </TabsList>
@@ -141,6 +143,7 @@ function EditorPage() {
         <TabsContent value="financing"><FinancingSection a={draft} set={set} ro={ro} r={r} /></TabsContent>
         <TabsContent value="forecast">{r ? <ForecastSection r={r} a={draft} /> : <p className="text-muted-foreground">Fix the inputs above to see the forecast.</p>}</TabsContent>
         <TabsContent value="exit">{r ? <ExitSection a={draft} set={set} ro={ro} r={r} /> : <p className="text-muted-foreground">Fix the inputs to see exit analysis.</p>}</TabsContent>
+        <TabsContent value="benchmarking"><BenchmarkingSection projectId={project.id} config={(project.benchmark_config ?? {}) as BenchmarkConfig} a={draft} r={r} ro={ro} apply={set} /></TabsContent>
         <TabsContent value="history">
           <Card title={`Version history — ${scenario.name}`}>
             <table className="fin-table">

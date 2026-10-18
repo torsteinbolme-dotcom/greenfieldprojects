@@ -42,3 +42,20 @@ describe("F&B from restaurant benchmarks", () => {
     expect(withFbBenchmark(base as AssumptionsWithFb, assets, records)).toBe(base);
   });
 });
+
+import { calculate } from "@/financialEngine";
+describe("F&B following passengers each year", () => {
+  const a = { ...(projectMountain as Assumptions), fbFollowsPassengers: true, passengerGrowth: [0.1], priceGrowth: [0.02], costInflation: 0.03, ancillaryGrowth: [0.5] };
+  const r = calculate(a);
+  it("revenue follows passengers and ticket price growth, not ancillary growth", () => {
+    expect(r.rows[2]!.fbRevenue).toBeCloseTo(a.fbRevenueYear1 * 1.1 ** 2 * 1.02 ** 2, 2);
+  });
+  it("OPEX follows passengers and cost inflation once", () => {
+    const fbOpex = r.rows[2]!.opex - a.cableFixedOpex * 1.03 ** 2 - (a.merchOpexYear1 * r.rows[2]!.merchRevenue / a.merchRevenueYear1) * 1.03 ** 2;
+    expect(fbOpex).toBeCloseTo(a.fbOpexYear1 * 1.1 ** 2 * 1.03 ** 2, 2);
+  });
+  it("existing projects without the setting are unchanged", () => {
+    const off = calculate({ ...a, fbFollowsPassengers: false });
+    expect(off.rows[2]!.fbRevenue).toBeCloseTo(a.fbRevenueYear1 * 1.5 ** 2, 2);
+  });
+});

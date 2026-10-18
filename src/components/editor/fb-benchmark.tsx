@@ -19,7 +19,7 @@ export function FbBenchmarkPanel({ a, set, ro }: { a: Assumptions; set: (p: Part
 
   const update = (next: FbBenchmark) => {
     const derived = withFbBenchmark({ ...aw, fbBenchmark: next }, data.assets, data.records);
-    set({ fbBenchmark: next, fbRevenueYear1: derived.fbRevenueYear1, fbOpexYear1: derived.fbOpexYear1 } as Partial<Assumptions>);
+    set({ fbBenchmark: next, fbRevenueYear1: derived.fbRevenueYear1, fbOpexYear1: derived.fbOpexYear1, fbFollowsPassengers: next.adjust && !!(next.revenue || next.opex) } as Partial<Assumptions>);
   };
   const choose = (kind: "revenue" | "opex", v: string) =>
     update({ ...sel, [kind]: v === MANUAL ? null : { assetId: v, year: latestYear(data.records, v) } });
@@ -65,7 +65,7 @@ export function FbBenchmarkPanel({ a, set, ro }: { a: Assumptions; set: (p: Part
         <Switch id="fb-adjust" checked={sel.adjust} disabled={ro} onCheckedChange={(c) => update({ ...sel, adjust: c })} />
         <Label htmlFor="fb-adjust">Adjust to Project Passenger Volume</Label>
       </div>
-      <p className="text-xs text-muted-foreground">Scaled by year-1 project passengers ({formatNumber(a.initialPassengers, 0, 0)}) ÷ the passengers of each restaurant's own cable car in the benchmark year. Later years follow the model's existing ancillary growth and cost inflation.</p>
+      <p className="text-xs text-muted-foreground">Scaled by year-1 project passengers ({formatNumber(a.initialPassengers, 0, 0)}) ÷ the passengers of each restaurant's own cable car in the benchmark year. When on, every later year follows the passenger forecast: revenue also grows with ticket price growth, OPEX with cost inflation.</p>
       <div className="grid grid-cols-3 gap-3 rounded-md bg-muted/40 p-3 text-sm">
         <div><p className="text-xs text-muted-foreground">F&B revenue year 1</p><p className="tabular-nums font-medium">{nok(a.fbRevenueYear1)}</p></div>
         <div><p className="text-xs text-muted-foreground">F&B OPEX year 1</p><p className="tabular-nums font-medium">{nok(a.fbOpexYear1)}</p></div>

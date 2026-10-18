@@ -123,7 +123,7 @@ function SegmentBridge({ a }: { a: Assumptions }) {
     <div className="mt-6 border-t pt-5" aria-label="Segment bridge">
       <h4 className="mb-3 font-semibold">Segment bridge · year 1 passengers</h4>
       <div className="grid gap-6 lg:grid-cols-2">
-        <WaterfallChart steps={steps} format={v => int(v)} />
+        <WaterfallChart steps={steps} format={v => int(v)} tickAngle={-30} />
         <div className="overflow-x-auto">
           <table className="fin-table">
             <thead><tr><th>Segment</th><th className="text-right">Passengers</th><th className="text-right">Net / guest (NOK)</th><th className="text-right">Net revenue (NOK)</th><th className="text-right">Share</th></tr></thead>

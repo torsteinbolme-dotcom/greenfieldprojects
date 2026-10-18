@@ -243,7 +243,7 @@ function RecordDialog({ orgId, assets, init, onClose }: { orgId: string; assets:
   const isNewYear = r && (f.year !== r.financial_year || f.status !== r.data_status);
 
   async function save() {
-    if (!f.name.trim()) return toast.error("Asset name is required");
+    if (!f.name.trim()) { toast.error("Asset name is required"); return; }
     setBusy(true);
     try {
       let assetId = init.asset?.id;
@@ -303,7 +303,7 @@ function ImportDialog({ orgId, assets, onClose }: { orgId: string; assets: Bench
   async function onFile(file: File) {
     const XLSX = await import("xlsx");
     const wb = XLSX.read(await file.arrayBuffer());
-    const parsed = parseWideSheet(XLSX.utils.sheet_to_json<unknown[]>(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: null }));
+    const parsed = parseWideSheet(XLSX.utils.sheet_to_json<unknown[]>(wb.Sheets[wb.SheetNames[0] ?? ""]!, { header: 1, defval: null }));
     const y = file.name.match(/20\d\d/); if (y) setYear(Number(y[0]));
     setSource(file.name);
     if (!parsed.length) toast.error("No benchmark columns found. Expected a CABLE CARS / F&B header row followed by asset names.");

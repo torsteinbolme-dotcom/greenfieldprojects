@@ -23,12 +23,12 @@ type Result = ReturnType<typeof calculate>;
 type Props = { projectId: string; config: BenchmarkConfig; a: Assumptions; r: Result | null; ro: boolean; apply: (patch: Partial<Assumptions>) => void };
 
 const ROWS: { key: keyof Metrics; label: string; fmt: (v: number | null) => string; group: "cable" | "fnb" }[] = [
-  { key: "cableRevenuePerPax", label: "Revenue per passenger (NOK)", fmt: (v) => (v == null ? "—" : nok(v)), group: "cable" },
-  { key: "cableOpexPerPax", label: "OPEX per passenger (NOK)", fmt: (v) => (v == null ? "—" : nok(v)), group: "cable" },
-  { key: "cableEbitdaPerPax", label: "EBITDA per passenger (NOK)", fmt: (v) => (v == null ? "—" : nok(v)), group: "cable" },
+  { key: "cableRevenuePerPax", label: "Revenue per passenger (NOK)", fmt: (v) => (v == null ? "—" : nok(Math.round(v) || 0)), group: "cable" },
+  { key: "cableOpexPerPax", label: "OPEX per passenger (NOK)", fmt: (v) => (v == null ? "—" : nok(Math.round(v) || 0)), group: "cable" },
+  { key: "cableEbitdaPerPax", label: "EBITDA per passenger (NOK)", fmt: (v) => (v == null ? "—" : nok(Math.round(v) || 0)), group: "cable" },
   { key: "cableMargin", label: "EBITDA margin", fmt: (v) => pct(v), group: "cable" },
-  { key: "restRevenuePerPax", label: "Restaurant revenue per cable car passenger (NOK)", fmt: (v) => (v == null ? "—" : nok(v)), group: "fnb" },
-  { key: "restEbitdaPerPax", label: "Restaurant EBITDA contribution per passenger (NOK)", fmt: (v) => (v == null ? "—" : nok(v)), group: "fnb" },
+  { key: "restRevenuePerPax", label: "Restaurant revenue per cable car passenger (NOK)", fmt: (v) => (v == null ? "—" : nok(Math.round(v) || 0)), group: "fnb" },
+  { key: "restEbitdaPerPax", label: "Restaurant EBITDA contribution per passenger (NOK)", fmt: (v) => (v == null ? "—" : nok(Math.round(v) || 0)), group: "fnb" },
   { key: "restMargin", label: "Restaurant EBITDA margin", fmt: (v) => pct(v), group: "fnb" },
 ];
 
@@ -107,7 +107,7 @@ export function BenchmarkingSection({ projectId, config, a, r, ro, apply }: Prop
   };
 
   const valid = weightsValid(cfg.cable) && weightsValid(cfg.fnb);
-  const chartData = ROWS.filter((x) => x.key !== "cableMargin" && x.key !== "restMargin").map((x) => ({ name: x.label.replace(" (NOK)", ""), Project: proj?.[x.key] ?? 0, Benchmark: bench[x.key] ?? 0 }));
+  const chartData = ROWS.filter((x) => x.key !== "cableMargin" && x.key !== "restMargin").map((x) => ({ name: ({ cableRevenuePerPax: "Revenue", cableOpexPerPax: "OPEX", cableEbitdaPerPax: "EBITDA", restRevenuePerPax: "Restaurant revenue", restEbitdaPerPax: "Restaurant EBITDA" } as Record<string, string>)[x.key] ?? x.label, Project: proj?.[x.key] ?? 0, Benchmark: bench[x.key] ?? 0 }));
   const flagged = ROWS.filter((x) => proj && deviation(proj[x.key], bench[x.key], threshold).flagged);
 
   return (

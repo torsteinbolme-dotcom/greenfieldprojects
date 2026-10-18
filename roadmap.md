@@ -28,6 +28,6 @@
 ## Benchmarks (brief: Improve_the_existing_Greenfield_Projects)
 - [x] Phase 1: benchmark database (assets + yearly records, NOK, status, source, notes), 2025 data from the uploaded workbook, Excel import, manual edit, history kept per year.
 - [x] Phase 1: dashboard with Cable cars / Restaurants / Combined tabs, sortable tables, charts, history chart.
-- [ ] Phase 2: Benchmarking tab in each project (comparable selection, weights summing to 100%, calendar vs stabilised years).
-- [ ] Phase 3: "Apply Benchmark Assumptions" with preview + confirmation; deviation indicators with configurable thresholds. Blocked: needs user approval to split fixed/variable OPEX in the signed-off engine.
+- [x] Phase 2: Benchmarking tab in each project (comparable selection, weights summing to 100%, calendar vs stabilised years).
+- [x] Phase 3: Apply Benchmark Assumptions (preview + confirm, undoable) and deviation flags with configurable threshold. Engine OPEX split declined by user (2026-10-18).
 - [ ] New accounts don't get the 2025 benchmark seed yet.

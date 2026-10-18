@@ -239,7 +239,8 @@ export function ForecastSection({ r }: { r: ModelResult }) {
 const MULTIPLES = [10, 12.5, 15, 17.5, 20];
 
 export function ExitSection({ a, set, ro, r }: P & { r: ModelResult }) {
-  const exit = r.rows[a.exitYear - 1]!;
+  const exit = r.rows[a.exitYear - 1];
+  if (!exit) return null;
   const sens = MULTIPLES.map((m) => {
     const s = calculate({ ...a, exitMultiple: m });
     return { m, ev: s.enterpriseValue, eq: s.exitEquityValue, irr: s.equityIrr, moic: s.equityMultiple };
@@ -272,7 +273,7 @@ export function ExitSection({ a, set, ro, r }: P & { r: ModelResult }) {
           <tbody>
             {sens.map((s) => (
               <tr key={s.m} className={s.m === a.exitMultiple ? "font-semibold" : ""}>
-                <td className="num">{s.m.toFixed(1)}x</td><td className="num text-right">{nokM(s.ev)}</td><td className="num text-right">{nokM(s.eq)}</td>
+                <td className="num">{mult(s.m, 1)}</td><td className="num text-right">{nokM(s.ev)}</td><td className="num text-right">{nokM(s.eq)}</td>
                 <td className="num text-right">{pct(s.irr)}</td><td className="num text-right">{mult(s.moic)}</td>
               </tr>
             ))}

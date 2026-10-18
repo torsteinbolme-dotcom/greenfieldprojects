@@ -1,28 +1,33 @@
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { formatNumber, formatNumberInput, parseNumberInput } from "@/lib/format";
 
 type Props = { value: number; onChange: (v: number) => void; percent?: boolean | undefined; disabled?: boolean | undefined; className?: string | undefined; step?: string | undefined };
 
 /** Numeric input. With `percent`, the stored value is a decimal (0.12) and shown as 12. */
 export function NumField({ value, onChange, percent, disabled, className, step }: Props) {
-  const toText = (v: number) => (Number.isFinite(v) ? String(percent ? +(v * 100).toPrecision(10) : v) : "");
+  const toText = (v: number) => (Number.isFinite(v) ? formatNumber(percent ? v * 100 : v) : "");
   const [text, setText] = useState(toText(value));
-  useEffect(() => { setText(toText(value)); }, [value, percent]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [focused, setFocused] = useState(false);
+  useEffect(() => { if (!focused) setText(toText(value)); }, [value, percent, focused]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className={cn("relative", className)}>
       <Input
-        type="number"
-        step={step ?? "any"}
+        type="text"
+        inputMode={step === "1" ? "numeric" : "decimal"}
         disabled={disabled}
         value={text}
         className={cn("num h-8 text-right", percent && "pr-6")}
         onChange={(e) => {
-          setText(e.target.value);
-          const n = parseFloat(e.target.value);
-          if (Number.isFinite(n)) onChange(percent ? n / 100 : n);
+          const next = formatNumberInput(e.target.value);
+          if (next === null) return;
+          setText(next);
+          const n = parseNumberInput(next);
+          if (n !== null) onChange(percent ? n / 100 : n);
         }}
-        onBlur={() => setText(toText(value))}
+        onFocus={() => setFocused(true)}
+        onBlur={() => { setFocused(false); setText(toText(value)); }}
       />
       {percent && <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>}
     </div>

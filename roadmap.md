@@ -18,4 +18,4 @@
 - [x] Default the model horizon to 15 years everywhere (new projects, example, new-account sample) and set the open project's Base scenario to 15; verify it saves and reloads.
 
 ## Open
-- [ ] Tax-loss carryforward in the model (financialEngine.ts — user requested 2026-10-18)
+- [x] Tax-loss carryforward in the model (engine change, tested).

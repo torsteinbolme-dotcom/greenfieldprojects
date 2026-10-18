@@ -21,3 +21,5 @@
 - Numeric displays and text-based numeric inputs share `src/lib/format.ts`; format presentation only and retain stored numeric precision. Why: consistent locale formatting must not rewrite signed-off calculations or historical assumptions.
 - Forecast expense detail is derived for presentation through `src/lib/forecast-opex.ts` from current assumptions and engine rows; retain the engine's authoritative total. Why: expose individual costs without modifying signed-off formulas or stored outputs.
 - The engine excludes per-passenger variable cable car cost and revenue-based maintenance capex (removed from the formulas at the user's request on 2026-10-18); both keys remain in the `Assumptions` type and stored JSON only so earlier versions and the example file still load, and new saves tag `mountain-v2`. Why: the user wants those costs out of the calculation entirely, while historical inputs must still open.
+
+- The engine carries tax losses forward indefinitely: negative taxable income (EBIT minus interest) accumulates and offsets later profits before tax is charged (added 2026-10-18 at user request).

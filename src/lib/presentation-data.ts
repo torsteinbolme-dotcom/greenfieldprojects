@@ -11,7 +11,7 @@ export type PresentationType = 'executive' | 'investment' | 'detailed';
 export type PresentationOptions = { type: PresentationType; charts: boolean; benchmarks: boolean; notes: boolean };
 export const DEFAULT_PRESENTATION_OPTIONS: PresentationOptions = { type: 'investment', charts: true, benchmarks: true, notes: true };
 export type PresentationInput = {
-  project: { name: string; location: string | null; description?: string | null; assumption_notes?: string | null; benchmark_config: unknown };
+  project: { name: string; location: string | null; description?: string | null; assumption_notes?: string | null; benchmark_config?: unknown };
   scenario: { name: string; kind: string };
   assumptions: Assumptions; result: ModelResult;
   assets: BenchmarkAsset[]; records: BenchmarkRecord[];

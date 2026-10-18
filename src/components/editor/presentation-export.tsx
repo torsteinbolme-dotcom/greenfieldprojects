@@ -14,11 +14,11 @@ import { DEFAULT_PRESENTATION_OPTIONS, presentationData, type PresentationInput,
 async function pngData(file: Blob): Promise<string> {
   const image = await createImageBitmap(file);
   const canvas = document.createElement('canvas');
-  const ratio = Math.min(1, 1600 / image.width);
-  canvas.width = Math.round(image.width * ratio); canvas.height = Math.round(image.height * ratio);
+  const ratio = Math.min(1600 / image.width, 476 / image.height);
+  canvas.width = 1600; canvas.height = 476;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw Error('Cannot prepare the cover image.');
-  ctx.drawImage(image, 0, 0, canvas.width, canvas.height); image.close();
+  ctx.drawImage(image, (1600 - image.width * ratio) / 2, (476 - image.height * ratio) / 2, image.width * ratio, image.height * ratio); image.close();
   return canvas.toDataURL('image/png');
 }
 export function PresentationExport({ input, coverPath }: { input: PresentationInput; coverPath: string | null }) {

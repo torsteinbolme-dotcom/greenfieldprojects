@@ -14,8 +14,7 @@ export function buildPresentation(d: PresentationData, options: PresentationOpti
   pptx.author = 'Greenfield Projects';
   pptx.subject = `${d.project.name} · ${d.scenario.name}`;
   pptx.title = `${d.project.name} — ${d.scenario.name}`;
-  pptx.lang = 'nb-NO';
-  pptx.theme = { headFontFace: 'Outfit', bodyFontFace: 'Outfit', lang: 'nb-NO' };
+  pptx.theme = { headFontFace: 'Outfit', bodyFontFace: 'Outfit' };
   let count = 0;
   const { assumptions: a, result: r, y3 } = d;
   function slide(title: string, note = '') {
@@ -27,7 +26,7 @@ export function buildPresentation(d: PresentationData, options: PresentationOpti
     return s;
   }
   function table(s: PptxGenJS.Slide, rows: string[][], headers: string[], y = 1.9) {
-    s.addTable([headers, ...rows], { x: .6, y, w: 12.1, colW: headers.map(() => 12.1 / headers.length),
+    s.addTable([headers, ...rows].map(row => row.map(text => ({ text }))), { x: .6, y, w: 12.1, colW: headers.map(() => 12.1 / headers.length),
       fontFace: 'Outfit', fontSize: 18, color: C.ink, fill: C.white, border: { type: 'solid', color: C.grey, pt: .5 },
       margin: .12, rowH: .43, bold: false, autoPage: false,
       });
@@ -51,7 +50,7 @@ export function buildPresentation(d: PresentationData, options: PresentationOpti
         { x: .6, y: 1.85, w: 12.1, h: 4.7, showLegend: kind !== 'passengers', legendPos: 'b',
           chartColors: [C.blue, C.gold], showValue: false, showCatName: false, catAxisLabelFontSize: 12,
           valAxisLabelFontSize: 14, valAxisNumFmt: kind === 'passengers' ? '# ##0' : '0.0',
-          showCatName: false, valGridLine: { color: C.grey, width: .5 }, lineSize: 2, showMarker: false,
+          valGridLine: { color: C.grey, size: .5 }, lineSize: 2, showMarker: false,
           showTitle: false, showBorder: false });
     } else {
       const chosen = rows.filter(x => x.year === 1 || x.year === 3 || x.year === a.exitYear || x.year === rows.length);
@@ -60,12 +59,14 @@ export function buildPresentation(d: PresentationData, options: PresentationOpti
   }
   const cover = slide(d.project.name.slice(0, 150), d.project.description ?? 'Project investment presentation.');
   cover.addText(`${d.project.location ?? 'Location not specified'}\n${d.scenario.name} · Opening ${a.openingYear}`, { x: .6, y: 1.8, w: 12.1, h: 1, fontSize: 22, color: C.ink, margin: 0 });
-  if (imageData) cover.addImage({ data: imageData, ...pptx.imageSizingContain(imageData, .6, 3.1, 12.1, 3.6) });
+  if (imageData) cover.addImage({ data: imageData, x: .6, y: 3.1, w: 12.1, h: 3.6 });
   else cover.addText(`${mult(r.equityMultiple)} equity MOIC\n${pct(r.equityIrr)} equity IRR · Exit Y${a.exitYear}`, { x: .6, y: 3.3, w: 12, h: 2.2, fontSize: 38, bold: true, color: C.blue, margin: 0 });
 
+  if (options.type !== 'executive') {
   const overview = slide('Project overview & investment highlights');
   stats(overview, [['Total CAPEX', money(r.capex)], ['Opening year', String(a.openingYear)], ['Forecast horizon', `${a.years} operating years`], ['Y3 passengers', int(y3?.passengers)], [`Equity MOIC · Y${a.exitYear}`, mult(r.equityMultiple)], [`Equity IRR · Y${a.exitYear}`, pct(r.equityIrr)]]);
 
+  }
   function financing() {
     const s = slide('CAPEX & financing', d.project.assumption_notes ?? 'CAPEX includes contingency. Additional equity is funded in the actual deficit years.');
     stats(s, [['Total CAPEX', money(r.capex)], ['Initial equity', money(r.equity)], ['Debt financing', money(r.debt)], [`Additional equity · to Y${a.exitYear}`, money(r.additionalEquity)], [`Total equity invested · to Y${a.exitYear}`, money(r.totalEquityInvested)], ['Interest rate', pct(a.interestRate)]]);

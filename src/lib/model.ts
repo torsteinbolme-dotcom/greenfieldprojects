@@ -40,9 +40,16 @@ export function blankAssumptions(name: string): Assumptions {
 
 /** Add starter segments on creation only; preserve saved inputs. */
 export function withDefaultProjectSegments(a: Assumptions): Assumptions {
+  a = withDefaultOpexGrowth(a);
   if (a.segments.some((s) => s.name.trim().toLowerCase() === "mice")) return a;
   return withLinkedTicketPrices({ ...a, segments: [...a.segments, {
     name: "MICE", share: 0, grossPrice: 0, vatRate: 0.12, commission: 0,
     boardingsPerGuest: 2,
   }] });
+}
+
+/** Creation defaults only: explicit cost growth keeps manual F&B independent of revenue. */
+export function withDefaultOpexGrowth(a: Assumptions): Assumptions {
+  if (a.opexGrowth?.fb?.length) return a;
+  return { ...a, opexGrowth: { ...a.opexGrowth, fb: [a.costInflation, a.costInflation, a.costInflation] } };
 }

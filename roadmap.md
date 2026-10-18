@@ -1,4 +1,5 @@
 # Tasks
+- [ ] Apply separate F&B OPEX growth to all current scenarios and future projects, preserving rates and previous versions; verify saved forecasts.
 - [x] Separate manual F&B OPEX development from revenue growth: year-1 OPEX and explicit F&B growth only; benchmark and absent-list legacy behaviour preserved; 158 tests pass and signed-in forecast verified at 9,0 / 10,8 / 12,4 NOK m.
 - [x] Rename Ancillary growth to Ancillary revenue growth; verified in the signed-in project.
 - [x] Add current-scenario presentation export with three deck lengths, optional charts/benchmarks/notes and cover image.

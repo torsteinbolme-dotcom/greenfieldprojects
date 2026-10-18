@@ -50,6 +50,13 @@
       "when": 1792348894487,
       "tag": "0006_project_cover_url_comment",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792358321063,
+      "tag": "0007_default_independent_fb_opex_growth",
+      "breakpoints": true
     }
   ]
 }

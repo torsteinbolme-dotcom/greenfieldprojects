@@ -17,3 +17,4 @@
 - New signups get their own organization plus a seeded Project Mountain (`handle_new_user` trigger). Why: every account starts with a working example.
 - Ticket percentages are optional segment inputs stored in scenario JSON and applied through `src/lib/ticket-pricing.ts` before editing, calculating and saving; keep the authoritative engine and example unchanged. Why: user-editable fare relationships persist per version without rewriting historical inputs or engine formulas.
 - Use the scoped serial autosave controller for editable assumptions and text details; undo creates a new saved snapshot and never deletes version history. Why: edits during requests must survive and scenario histories stay isolated.
+- Comparison display years are derived through `comparisonYears` in `src/lib/portfolio.ts`, independently of full forecast lengths. Why: shortening comparison graphs must not change authoritative financial calculations.

@@ -130,9 +130,12 @@ export async function duplicateProject(orgId: string, p: ProjectRow) {
     await createScenario(orgId, np.id, s.name, s.kind, latest.assumptions as unknown as Assumptions);
   }
   if (p.cover_image_url) {
-    const to = coverPath(orgId, np.id, p.cover_image_url.split(".").pop() ?? "jpg");
-    const { error: copyErr } = await supabase.storage.from(COVER_BUCKET).copy(COVER_BUCKET, p.cover_image_url, to);
-    if (!copyErr) await supabase.from("projects").update({ cover_image_url: to }).eq("id", np.id);
+    const { data: photo } = await supabase.storage.from(COVER_BUCKET).download(p.cover_image_url);
+    if (photo) {
+      const to = coverPath(orgId, np.id, p.cover_image_url);
+      const { error: up } = await supabase.storage.from(COVER_BUCKET).upload(to, photo, { upsert: true, contentType: photo.type || "image/jpeg" });
+      if (!up) await supabase.from("projects").update({ cover_image_url: to }).eq("id", np.id);
+    }
   }
   await logAudit(orgId, "project", np.id, "duplicated", { from: p.id });
   return np;

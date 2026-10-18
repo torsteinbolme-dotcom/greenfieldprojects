@@ -60,7 +60,6 @@ const METRICS: Metric[] = [
   { key: "margin", label: "EBITDA margin", group: "operations", fmt: "pct", get: (r) => r.y3?.margin ?? null },
   { key: "revPax", label: "Revenue / passenger (NOK)", group: "operations", fmt: "nok", get: (r) => r.y3?.revenuePerPax ?? null },
   { key: "ebitdaPax", label: "EBITDA / passenger (NOK)", group: "operations", fmt: "nok", get: (r) => r.y3?.ebitdaPerPax ?? null },
-  { key: "projectIrr", label: "Project IRR", group: "returns", fmt: "pct", get: (r) => r.ret.projectIrr },
   { key: "irr", label: "Equity IRR", group: "returns", fmt: "pct", get: (r) => r.result.equityIrr },
   { key: "payback", label: "Payback period", group: "returns", fmt: "years", get: (r) => r.ret.payback },
   { key: "exitYear", label: "Exit year", group: "returns", fmt: "year", get: (r) => r.a.exitYear },
@@ -161,7 +160,7 @@ function ProjectVsProject() {
               ))}</tbody>
             </table>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">Year 3 = third full operating year after opening. Project IRR and payback use unlevered free cash flow (EBITDA minus tax on operating profit, losses carried forward) against total CAPEX, with the exit value net of transaction costs; payback ignores the exit.</p>
+          <p className="mt-3 text-xs text-muted-foreground">Year 3 = third full operating year after opening. Payback uses unlevered free cash flow (EBITDA minus tax on operating profit, losses carried forward) against total CAPEX and ignores the exit value.</p>
         </Card>
 
         <div className="grid gap-4 md:grid-cols-2">

@@ -27,7 +27,6 @@ import { InvestmentSummary } from "@/components/editor/investment-summary";
 import { BreakEvenPanel } from "@/components/editor/break-even";
 import { SaveControls } from "@/components/editor/save-controls";
 import { CapacitySection } from "@/components/editor/capacity";
-import { maintenanceReview } from "@/lib/maintenance";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
   validateSearch: z.object({ scenario: z.string().optional(), tab: z.string().optional() }),
@@ -95,7 +94,6 @@ function EditorPage() {
   if (!scenario || !draft) return <p className="text-muted-foreground">Loading scenario…</p>;
 
   const y3 = r?.rows[2];
-  const maintenanceWarning = maintenanceReview(draft);
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -127,7 +125,6 @@ function EditorPage() {
       </div>
       {scenario.kind !== "base" && <p className="text-xs text-muted-foreground">Editing scenario “{scenario.name}”. Base is never modified by changes here.</p>}
       {error && <div className="rounded-md bg-warning p-3 text-sm text-warning-foreground">Cannot calculate: {error}</div>}
-      {maintenanceWarning && <div role="status" className="rounded-md border border-warning-foreground/30 bg-warning p-3 text-sm text-warning-foreground">{maintenanceWarning}</div>}
 
       <Tabs value={search.tab ?? "summary"} onValueChange={(t) => navigate({ search: (s) => ({ ...s, tab: t }), replace: true })}>
         <TabsList className="h-auto flex-wrap">

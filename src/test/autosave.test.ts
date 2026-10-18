@@ -37,7 +37,7 @@ describe("automatic saving and undo", () => {
   });
   it("keeps a failed edit available for retry", async () => {
     const save = vi.fn().mockRejectedValueOnce(new Error("Offline")).mockResolvedValue(undefined);
-    const editor = new Autosave(699, save);
+    const editor = new Autosave<number>(699, save);
     editor.edit(800);
     await editor.flush();
     expect(editor.getSnapshot()).toMatchObject({ value: 800, status: "error" });
@@ -47,8 +47,8 @@ describe("automatic saving and undo", () => {
   it("keeps scenario undo and saving isolated", async () => {
     const saveBase = vi.fn().mockResolvedValue(undefined);
     const saveOther = vi.fn().mockResolvedValue(undefined);
-    const base = new Autosave(699, saveBase);
-    const other = new Autosave(800, saveOther);
+    const base = new Autosave<number>(699, saveBase);
+    const other = new Autosave<number>(800, saveOther);
     other.edit(900);
     await other.flush();
     other.undo();

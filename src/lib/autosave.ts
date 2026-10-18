@@ -44,7 +44,11 @@ export class Autosave<T> {
   };
   flush = async (): Promise<void> => {
     clearTimeout(this.timer);
-    if (this.running) { await this.running; return; }
+    if (this.running) {
+      await this.running;
+      if (this.state.status === "pending" || this.state.status === "saving") await this.flush();
+      return;
+    }
     if (JSON.stringify(this.state.value) === this.saved) { this.publish({ status: "saved", error: null }); return; }
     const snapshot = this.state.value;
     this.publish({ status: "saving", error: null });

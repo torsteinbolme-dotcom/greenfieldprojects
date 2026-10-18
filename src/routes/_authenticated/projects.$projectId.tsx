@@ -51,7 +51,7 @@ function EditorPage() {
     },
   });
   const latest = versions.data?.[0];
-  const { controller, state } = useAutosave<Assumptions>(scenario?.id ?? "", latest ? withLinkedTicketPrices(latest.assumptions as unknown as Assumptions) : null, async (value) => {
+  const { controller, state } = useAutosave<Assumptions>(scenario?.id ?? "", latest && m ? withLinkedTicketPrices(latest.assumptions as unknown as Assumptions) : null, async (value) => {
     if (!m || !scenario || ro) throw new Error("Editing is unavailable");
     await saveAssumptionVersion(m.organization_id, scenario.id, value, "Automatic save");
     await supabase.from("projects").update({ updated_at: new Date().toISOString() }).eq("id", projectId);
@@ -62,7 +62,16 @@ function EditorPage() {
   const draft = state?.value ?? null;
   const { result: r, error } = useMemo(() => (draft ? safeCalculate(draft) : { result: null, error: null }), [draft]);
   const set = (patch: Partial<Assumptions>) => {
-    if (draft && !ro) controller?.edit(withLinkedTicketPrices({ ...draft, ...patch }), Object.keys(patch).join(","));
+    if (!draft || ro) return;
+    let action = Object.keys(patch).join(",");
+    if (patch.segments) {
+      const index = patch.segments.findIndex((s, i) => JSON.stringify(s) !== JSON.stringify(draft.segments[i]));
+      const next = patch.segments[index];
+      const previous = draft.segments[index];
+      const field = next && previous ? Object.keys(next).find((key) => next[key as keyof typeof next] !== previous[key as keyof typeof previous]) : "rows";
+      action += `:${index}:${field}`;
+    }
+    controller?.edit(withLinkedTicketPrices({ ...draft, ...patch }), action);
   };
   const [newScenOpen, setNewScenOpen] = useState(false);
 

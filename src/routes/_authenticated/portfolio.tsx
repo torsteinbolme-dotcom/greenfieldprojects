@@ -77,9 +77,9 @@ function PortfolioPage() {
         <table className="fin-table">
           <thead>
             <tr>
-              <th /><Th k="project" right={false}>Project</Th><Th k="scenario" right={false}>Scenario</Th><Th k="capex">CAPEX (NOK m)</Th><Th k="passengers">Passengers {label}</Th>
+              <th /><Th k="project" right={false}>Project</Th><Th k="scenario" right={false}>Scenario</Th><Th k="moic">MOIC</Th><Th k="capex">CAPEX (NOK m)</Th><Th k="passengers">Passengers {label}</Th>
               <Th k="revenue">Revenue {label}</Th><Th k="ebitda">EBITDA {label}</Th><Th k="margin">Margin</Th>
-              <Th k="moic">MOIC</Th><Th k="irr">Equity IRR</Th><Th k="exitEquity">Exit equity (NOK m)</Th>
+              <Th k="irr">Equity IRR</Th><Th k="exitEquity">Exit equity (NOK m)</Th>
             </tr>
           </thead>
           <tbody>
@@ -91,9 +91,10 @@ function PortfolioPage() {
                   {e.error && <div className="text-xs text-destructive">{e.error}</div>}
                   {!e.error && !m.row && <div className="text-xs text-muted-foreground">Not operating in {label}</div>}</td>
                 <td>{e.scenario.name}</td>
+                <td className="num text-right">{mult(m.moic)}</td>
                 <td className="num text-right">{nokM(m.capex)}</td><td className="num text-right">{int(m.passengers)}</td>
                 <td className="num text-right">{nokM(m.revenue)}</td><td className="num text-right">{nokM(m.ebitda)}</td>
-                <td className="num text-right">{pct(m.margin)}</td><td className="num text-right">{mult(m.moic)}</td><td className="num text-right">{pct(m.irr)}</td><td className="num text-right">{nokM(m.exitEquity)}</td>
+                <td className="num text-right">{pct(m.margin)}</td><td className="num text-right">{pct(m.irr)}</td><td className="num text-right">{nokM(m.exitEquity)}</td>
               </tr>
             ))}
           </tbody>

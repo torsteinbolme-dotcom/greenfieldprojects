@@ -11,7 +11,11 @@ export async function presentationBytes(pptx: PptxGenJS): Promise<Uint8Array> {
     let xml = await entry.async('string');
     xml = xml.replace(/<c:lineChart>([\s\S]*?)<\/c:lineChart>/g, (_, body: string) => {
       let ids = 0;
-      const clean = body.replace(/<c:invertIfNegative\b[^>]*\/>/g, '').replace(/<c:axId\b[^>]*\/>/g, tag => ++ids <= 2 ? tag : '');
+      const clean = body.replace(/<c:invertIfNegative\b[^>]*\/>/g, '').replace(/<c:ser>([\s\S]*?)<\/c:ser>/g, (_, series: string) => {
+        const marker = series.match(/<c:marker>[\s\S]*?<\/c:marker>/)?.[0] ?? '';
+        const rest = series.replace(marker, '');
+        return `<c:ser>${rest.replace(/(<c:cat>)/, `${marker}$1`)}</c:ser>`;
+      }).replace(/<c:axId\b[^>]*\/>/g, tag => ++ids <= 2 ? tag : '');
       return `<c:lineChart><c:grouping val="standard"/>${clean}</c:lineChart>`;
     });
     zip.file(name, xml);

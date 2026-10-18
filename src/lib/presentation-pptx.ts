@@ -51,7 +51,7 @@ export function buildPresentation(d: PresentationData, options: PresentationOpti
           chartColors: [C.blue, C.gold], showValue: false, catAxisLabelFontSize: 12,
           valAxisLabelFontSize: 14, valAxisLabelFormatCode: kind === 'passengers' ? '#,##0' : '0.0',
           valGridLine: { color: C.grey, size: .5 }, lineSize: 2,
-          showTitle: false, showBorder: false });
+          showTitle: false });
     } else {
       const chosen = rows.filter(x => x.year === 1 || x.year === 3 || x.year === a.exitYear || x.year === rows.length);
       table(s, chosen.map(x => [`Y${x.year} · ${x.calendarYear}`, int(x.passengers), money(x.revenue), money(x.ebitda)]), ['Operating year', 'Passengers', 'Revenue', 'EBITDA']);

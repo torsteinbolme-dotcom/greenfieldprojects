@@ -27,7 +27,7 @@ describe("independent financial validation", () => {
     expect(r.rows.map(x => x.revenue)).toEqual([180, 360]);
     expect(r.rows.map(x => x.opex)).toEqual([80, 80]);
     expect(r.rows.map(x => x.ebitda)).toEqual([100, 280]);
-    expect(r.rows[0]?.ebitda / (r.rows[0]?.revenue ?? 1)).toBeCloseTo(5 / 9, 10);
+    expect((r.rows[0]?.ebitda ?? 0) / (r.rows[0]?.revenue ?? 1)).toBeCloseTo(5 / 9, 10);
     expect(r.rows.map(x => x.interest)).toEqual([10, 5]);
     expect(r.rows.map(x => x.principal)).toEqual([50, 50]);
     expect(r.rows.map(x => x.closingDebt)).toEqual([50, 0]);
@@ -102,9 +102,26 @@ describe("independent financial validation", () => {
     expect(maintenanceReview(a)).not.toBeNull();
     expect(JSON.stringify(a)).toBe(before);
     expect(calculate(a).rows.map(x => x.maintenanceCapex)).toEqual([1, 1]);
-    const legacy = fixture({ maintenanceCapexPct: undefined, maintenanceCapexRate: 0.01 });
+    const legacy = fixture({ maintenanceCapexRate: 0.01 });
+    delete legacy.maintenanceCapexPct;
     expect(maintenanceReview(legacy)).not.toBeNull();
     expect(calculate(legacy).rows.map(x => x.maintenanceCapex)).toEqual([0, 0]);
     expect(maintenanceReview(fixture({ maintenanceCapexRate: 0 }))).toBeNull();
+  });
+  it("uses retained cash before requesting fresh equity", () => {
+    const r = calculate(fixture({ initialPassengers: 200, passengerGrowth: [-0.5] }));
+    expect(r.rows.map(x => x.ebitda)).toEqual([100, 10]);
+    expect(r.rows.map(x => x.cashAfterDebt)).toEqual([40, -45]);
+    expect(r.rows.map(x => x.equityInjection)).toEqual([0, 5]);
+    expect(r.rows.map(x => x.retainedCash)).toEqual([40, 0]);
+    expect(r.totalEquityInvested).toBe(105);
+  });
+  it("deducts depreciation and interest and offsets carried tax losses before tax", () => {
+    const r = calculate(fixture({ taxRate: 0.2 }));
+    // Y1 EBITDA 20 - depreciation 20 - interest 10 = loss 10.
+    // Y2 EBITDA 120 - depreciation 20 - interest 5 - loss 10 = taxable 85.
+    expect(r.rows.map(x => x.depreciation)).toEqual([20, 20]);
+    expect(r.rows.map(x => x.tax)).toEqual([0, 17]);
+    expect(r.rows.map(x => x.cashAfterDebt)).toEqual([-40, 48]);
   });
 });

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +17,8 @@ import { createScenario, logAudit, saveAssumptionVersion, useMembership, useProj
 import { safeCalculate } from "@/lib/model";
 import { withLinkedTicketPrices } from "@/lib/ticket-pricing";
 import { int, mult, nokM, pct } from "@/lib/format";
+import { useAutosave } from "@/hooks/use-autosave";
+import { SaveControls } from "@/components/editor/save-controls";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
   validateSearch: z.object({ scenario: z.string().optional(), tab: z.string().optional() }),
@@ -41,41 +43,31 @@ function EditorPage() {
     enabled: !!scenario,
     queryKey: ["versions", scenario?.id],
     queryFn: async () => {
+      if (!scenario) return [];
       const { data, error } = await supabase.from("scenario_assumptions")
-        .select("id, version, assumptions, note, created_at, calculation_version").eq("scenario_id", scenario!.id).order("version", { ascending: false });
+        .select("id, version, assumptions, note, created_at, calculation_version").eq("scenario_id", scenario.id).order("version", { ascending: false });
       if (error) throw error;
       return data;
     },
   });
   const latest = versions.data?.[0];
-  const [draft, setDraft] = useState<Assumptions | null>(null);
-  const [loadedKey, setLoadedKey] = useState<string | null>(null);
-  useEffect(() => {
-    if (latest && loadedKey !== `${scenario?.id}:${latest.version}`) {
-      setDraft(withLinkedTicketPrices(latest.assumptions as unknown as Assumptions));
-      setLoadedKey(`${scenario?.id}:${latest.version}`);
-    }
-  }, [latest, scenario?.id, loadedKey]);
-
-  const dirty = !!draft && !!latest && JSON.stringify(draft) !== JSON.stringify(latest.assumptions);
+  const { controller, state } = useAutosave<Assumptions>(scenario?.id ?? "", latest ? withLinkedTicketPrices(latest.assumptions as unknown as Assumptions) : null, async (value) => {
+    if (!m || !scenario || ro) throw new Error("Editing is unavailable");
+    await saveAssumptionVersion(m.organization_id, scenario.id, value, "Automatic save");
+    await supabase.from("projects").update({ updated_at: new Date().toISOString() }).eq("id", projectId);
+    void qc.invalidateQueries({ queryKey: ["versions", scenario.id] });
+    void qc.invalidateQueries({ queryKey: ["latest-assumptions"] });
+    void qc.invalidateQueries({ queryKey: ["projects"] });
+  });
+  const draft = state?.value ?? null;
   const { result: r, error } = useMemo(() => (draft ? safeCalculate(draft) : { result: null, error: null }), [draft]);
-  const set = (patch: Partial<Assumptions>) => setDraft((d) => (d ? withLinkedTicketPrices({ ...d, ...patch }) : d));
+  const set = (patch: Partial<Assumptions>) => {
+    if (draft && !ro) controller?.edit(withLinkedTicketPrices({ ...draft, ...patch }), Object.keys(patch).join(","));
+  };
   const [newScenOpen, setNewScenOpen] = useState(false);
-  const [saving, setSaving] = useState(false);
 
   if (!project || !m) return <p className="text-muted-foreground">Loading project…</p>;
   if (!scenario || !draft) return <p className="text-muted-foreground">Loading scenario…</p>;
-
-  async function save() {
-    if (!draft || !scenario || !m) return;
-    setSaving(true);
-    try {
-      const v = await saveAssumptionVersion(m.organization_id, scenario.id, draft);
-      await supabase.from("projects").update({ updated_at: new Date().toISOString() }).eq("id", projectId);
-      toast.success(`Saved version ${v} of ${scenario.name}`);
-      qc.invalidateQueries();
-    } catch (e) { toast.error(e instanceof Error ? e.message : "Save failed"); } finally { setSaving(false); }
-  }
 
   const y3 = r?.rows[2];
   return (
@@ -87,8 +79,9 @@ function EditorPage() {
           <p className="text-sm text-muted-foreground">{project.location ?? "No location"} · {project.status}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Select value={scenario.id} onValueChange={(v) => {
-            if (dirty && !confirm("Discard unsaved changes?")) return;
+          <Select value={scenario.id} onValueChange={async (v) => {
+            await controller?.flush();
+            if (controller?.getSnapshot().status === "error") return;
             navigate({ search: (s) => ({ ...s, scenario: v }) });
           }}>
             <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
@@ -103,8 +96,7 @@ function EditorPage() {
             navigate({ search: (s) => ({ ...s, scenario: undefined }) });
             qc.invalidateQueries();
           }}>Delete scenario</Button>}
-          {dirty && latest && <Button variant="ghost" onClick={() => setDraft(withLinkedTicketPrices(latest.assumptions as unknown as Assumptions))}>Discard</Button>}
-          {!ro && <Button onClick={save} disabled={!dirty || saving}>{saving ? "Saving…" : dirty ? "Save new version" : `Saved · v${latest?.version}`}</Button>}
+          {!ro && state && controller && <SaveControls state={state} undo={controller.undo} retry={() => { void controller.flush(); }} />}
         </div>
       </div>
       {scenario.kind !== "base" && <p className="text-xs text-muted-foreground">Editing scenario “{scenario.name}”. Base is never modified by changes here.</p>}
@@ -148,7 +140,7 @@ function EditorPage() {
                 {versions.data?.map((v) => (
                   <tr key={v.id}>
                     <td className="num">v{v.version}</td><td>{new Date(v.created_at).toLocaleString()}</td><td>{v.note ?? "—"}</td><td className="num">{v.calculation_version}</td>
-                    <td className="text-right">{!ro && v.version !== latest?.version && <Button size="sm" variant="ghost" onClick={() => { setDraft(withLinkedTicketPrices(v.assumptions as unknown as Assumptions)); toast.info(`Loaded v${v.version} — save to restore it as a new version`); }}>Load</Button>}</td>
+                    <td className="text-right">{!ro && v.version !== latest?.version && <Button size="sm" variant="ghost" onClick={() => { controller?.edit(withLinkedTicketPrices(v.assumptions as unknown as Assumptions), "restore"); }}>Restore</Button>}</td>
                   </tr>
                 ))}
               </tbody>
@@ -167,7 +159,9 @@ function EditorPage() {
             const kind = String(f.get("kind") ?? "custom");
             if (!name || !latest) return;
             try {
-              const s = await createScenario(m.organization_id, projectId, name, kind, latest.assumptions as unknown as Assumptions);
+              await controller?.flush();
+              if (controller?.getSnapshot().status === "error") return;
+              const s = await createScenario(m.organization_id, projectId, name, kind, draft);
               setNewScenOpen(false);
               await qc.invalidateQueries();
               navigate({ search: (x) => ({ ...x, scenario: s.id }) });
@@ -193,24 +187,22 @@ type Ctx = { ro: boolean; project: ProjectRow; m: Membership; projectId: string 
   function ProjectDetails({ ro, project, m }: Ctx) {
     const qc = useQueryClient();
     const p = project;
+    const { controller, state } = useAutosave(p.id, { location: p.location ?? "", description: p.description ?? "", assumption_notes: p.assumption_notes ?? "" }, async (value) => {
+      const { error } = await supabase.from("projects").update({ ...value, updated_at: new Date().toISOString() }).eq("id", p.id);
+      if (error) throw error;
+      await logAudit(m.organization_id, "project", p.id, "details_updated");
+      void qc.invalidateQueries({ queryKey: ["projects"] });
+    });
+    if (!controller || !state) return null;
+    const change = (key: "location" | "description" | "assumption_notes", value: string) => controller.edit({ ...state.value, [key]: value }, key);
     return (
       <Card title="Project details">
-        <form className="space-y-3" onSubmit={async (e) => {
-          e.preventDefault();
-          const f = new FormData(e.currentTarget);
-          const { error } = await supabase.from("projects").update({
-            location: String(f.get("location") ?? "") || null, description: String(f.get("description") ?? "") || null,
-            assumption_notes: String(f.get("notes") ?? "") || null, updated_at: new Date().toISOString(),
-          }).eq("id", p.id);
-          if (error) { toast.error(error.message); return; }
-          await logAudit(m.organization_id, "project", p.id, "details_updated");
-          toast.success("Details saved"); qc.invalidateQueries({ queryKey: ["projects"] });
-        }}>
-          <Field label="Location"><Input name="location" defaultValue={p.location ?? ""} disabled={ro} /></Field>
-          <Field label="Description"><Textarea name="description" defaultValue={p.description ?? ""} disabled={ro} /></Field>
-          <Field label="Assumption notes (flag inputs not from the source workbook)"><Textarea name="notes" rows={4} defaultValue={p.assumption_notes ?? ""} disabled={ro} /></Field>
-          {!ro && <Button type="submit" size="sm" variant="outline">Save details</Button>}
-        </form>
+        <div className="space-y-3">
+          <Field label="Location"><Input name="location" value={state.value.location} disabled={ro} onChange={(e) => change("location", e.target.value)} /></Field>
+          <Field label="Description"><Textarea name="description" value={state.value.description} disabled={ro} onChange={(e) => change("description", e.target.value)} /></Field>
+          <Field label="Assumption notes (flag inputs not from the source workbook)"><Textarea name="notes" rows={4} value={state.value.assumption_notes} disabled={ro} onChange={(e) => change("assumption_notes", e.target.value)} /></Field>
+          {!ro && <SaveControls state={state} undo={controller.undo} retry={() => { void controller.flush(); }} />}
+        </div>
       </Card>
     );
   }

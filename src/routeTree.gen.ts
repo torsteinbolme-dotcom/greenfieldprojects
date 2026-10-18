@@ -17,6 +17,7 @@ import { Route as AuthenticatedComparisonRouteImport } from './routes/_authentic
 import { Route as AuthenticatedPortfolioRouteImport } from './routes/_authenticated/portfolio'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedComparisonIndexRouteImport } from './routes/_authenticated/comparison.index'
+import { Route as AuthenticatedComparisonBenchmarksRouteImport } from './routes/_authenticated/comparison.benchmarks'
 import { Route as AuthenticatedComparisonProjectsRouteImport } from './routes/_authenticated/comparison.projects'
 import { Route as AuthenticatedProjectsIndexRouteImport } from './routes/_authenticated/projects.index'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated/projects.$projectId'
@@ -61,6 +62,12 @@ const AuthenticatedComparisonIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedComparisonRoute,
   } as any)
+const AuthenticatedComparisonBenchmarksRoute =
+  AuthenticatedComparisonBenchmarksRouteImport.update({
+    id: '/benchmarks',
+    path: '/benchmarks',
+    getParentRoute: () => AuthenticatedComparisonRoute,
+  } as any)
 const AuthenticatedComparisonProjectsRoute =
   AuthenticatedComparisonProjectsRouteImport.update({
     id: '/projects',
@@ -87,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/comparison': typeof AuthenticatedComparisonRouteWithChildren
   '/portfolio': typeof AuthenticatedPortfolioRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/comparison/benchmarks': typeof AuthenticatedComparisonBenchmarksRoute
   '/comparison/projects': typeof AuthenticatedComparisonProjectsRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/comparison/': typeof AuthenticatedComparisonIndexRoute
@@ -98,6 +106,7 @@ export interface FileRoutesByTo {
   '/benchmarks': typeof AuthenticatedBenchmarksRoute
   '/portfolio': typeof AuthenticatedPortfolioRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/comparison/benchmarks': typeof AuthenticatedComparisonBenchmarksRoute
   '/comparison/projects': typeof AuthenticatedComparisonProjectsRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/comparison': typeof AuthenticatedComparisonIndexRoute
@@ -112,6 +121,7 @@ export interface FileRoutesById {
   '/_authenticated/comparison': typeof AuthenticatedComparisonRouteWithChildren
   '/_authenticated/portfolio': typeof AuthenticatedPortfolioRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/comparison/benchmarks': typeof AuthenticatedComparisonBenchmarksRoute
   '/_authenticated/comparison/projects': typeof AuthenticatedComparisonProjectsRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/_authenticated/comparison/': typeof AuthenticatedComparisonIndexRoute
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/comparison'
     | '/portfolio'
     | '/settings'
+    | '/comparison/benchmarks'
     | '/comparison/projects'
     | '/projects/$projectId'
     | '/comparison/'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '/benchmarks'
     | '/portfolio'
     | '/settings'
+    | '/comparison/benchmarks'
     | '/comparison/projects'
     | '/projects/$projectId'
     | '/comparison'
@@ -150,6 +162,7 @@ export interface FileRouteTypes {
     | '/_authenticated/comparison'
     | '/_authenticated/portfolio'
     | '/_authenticated/settings'
+    | '/_authenticated/comparison/benchmarks'
     | '/_authenticated/comparison/projects'
     | '/_authenticated/projects/$projectId'
     | '/_authenticated/comparison/'
@@ -220,6 +233,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedComparisonIndexRouteImport
       parentRoute: typeof AuthenticatedComparisonRoute
     }
+    '/_authenticated/comparison/benchmarks': {
+      id: '/_authenticated/comparison/benchmarks'
+      path: '/benchmarks'
+      fullPath: '/comparison/benchmarks'
+      preLoaderRoute: typeof AuthenticatedComparisonBenchmarksRouteImport
+      parentRoute: typeof AuthenticatedComparisonRoute
+    }
     '/_authenticated/comparison/projects': {
       id: '/_authenticated/comparison/projects'
       path: '/projects'
@@ -245,12 +265,15 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedComparisonRouteChildren {
+  AuthenticatedComparisonBenchmarksRoute: typeof AuthenticatedComparisonBenchmarksRoute
   AuthenticatedComparisonProjectsRoute: typeof AuthenticatedComparisonProjectsRoute
   AuthenticatedComparisonIndexRoute: typeof AuthenticatedComparisonIndexRoute
 }
 
 const AuthenticatedComparisonRouteChildren: AuthenticatedComparisonRouteChildren =
   {
+    AuthenticatedComparisonBenchmarksRoute:
+      AuthenticatedComparisonBenchmarksRoute,
     AuthenticatedComparisonProjectsRoute: AuthenticatedComparisonProjectsRoute,
     AuthenticatedComparisonIndexRoute: AuthenticatedComparisonIndexRoute,
   }

@@ -17,7 +17,7 @@ export function InvestmentSummary({ a, r, name, location }: { a: Assumptions; r:
   const split = y3 ? bridgeValues(a, y3) : null;
   const development = r.rows.map(row => ({ year: row.year, Revenue: row.revenue, EBITDA: row.ebitda, Passengers: row.passengers }));
   const cashflows = r.cashflows.map((flow, year) => ({ year, 'Equity cash flow': flow }));
-  return <div className="space-y-6" aria-label="Investment Summary">
+  return <section className="space-y-6" aria-label="Investment Summary">
     <section className="space-y-3"><div><h2 className="text-xl font-semibold">Investment Summary</h2><p className="text-sm text-muted-foreground">{name} · {location ?? 'Location not specified'} · Opening {a.openingYear}</p></div>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4"><Kpi label="Total CAPEX" value={nokM(r.capex)} sub="NOK m incl. contingency" /><Kpi label="Initial equity" value={nokM(r.equity)} sub={`NOK m · ${pct(1 - a.debtShare)}`} /><Kpi label="Debt financing" value={nokM(r.debt)} sub={`NOK m · ${pct(a.debtShare)}`} /><Kpi label="Total modelled equity" value={nokM(r.equity)} sub="NOK m · initial funding only" /></div>
     </section>
@@ -30,5 +30,5 @@ export function InvestmentSummary({ a, r, name, location }: { a: Assumptions; r:
     <BreakEvenPanel a={a} />
     <div className="grid gap-6 lg:grid-cols-2"><DevelopmentChart title="Revenue and EBITDA development" data={development} lines={['Revenue', 'EBITDA']} /><DevelopmentChart title="Annual passengers" data={development} lines={['Passengers']} passengers /><DevelopmentChart title="Equity cash flow" data={cashflows} lines={['Equity cash flow']} bar /></div>
     <EbitdaBridge a={a} r={r} />
-  </div>;
+  </section>;
 }

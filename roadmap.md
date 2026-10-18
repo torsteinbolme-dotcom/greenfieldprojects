@@ -1,6 +1,6 @@
 # Tasks
-- [ ] Add current-scenario presentation export with three deck lengths, optional charts/benchmarks/notes and cover image.
-- [ ] Verify exported finances, downloads, slide rendering, missing benchmarks, F&B and scenario isolation.
+- [x] Add current-scenario presentation export with three deck lengths, optional charts/benchmarks/notes and cover image.
+- [x] Verify exported finances, downloads, slide rendering, missing benchmarks, F&B and scenario isolation: 152 tests pass; real project downloads render and pass Office schema validation. Fixed chart XML ordering, small cover photos and CAPEX/footer spacing. Native Apple Keynote/Microsoft PowerPoint testing unavailable here; fonts or chart appearance may vary.
 - [x] Default MICE at an editable 60% adult fare in both new-project templates; preserve saved scenarios.
 - [x] Final refinements: explicit monthly distribution Save/Cancel and missing-capacity warnings; signed-in Save/reload/restore verified.
 - [x] Final refinements: audit canonical maintenance assumptions; flag ambiguous legacy values without overwriting history; no migration needed or safe.

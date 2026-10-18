@@ -96,12 +96,16 @@ function ProjectVsProject() {
   const sortMetric = METRICS.find((m) => m.key === sort.key);
   const sorted = sort.key === "name" ? sortByMetric(rows, (r) => r.project.name, sort.dir) : sortByMetric(rows, (r) => sortMetric?.get(r) ?? -Infinity, sort.dir);
   const colorFor = (id: string) => COLORS[Math.max(0, projects.findIndex((p) => p.id === id)) % COLORS.length];
+  // Equity IRR and MOIC are evaluated at each scenario's exit year; show Y{n} when the selection shares one exit year.
+  const exitYears = new Set(rows.map((r) => r.a.exitYear));
+  const metricLabel = (m: Metric) =>
+    (m.key === "irr" || m.key === "moic") && rows.length > 0 && exitYears.size === 1 ? `${m.label} Y${[...exitYears][0]}` : m.label;
   const visible = METRICS.filter((m) => !hidden.has(m.group));
   const onSort = (key: string) => setSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: key === "name" ? "asc" : "desc" }));
   const label = (r: Row) => `${r.project.name}${r.scenario.kind === "base" ? "" : ` (${r.scenario.name})`}`;
 
   function exportCsv() {
-    const head = ["Rank", "Project", "Scenario", ...visible.map((m) => m.label)];
+    const head = ["Rank", "Project", "Scenario", ...visible.map((m) => metricLabel(m))];
     const lines = sorted.map((r, i) => [i + 1, r.project.name, r.scenario.kind === "base" ? "Base Case" : r.scenario.name, ...visible.map((m) => { const v = m.get(r); return v == null || !Number.isFinite(v) ? "N/A" : String(Math.round(v * 10000) / 10000); })]);
     const csv = [head, ...lines].map((l) => l.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(";")).join("\n");
     const a = document.createElement("a");
@@ -137,7 +141,7 @@ function ProjectVsProject() {
             <div><Label className="text-xs">Rank by</Label>
               <Select value={sort.key} onValueChange={(v) => setSort({ key: v, dir: "desc" })}>
                 <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
-                <SelectContent>{METRICS.map((m) => <SelectItem key={m.key} value={m.key}>{m.label}</SelectItem>)}</SelectContent>
+                <SelectContent>{METRICS.map((m) => <SelectItem key={m.key} value={m.key}>{metricLabel(m)}</SelectItem>)}</SelectContent>
               </Select></div>
             <Button variant="outline" className="ml-auto" onClick={exportCsv}><Download className="mr-1 h-4 w-4" />Export CSV</Button>
           </div>
@@ -148,7 +152,7 @@ function ProjectVsProject() {
                 <tr>
                   <th>#</th>
                   <SortTh k="name" label="Project" sort={sort} onSort={onSort} />
-                  {visible.map((m) => <SortTh key={m.key} k={m.key} label={m.label} sort={sort} onSort={onSort} right />)}
+                  {visible.map((m) => <SortTh key={m.key} k={m.key} label={metricLabel(m)} sort={sort} onSort={onSort} right />)}
                 </tr>
               </thead>
               <tbody>{sorted.map((r, i) => (
@@ -165,13 +169,13 @@ function ProjectVsProject() {
 
         <div className="grid gap-4 md:grid-cols-2">
           {CHARTS.map((k) => { const m = METRICS.find((x) => x.key === k)!; return (
-            <Card key={k} title={m.key === "capex" ? m.label : m.group === "operations" ? `Year 3 ${/^[A-Z][a-z]/.test(m.label) ? m.label.charAt(0).toLowerCase() + m.label.slice(1) : m.label}` : m.label}>
+            <Card key={k} title={m.key === "capex" ? metricLabel(m) : m.group === "operations" ? `Year 3 ${/^[A-Z][a-z]/.test(m.label) ? m.label.charAt(0).toLowerCase() + m.label.slice(1) : m.label}` : metricLabel(m)}>
               <div className="h-56"><ResponsiveContainer>
                 <BarChart margin={{ top: 18, right: 12, left: 4, bottom: 0 }} data={sorted.map((r) => { const v = m.get(r); return { name: label(r), id: r.project.id, v: v == null ? null : m.fmt === "nokM" ? v / 1e6 : m.fmt === "pct" ? v * 100 : v }; })}>
                   <CartesianGrid stroke="var(--border)" vertical={false} />
                   <XAxis dataKey="name" fontSize={11} /><YAxis fontSize={11} width={72} tickFormatter={(v) => formatNumber(Number(v), 0, 1)} unit={m.fmt === "pct" ? "%" : m.fmt === "mult" ? "x" : ""} />
                   <Tooltip formatter={(v) => (m.fmt === "pct" ? `${formatNumber(Number(v), 1, 1)}%` : m.fmt === "nokM" ? `${formatNumber(Number(v), 1, 1)} NOK m` : fmt(m.fmt, Number(v)))} />
-                  <Bar dataKey="v" name={m.label}>{sorted.map((r) => <Cell key={r.project.id} fill={colorFor(r.project.id)} />)}<LabelList dataKey="v" position="top" fontSize={11} fill="var(--foreground)" formatter={(v: unknown) => v == null || !Number.isFinite(Number(v)) ? "" : m.fmt === "pct" ? `${formatNumber(Number(v), 1, 1)}%` : m.fmt === "mult" ? `${formatNumber(Number(v), 2, 2)}x` : m.fmt === "nokM" ? formatNumber(Number(v), 1, 1) : formatNumber(Number(v), 0, 0)} /></Bar>
+                  <Bar dataKey="v" name={metricLabel(m)}>{sorted.map((r) => <Cell key={r.project.id} fill={colorFor(r.project.id)} />)}<LabelList dataKey="v" position="top" fontSize={11} fill="var(--foreground)" formatter={(v: unknown) => v == null || !Number.isFinite(Number(v)) ? "" : m.fmt === "pct" ? `${formatNumber(Number(v), 1, 1)}%` : m.fmt === "mult" ? `${formatNumber(Number(v), 2, 2)}x` : m.fmt === "nokM" ? formatNumber(Number(v), 1, 1) : formatNumber(Number(v), 0, 0)} /></Bar>
                 </BarChart>
               </ResponsiveContainer></div>
             </Card>

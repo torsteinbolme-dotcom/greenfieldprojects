@@ -123,7 +123,7 @@ function ComparisonPage() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="overflow-x-auto"><table className="fin-table mt-4">
+            <div className="overflow-x-auto"><table className="fin-table fin-table-tight mt-4">
               <thead><tr>
                 <SortHeader k="name" sort={sort} onSort={onSort} />
                 <SortHeader k="equity" sort={sort} onSort={onSort} right />

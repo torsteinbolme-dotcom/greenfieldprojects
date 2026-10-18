@@ -1,3 +1,4 @@
+import { fbOpexAt } from "@/lib/fb-opex";
 import { calculate, type Assumptions } from "@/financialEngine";
 import type { BenchmarkAsset, BenchmarkRecord } from "./benchmarks";
 import { weightedBenchmark, type Metrics } from "./project-benchmarks";
@@ -99,7 +100,7 @@ function statement(a: Assumptions, year: number): Statement | null {
   const row = r.rows[year - 1];
   if (!row) return null;
   const inflate = Math.pow(1 + a.costInflation, year - 1);
-  const restOpex = (a.fbRevenueYear1 > 0 ? (a.fbOpexYear1 * row.fbRevenue) / a.fbRevenueYear1 : 0) * inflate;
+  const restOpex = fbOpexAt(a, row);
   return {
     cableRevenue: row.ticketRevenue + row.merchRevenue, cableOpex: row.opex - restOpex, restRevenue: row.fbRevenue, restOpex,
     revenue: row.revenue, opex: row.opex, ebitda: row.ebitda, margin: row.revenue ? row.ebitda / row.revenue : null,
@@ -171,7 +172,9 @@ export function buildBasis(input: Assumptions, s: BasisSettings, assets: Benchma
   }
 
   // 3. Restaurant revenue and costs (F&B only, divided by the cable car's passengers).
-  const g = growthProduct(a.ancillaryGrowth, t);
+  const paxIdx = a.initialPassengers > 0 ? P / a.initialPassengers : 0;
+  const g = a.fbFollowsPassengers ? paxIdx * (base.weightedTicket > 0 ? row.ticketNetPrice / base.weightedTicket : 1) : growthProduct(a.ancillaryGrowth, t);
+  const gOpex = a.fbFollowsPassengers ? paxIdx : g;
   let restRevenue = before.restRevenue;
   const margin0 = before.restRevenue > 0 ? 1 - before.restOpex / before.restRevenue : null;
   if (s.restRevenue.on) {
@@ -195,7 +198,7 @@ export function buildBasis(input: Assumptions, s: BasisSettings, assets: Benchma
     }
     if (restOpex < 0) errors.push("The derived restaurant OPEX is negative — reduce the adjustment or choose other sources.");
   }
-  if (s.restRevenue.on || rm !== "none") patch.fbOpexYear1 = Math.max(0, Math.round(restOpex / (g * costInfl)));
+  if (s.restRevenue.on || rm !== "none") patch.fbOpexYear1 = Math.max(0, Math.round(restOpex / (gOpex * costInfl)));
 
   if (!s.cableRevenue.on && cm === "none" && !s.restRevenue.on && rm === "none") errors.push("Choose at least one benchmark metric to apply.");
   if (s.mode === "simple") notes.push("Simple mode: a linear benchmark estimate — per-passenger figures scaled to project passengers.");

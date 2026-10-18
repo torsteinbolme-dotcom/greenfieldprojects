@@ -1,4 +1,6 @@
 # Tasks
+- [ ] Separate manual F&B OPEX development from revenue growth: use the year-1 OPEX amount and explicit F&B OPEX growth; preserve benchmark and legacy behaviour; verify forecasts and returns.
+- [ ] Rename Ancillary growth to Ancillary revenue growth.
 - [x] Add current-scenario presentation export with three deck lengths, optional charts/benchmarks/notes and cover image.
 - [x] Verify exported finances, downloads, slide rendering, missing benchmarks, F&B and scenario isolation: 152 tests pass; real project downloads render and pass Office schema validation. Fixed chart XML ordering, small cover photos and CAPEX/footer spacing. Native Apple Keynote/Microsoft PowerPoint testing unavailable here; fonts or chart appearance may vary.
 - [x] Default MICE at an editable 60% adult fare in both new-project templates; preserve saved scenarios.

@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { z } from "zod";
-import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/editor/sections";
@@ -117,7 +117,7 @@ function ComparisonPage() {
                 <BarChart data={rows.map((e) => ({ name: e.project.name, IRR: (e.result.equityIrr ?? 0) * 100 }))}>
                   <CartesianGrid stroke="var(--border)" vertical={false} />
                   <XAxis dataKey="name" fontSize={11} /><YAxis unit="%" fontSize={11} tickFormatter={(v) => formatNumber(Number(v))} /><Tooltip formatter={(v) => `${formatNumber(Number(v))}%`} />
-                  {rows.map((e) => <Bar key={e.project.id} dataKey="IRR" fill={colorFor(e.project.id)} />)}
+                  <Bar dataKey="IRR">{rows.map((e) => <Cell key={e.project.id} fill={colorFor(e.project.id)} />)}</Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>

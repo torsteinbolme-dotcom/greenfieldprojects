@@ -1,3 +1,4 @@
+import { fbEscalator } from "@/lib/fb-benchmark";
 import { fbOpexAt } from "@/lib/fb-opex";
 import { calculate, type Assumptions } from "@/financialEngine";
 import type { BenchmarkAsset, BenchmarkRecord } from "./benchmarks";
@@ -173,8 +174,8 @@ export function buildBasis(input: Assumptions, s: BasisSettings, assets: Benchma
 
   // 3. Restaurant revenue and costs (F&B only, divided by the cable car's passengers).
   const paxIdx = a.initialPassengers > 0 ? P / a.initialPassengers : 0;
-  const g = a.fbFollowsPassengers ? paxIdx * (base.weightedTicket > 0 ? row.ticketNetPrice / base.weightedTicket : 1) : growthProduct(a.ancillaryGrowth, t);
-  const gOpex = a.fbFollowsPassengers ? paxIdx : g;
+  const g = fbEscalator(a, "revenue", t);
+  const gOpex = fbEscalator(a, "opex", t) / costInfl;
   let restRevenue = before.restRevenue;
   const margin0 = before.restRevenue > 0 ? 1 - before.restOpex / before.restRevenue : null;
   if (s.restRevenue.on) {

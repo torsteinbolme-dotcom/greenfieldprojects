@@ -16,7 +16,7 @@ export type Assumptions = {
   exitYear:number;exitMultiple:number;exitTransactionCostRate:number;
   distributeCashAnnually:boolean;
   fbFollowsPassengers?:boolean;
-  fbBenchmark?:{adjust:boolean;revenue?:{adjust?:boolean}|null;opex?:{adjust?:boolean}|null};
+  fbBenchmark?:{adjust:boolean;revenue?:{assetId:string;year:number;adjust?:boolean}|null;opex?:{assetId:string;year:number;adjust?:boolean}|null};
 };
 export type YearResult={year:number;calendarYear:number;passengers:number;ticketNetPrice:number;ticketRevenue:number;fbRevenue:number;merchRevenue:number;revenue:number;opex:number;ebitda:number;depreciation:number;ebit:number;openingDebt:number;interest:number;principal:number;closingDebt:number;tax:number;cashAfterDebt:number;distribution:number;retainedCash:number;dscr:number|null};
 const growth=(values:number[],year:number)=>values[Math.min(year-2,values.length-1)]??0;

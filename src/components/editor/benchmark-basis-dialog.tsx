@@ -20,8 +20,8 @@ type Props = {
   scenarios: { id: string; name: string }[];
   scenarioId: string;
   onScenario: (id: string) => void;
-  initialCable?: Weights;
-  initialFnb?: Weights;
+  initialCable?: Weights | undefined;
+  initialFnb?: Weights | undefined;
   onApply: (patch: Partial<Assumptions>) => void;
   onClose: () => void;
 };
@@ -43,7 +43,7 @@ export function BenchmarkBasisDialog({ a, assets, records, years, scenarios, sce
       {assets.filter((x) => x.business_type === type).map((x) => (
         <label key={x.id} className="flex items-center gap-1.5 text-sm">
           <Checkbox checked={x.id in value} onCheckedChange={(c) => { const ids = Object.keys(value).filter((i) => i !== x.id); if (c) ids.push(x.id); onChange(equalWeights(ids)); }} />
-          {x.name}{x.id in value && Object.keys(value).length > 1 ? ` (${formatNumber(value[x.id] * 100, 0, 1)}%)` : ""}
+          {x.name}{x.id in value && Object.keys(value).length > 1 ? ` (${formatNumber((value[x.id] ?? 0) * 100, 0, 1)}%)` : ""}
         </label>
       ))}
     </div>

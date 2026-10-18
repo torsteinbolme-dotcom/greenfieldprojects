@@ -50,7 +50,7 @@ describe("scenario updates and reconciliation", () => {
     expect(b.after.revenue - b.after.opex).toBeCloseTo(b.after.ebitda, 6);
     // Recalculates all years through the engine, not a Year-3 override.
     const r = calculate(b.next);
-    expect(r.rows[4].opex).not.toBe(calculate(a).rows[4].opex);
+    expect(r.rows[4]?.opex).not.toBe(calculate(a).rows[4]?.opex);
   });
   it("does not touch passengers, CAPEX, financing or ticket prices unless revenue is selected", () => {
     const s = { ...noInfl(), cableCost: { metric: "opexPerPax" as const, sources: { fj: 1 } } };

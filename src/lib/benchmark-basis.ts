@@ -129,7 +129,7 @@ export function buildBasis(input: Assumptions, s: BasisSettings, assets: Benchma
   let cableRevenue = before.cableRevenue;
   if (s.cableRevenue.on) {
     const v = bm(s.cableRevenue.sources, "cable").cableRevenuePerPax;
-    metrics.cableRevenuePerPax = v;
+    metrics["cableRevenuePerPax"] = v;
     if (v == null) errors.push("No revenue per passenger data for the selected cable car sources.");
     else {
       cableRevenue = linearEstimate(v, P, infl, m);
@@ -149,19 +149,19 @@ export function buildBasis(input: Assumptions, s: BasisSettings, assets: Benchma
   if (cm !== "none") {
     const b = bm(s.cableCost.sources, "cable");
     if (cm === "opexPerPax") {
-      metrics.cableOpexPerPax = b.cableOpexPerPax;
+      metrics["cableOpexPerPax"] = b.cableOpexPerPax;
       if (s.mode === "advanced") {
         const tot = weightedTotals(s.cableCost.sources, records, s.benchmarkYear);
         if (!tot) errors.push("No OPEX and passenger data for the selected cable car sources.");
-        else { const adv = advancedOpex(tot.opex, tot.passengers, P, s.fixedShare, s.fixedCostChange, infl, m); cableOpex = adv.total; metrics.fixedOpex = adv.fixed; metrics.variableOpex = adv.variable; }
+        else { const adv = advancedOpex(tot.opex, tot.passengers, P, s.fixedShare, s.fixedCostChange, infl, m); cableOpex = adv.total; metrics["fixedOpex"] = adv.fixed; metrics["variableOpex"] = adv.variable; }
       } else if (b.cableOpexPerPax == null) errors.push("No OPEX per passenger data for the selected cable car sources.");
       else cableOpex = linearEstimate(b.cableOpexPerPax, P, infl, m);
     } else if (cm === "ebitdaPerPax") {
-      metrics.cableEbitdaPerPax = b.cableEbitdaPerPax;
+      metrics["cableEbitdaPerPax"] = b.cableEbitdaPerPax;
       if (b.cableEbitdaPerPax == null) errors.push("No EBITDA per passenger data for the selected cable car sources.");
       else cableOpex = cableRevenue - linearEstimate(b.cableEbitdaPerPax, P, infl, m);
     } else {
-      metrics.cableMargin = b.cableMargin;
+      metrics["cableMargin"] = b.cableMargin;
       if (b.cableMargin == null) errors.push("No EBITDA margin data for the selected cable car sources.");
       else cableOpex = cableRevenue * (1 - b.cableMargin * (1 + m));
     }
@@ -176,7 +176,7 @@ export function buildBasis(input: Assumptions, s: BasisSettings, assets: Benchma
   const margin0 = before.restRevenue > 0 ? 1 - before.restOpex / before.restRevenue : null;
   if (s.restRevenue.on) {
     const v = bm(s.restRevenue.sources, "fnb").restRevenuePerPax;
-    metrics.restRevenuePerPax = v;
+    metrics["restRevenuePerPax"] = v;
     if (v == null) errors.push("No restaurant revenue data for the selected restaurant sources.");
     else { restRevenue = linearEstimate(v, P, infl, m); patch.fbRevenueYear1 = Math.round(restRevenue / g); }
   }
@@ -185,11 +185,11 @@ export function buildBasis(input: Assumptions, s: BasisSettings, assets: Benchma
   if (rm !== "none") {
     const b = bm(s.restCost.sources, "fnb");
     if (rm === "ebitdaPerPax") {
-      metrics.restEbitdaPerPax = b.restEbitdaPerPax;
+      metrics["restEbitdaPerPax"] = b.restEbitdaPerPax;
       if (b.restEbitdaPerPax == null) errors.push("No restaurant EBITDA data for the selected restaurant sources.");
       else restOpex = restRevenue - linearEstimate(b.restEbitdaPerPax, P, infl, m);
     } else {
-      metrics.restMargin = b.restMargin;
+      metrics["restMargin"] = b.restMargin;
       if (b.restMargin == null) errors.push("No restaurant margin data for the selected restaurant sources.");
       else restOpex = restRevenue * (1 - b.restMargin * (1 + m));
     }

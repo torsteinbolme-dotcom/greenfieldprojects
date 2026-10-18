@@ -15,9 +15,8 @@ export const performanceYearOf = (a: Pick<Assumptions, "performanceYear">, r: Mo
 
 /** Splits one forecast year into cable car, restaurant (F&B) and other (merchandise) parts; parts sum to the engine totals. */
 export function splitYear(a: Assumptions, row: YearResult) {
-  const inflate = Math.pow(1 + a.costInflation, row.year - 1);
   const fbOpex = fbOpexAt(a, row);
-  const otherOpex = (a.merchRevenueYear1 > 0 ? (a.merchOpexYear1 * row.merchRevenue) / a.merchRevenueYear1 : 0) * inflate;
+  const otherOpex = merchOpexAt(a, row.year, row.merchRevenue);
   const cableOpex = row.opex - fbOpex - otherOpex;
   const d = (x: number, y: number) => (y ? x / y : null);
   const cableEbitda = row.ticketRevenue - cableOpex;

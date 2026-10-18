@@ -42,7 +42,7 @@ export function fbEscalator(a: Assumptions, kind: "revenue" | "opex", year = FB_
   const revenue = revenueLinked ? pax * price : ancillary;
   if (kind === "revenue") return revenue;
   const opex = sel?.opex ? (sourceAdjust(sel, sel.opex) ? pax : 1) : a.fbFollowsPassengers ? pax : revenue;
-  return opex * Math.pow(1 + a.costInflation, year - 1);
+  return opex * costIndex(a, "fb", year);
 }
 
 export type FbLine = {

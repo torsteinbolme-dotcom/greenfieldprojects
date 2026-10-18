@@ -82,7 +82,9 @@ describe("F&B following passengers each year", () => {
     expect(r.rows[2]?.fbRevenue).toBeCloseTo(a.fbRevenueYear1 * 1.1 ** 2 * 1.02 ** 2, 2);
   });
   it("OPEX follows passengers and cost inflation once", () => {
-    const fbOpex = r.rows[2].opex - a.cableFixedOpex * 1.03 ** 2 - (a.merchOpexYear1 * r.rows[2].merchRevenue / a.merchRevenueYear1) * 1.03 ** 2;
+    const row = r.rows[2];
+    if (!row) throw new Error("Missing year 3");
+    const fbOpex = row.opex - a.cableFixedOpex * 1.03 ** 2 - (a.merchOpexYear1 * row.merchRevenue / a.merchRevenueYear1) * 1.03 ** 2;
     expect(fbOpex).toBeCloseTo(a.fbOpexYear1 * 1.1 ** 2 * 1.03 ** 2, 2);
   });
   it("existing projects without the setting are unchanged", () => {

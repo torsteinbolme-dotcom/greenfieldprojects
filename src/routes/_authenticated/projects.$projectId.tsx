@@ -23,6 +23,8 @@ import { useAutosave } from "@/hooks/use-autosave";
 import { useBenchmarks } from "@/lib/benchmarks";
 import { withFbBenchmark, type AssumptionsWithFb } from "@/lib/fb-benchmark";
 import { EbitdaBridge } from "@/components/editor/ebitda-bridge";
+import { InvestmentSummary } from "@/components/editor/investment-summary";
+import { BreakEvenPanel } from "@/components/editor/break-even";
 import { SaveControls } from "@/components/editor/save-controls";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
@@ -123,12 +125,13 @@ function EditorPage() {
       {scenario.kind !== "base" && <p className="text-xs text-muted-foreground">Editing scenario “{scenario.name}”. Base is never modified by changes here.</p>}
       {error && <div className="rounded-md bg-warning p-3 text-sm text-warning-foreground">Cannot calculate: {error}</div>}
 
-      <Tabs value={search.tab ?? "overview"} onValueChange={(t) => navigate({ search: (s) => ({ ...s, tab: t }), replace: true })}>
+      <Tabs value={search.tab ?? "summary"} onValueChange={(t) => navigate({ search: (s) => ({ ...s, tab: t }), replace: true })}>
         <TabsList className="h-auto flex-wrap">
-          {([["overview", "Overview"], ["segments", "Passenger segments"], ["capex", "CAPEX"], ["revenue", "Revenue & OPEX"], ["financing", "Financing"], ["forecast", "Forecast"], ["exit", "Exit analysis"], ["benchmarking", "Benchmarking"], ["history", "Version history"]] as const).map(([k, l]) => (
+          {([["summary", "Investment Summary"], ["overview", "Overview"], ["segments", "Passenger segments"], ["capex", "CAPEX"], ["revenue", "Revenue & OPEX"], ["financing", "Financing"], ["forecast", "Forecast"], ["exit", "Exit analysis"], ["benchmarking", "Benchmarking"], ["history", "Version history"]] as const).map(([k, l]) => (
             <TabsTrigger key={k} value={k}>{l}</TabsTrigger>
           ))}
         </TabsList>
+        <TabsContent value="summary">{r ? <InvestmentSummary key={scenario.id} a={draft} r={r} name={project.name} location={project.location} /> : <p className="text-muted-foreground">Fix the inputs to see the investment summary.</p>}</TabsContent>
         <TabsContent value="overview" className="space-y-4">
           {r && (
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-7">
@@ -142,6 +145,7 @@ function EditorPage() {
             </div>
           )}
           {r && <EbitdaBridge key={scenario.id} a={draft} r={r} />}
+          {r && <BreakEvenPanel key={`break-even:${scenario.id}`} a={draft} />}
           <div className="grid gap-4 lg:grid-cols-2">
             <ProjectDetails ro={ro} project={project} m={m} projectId={projectId} />
             <FilesCard ro={ro} project={project} m={m} projectId={projectId} />

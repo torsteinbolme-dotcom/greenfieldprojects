@@ -37,7 +37,7 @@ describe("F&B from restaurant benchmarks (year-1 basis)", () => {
   it("always scales a selected restaurant's OPEX per passenger to project year-1 passengers", () => {
     const n = withFbBenchmark({ ...base, fbBenchmark: { adjust: false, opex: { assetId: "eggen", year: 2025 } } } as AssumptionsWithFb, assets, records);
     const row = calculate(n).rows[0];
-    if (!row) throw new Error("Missing year 3");
+    if (!row) throw new Error("Missing forecast year");
     expect(fbOpexAt(n, row)).toBeCloseTo(17583879 / 116505 * 250000, -1);
   });
   it("follows project passengers when they change", () => {
@@ -77,9 +77,9 @@ describe("F&B benchmark lands on the year-1 amount in the engine", () => {
 describe("F&B following passengers each year", () => {
   const a = { ...(projectMountain as Assumptions), fbFollowsPassengers: true, passengerGrowth: [0.1], priceGrowth: [0.02], costInflation: 0.03, ancillaryGrowth: [0.5] };
   const r = calculate(a);
-  if (!r.rows[2]) throw new Error("Missing year 3");
+  if (!r.rows[2]) throw new Error("Missing forecast year");
   it("revenue follows passengers and ticket price growth, not ancillary growth", () => {
-    expect(r.rows[0]!.fbRevenue).toBeCloseTo(a.fbRevenueYear1 * 1.1 ** 2 * 1.02 ** 2, 2);
+    expect(r.rows[2]?.fbRevenue).toBeCloseTo(a.fbRevenueYear1 * 1.1 ** 2 * 1.02 ** 2, 2);
   });
   it("OPEX follows passengers and cost inflation once", () => {
     const fbOpex = r.rows[2].opex - a.cableFixedOpex * 1.03 ** 2 - (a.merchOpexYear1 * r.rows[2].merchRevenue / a.merchRevenueYear1) * 1.03 ** 2;
@@ -87,7 +87,7 @@ describe("F&B following passengers each year", () => {
   });
   it("existing projects without the setting are unchanged", () => {
     const off = calculate({ ...a, fbFollowsPassengers: false });
-    if (!off.rows[2]) throw new Error("Missing year 3");
+    if (!off.rows[2]) throw new Error("Missing forecast year");
     expect(off.rows[2].fbRevenue).toBeCloseTo(a.fbRevenueYear1 * 1.5 ** 2, 2);
   });
 });

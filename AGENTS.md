@@ -27,7 +27,7 @@
 - F&B selections and frozen per-line source snapshots live in scenario assumptions; replace snapshots only via confirmed refresh; per-line passenger flags use legacy fallbacks; totals stay in the engine. Why: benchmark edits cannot silently change forecasts.
 - The overview EBITDA bridge derives from engine rows and forecastOpex in `src/lib/ebitda-bridge.ts`, never from a second calculation engine. Why: every business split reconciles with authoritative totals and unavailable categories stay unallocated.
 - Break-even is a read-only engine sensitivity in `src/lib/break-even.ts` (scale the passenger forecast, rederive passenger-linked F&B, solve EBITDA/cashAfterDebt). Why: costs and tax-loss history stay consistent with the engine.
-- Investment Summary reads engine outputs directly (incl. additional/total equity). Why: no second calculation path.
+- Investment Summary and lazy browser PPTX exports read active engine outputs; export data/layout stay in `presentation-*` modules. Why: no second calculation path or stored output.
 - Per-cost OPEX growth lists (`opexGrowth.cable/fb`) and `merchOpexRate` (merch OPEX = % of merch revenue) are optional scenario fields read via `costIndex`/`merchOpexAt`; absent fields fall back to `costInflation` and the legacy ratio (user-approved 2026-10-18). Why: old versions keep identical results.
 - Project photos: private `project-covers` bucket, path `<org>/<project>.<ext>`; `projects.cover_image_url` stores that path and the UI signs URLs (`src/lib/covers*.ts`). Why: public buckets are blocked.
 - Capacity stays outside the engine in scenario JSON; distributions are local drafts until valid explicit Save; key the editor by scenario. Why: protect forecasts and isolate drafts.

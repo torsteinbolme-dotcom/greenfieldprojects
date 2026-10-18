@@ -27,7 +27,7 @@ export function buildPresentation(d: PresentationData, options: PresentationOpti
   }
   function table(s: PptxGenJS.Slide, rows: string[][], headers: string[], y = 1.9) {
     s.addTable([headers, ...rows].map(row => row.map(text => ({ text }))), { x: .6, y, w: 12.1, colW: headers.map(() => 12.1 / headers.length),
-      fontFace: 'Outfit', fontSize: 18, color: C.ink, fill: C.white, border: { type: 'solid', color: C.grey, pt: .5 },
+      fontFace: 'Outfit', fontSize: 18, color: C.ink, fill: { color: C.white }, border: { type: 'solid', color: C.grey, pt: .5 },
       margin: .12, rowH: .43, bold: false, autoPage: false,
       });
   }
@@ -48,7 +48,7 @@ export function buildPresentation(d: PresentationData, options: PresentationOpti
       s.addChart(pptx.ChartType.line, kind === 'passengers' ? [{ name: 'Passengers', labels: rows.map(x => `Y${x.year}`), values: rows.map(x => x.passengers) }] :
         [{ name: 'Revenue · MNOK', labels: rows.map(x => `Y${x.year}`), values: rows.map(x => x.revenue / 1e6) }, { name: 'EBITDA · MNOK', labels: rows.map(x => `Y${x.year}`), values: rows.map(x => x.ebitda / 1e6) }],
         { x: .6, y: 1.85, w: 12.1, h: 4.7, showLegend: kind !== 'passengers', legendPos: 'b',
-          chartColors: [C.blue, C.gold], showValue: false, showCatName: false, catAxisLabelFontSize: 12,
+          chartColors: [C.blue, C.gold], showValue: false, catAxisLabelFontSize: 12,
           valAxisLabelFontSize: 14, valAxisNumFmt: kind === 'passengers' ? '# ##0' : '0.0',
           valGridLine: { color: C.grey, size: .5 }, lineSize: 2, showMarker: false,
           showTitle: false, showBorder: false });

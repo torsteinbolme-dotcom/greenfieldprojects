@@ -1,4 +1,5 @@
 # Tasks
+- [x] Verify displayed base white (#F2F2F2) and blue (#14314D): browser measurements confirm page/panel backgrounds and sidebar use the exact requested colours.
 - [x] Format all numbers with spaced thousands, decimal commas and no more than two decimals, including editable fields and graphs.
 - [x] Limit side-by-side comparisons to 15 years and add an EBITDA graph below the first graph.
 - [x] Apply Outfit and the selected blue, white and supplemental colours throughout the site.

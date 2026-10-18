@@ -47,3 +47,4 @@
 - [x] Use year 1 rather than year 3 for restaurant passenger scaling; verified revenue 31 225 263 and OPEX 29 030 921 for 225 000 project passengers.
 - [x] Default the Benchmarking comparison to operating year 3 (stabilised), matching Year 3 everywhere; verified in the signed-in preview.
 - [x] Label Overview headline figures with the year they cover (Weighted ticket Y1, Y3 passengers, MOIC/Exit equity at the exit year); verified in the signed-in preview.
+- [x] Show the year-3 average net ticket price on the Investment Summary's Year 3 performance card; verified 584 NOK in the signed-in preview and pinned by an engine test.

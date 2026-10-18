@@ -8,7 +8,7 @@ import { formatNumber, nok, pct } from "@/lib/format";
 
 const MANUAL = "manual";
 
-/** "Use Benchmark" selectors for F&B revenue and F&B OPEX, with a shared passenger adjustment toggle. */
+/** Restaurant revenue and OPEX sources automatically scaled to project year-1 passengers. */
 export function FbBenchmarkPanel({ a, set, ro }: { a: Assumptions; set: (p: Partial<Assumptions>) => void; ro: boolean }) {
   const { data } = useBenchmarks();
   const aw = a as AssumptionsWithFb;
@@ -48,7 +48,7 @@ export function FbBenchmarkPanel({ a, set, ro }: { a: Assumptions; set: (p: Part
           <dt className="text-muted-foreground">Benchmark financial year</dt><dd className="text-right">{l.source.year}</dd>
           <dt className="text-muted-foreground">Original benchmark value</dt><dd className="text-right tabular-nums">{l.original == null ? "N/A" : `${nok(l.original)} NOK`}</dd>
           <dt className="text-muted-foreground">Cable car passengers</dt><dd className="text-right tabular-nums">{l.benchPassengers == null ? "N/A" : formatNumber(l.benchPassengers, 0, 0)}</dd>
-          <dt className="text-muted-foreground">Passenger-adjusted (year 3)</dt><dd className="text-right tabular-nums">{sel.adjust && l.adjusted != null ? `${nok(l.adjusted)} NOK` : "—"}</dd>
+          <dt className="text-muted-foreground">Passenger-adjusted (year 1)</dt><dd className="text-right tabular-nums">{l.adjusted != null ? `${nok(l.adjusted)} NOK` : "—"}</dd>
           {l.warning && <dd className="col-span-2 flex items-start gap-1 text-destructive"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />{l.warning}</dd>}
         </dl>
       ) : <p className="text-xs text-muted-foreground">Manual Input — edit the year-1 amount below.</p>}
@@ -61,7 +61,7 @@ export function FbBenchmarkPanel({ a, set, ro }: { a: Assumptions; set: (p: Part
         <Row kind="revenue" title="F&B revenue" l={rev} />
         <Row kind="opex" title="F&B OPEX" l={opex} />
       </div>
-      <p className="text-xs text-muted-foreground">Project passengers year 3: {formatNumber(passengersAt(a, FB_BASIS_YEAR), 0, 0)} · Restaurant revenue and OPEX are passenger-adjusted.</p>
+      <p className="text-xs text-muted-foreground">Project passengers year 1: {formatNumber(passengersAt(a, FB_BASIS_YEAR), 0, 0)} · Restaurant revenue and OPEX are passenger-adjusted.</p>
       <div className="grid grid-cols-3 gap-3 rounded-md bg-muted/40 p-3 text-sm">
         <div><p className="text-xs text-muted-foreground">F&B revenue year 1</p><p className="tabular-nums font-medium">{nok(a.fbRevenueYear1)}</p></div>
         <div><p className="text-xs text-muted-foreground">F&B OPEX year 1</p><p className="tabular-nums font-medium">{nok(a.fbOpexYear1)}</p></div>

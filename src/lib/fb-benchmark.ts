@@ -3,12 +3,11 @@ import type { BenchmarkAsset, BenchmarkRecord } from "./benchmarks";
 
 /**
  * F&B inputs taken from a restaurant benchmark. Selections live in the scenario JSON, so each
- * project and scenario keeps its own. The benchmark figure is scaled to the project's year-3
- * passenger volume (the stabilised year); the stored year-1 inputs are set so the engine's
- * year-3 F&B lands exactly on that scaled amount. The signed-off engine does all further
+ * project and scenario keeps its own. The benchmark figure is scaled to the project's year-1
+ * passenger volume and stored directly as the year-1 input. The signed-off engine does all further
  * calculation.
  */
-export const FB_BASIS_YEAR = 3;
+export const FB_BASIS_YEAR = 1;
 
 export type FbSource = { assetId: string; year: number };
 export type FbBenchmark = { revenue?: FbSource | null; opex?: FbSource | null; adjust: boolean };
@@ -44,7 +43,7 @@ export type FbLine = {
   parent: BenchmarkAsset | null;
   original: number | null; // benchmark revenue or OPEX as reported
   benchPassengers: number | null; // passengers of the restaurant's own cable car, same year
-  adjusted: number | null; // year-3 amount the benchmark is scaled to
+  adjusted: number | null; // year-1 amount the benchmark is scaled to
   warning: string | null;
 };
 
@@ -55,7 +54,7 @@ const pick = (records: BenchmarkRecord[], assetId: string | null | undefined, ye
 export const latestYear = (records: BenchmarkRecord[], assetId: string) =>
   Math.max(...records.filter((r) => r.asset_id === assetId).map((r) => r.financial_year), -Infinity);
 
-/** Adjusted = benchmark × (project year-3 passengers / passengers of that restaurant's own cable car) — the year-3 amount. */
+/** Adjusted = benchmark × (project year-1 passengers / passengers of that restaurant's own cable car). */
 export function fbLine(kind: "revenue" | "opex", source: FbSource, adjust: boolean, projectYearPassengers: number, assets: BenchmarkAsset[], records: BenchmarkRecord[]): FbLine {
   const asset = assets.find((x) => x.id === source.assetId) ?? null;
   const parent = asset ? assets.find((x) => x.id === asset.parent_asset_id) ?? null : null;
@@ -78,9 +77,7 @@ export function withFbBenchmark<T extends AssumptionsWithFb>(a: T, assets: Bench
   if (!sel.revenue && !sel.opex) return a;
   const next = { ...a, fbBenchmark: { ...sel, adjust: true }, fbFollowsPassengers: true };
   const paxBasis = passengersAt(a, FB_BASIS_YEAR);
-  const year1 = (kind: "revenue" | "opex", adjusted: number) =>
-    Math.round(adjusted / fbEscalator(next, kind));
-  if (sel.revenue) { const l = fbLine("revenue", sel.revenue, true, paxBasis, assets, records); if (l.adjusted != null) next.fbRevenueYear1 = year1("revenue", l.adjusted); }
-  if (sel.opex) { const l = fbLine("opex", sel.opex, true, paxBasis, assets, records); if (l.adjusted != null) next.fbOpexYear1 = year1("opex", l.adjusted); }
+  if (sel.revenue) { const l = fbLine("revenue", sel.revenue, true, paxBasis, assets, records); if (l.adjusted != null) next.fbRevenueYear1 = Math.round(l.adjusted); }
+  if (sel.opex) { const l = fbLine("opex", sel.opex, true, paxBasis, assets, records); if (l.adjusted != null) next.fbOpexYear1 = Math.round(l.adjusted); }
   return next;
 }

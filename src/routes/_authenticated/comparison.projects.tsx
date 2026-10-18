@@ -73,6 +73,17 @@ const METRICS: Metric[] = [
 const CHARTS = ["capex", "pax", "rev", "ebitda", "margin", "ebitdaPax", "irr", "moic"];
 const DEV = { passengers: "Passengers", revenue: "Revenue (NOK m)", ebitda: "EBITDA (NOK m)", fcf: "Free cash flow (NOK m)" } as const;
 
+/** Contiguous blocks of the same group, so the header spans match the column order. */
+function groupRuns(ms: Metric[]) {
+  const runs: { group: Group; metrics: Metric[] }[] = [];
+  for (const m of ms) {
+    const last = runs[runs.length - 1];
+    if (last && last.group === m.group) last.metrics.push(m);
+    else runs.push({ group: m.group, metrics: [m] });
+  }
+  return runs;
+}
+
 function ProjectVsProject() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });

@@ -55,6 +55,117 @@ export type Database = {
           },
         ]
       }
+      benchmark_assets: {
+        Row: {
+          business_type: string
+          created_at: string
+          id: string
+          location: string | null
+          name: string
+          organization_id: string
+          parent_asset_id: string | null
+        }
+        Insert: {
+          business_type: string
+          created_at?: string
+          id?: string
+          location?: string | null
+          name: string
+          organization_id: string
+          parent_asset_id?: string | null
+        }
+        Update: {
+          business_type?: string
+          created_at?: string
+          id?: string
+          location?: string | null
+          name?: string
+          organization_id?: string
+          parent_asset_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "benchmark_assets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "benchmark_assets_parent_asset_id_fkey"
+            columns: ["parent_asset_id"]
+            isOneToOne: false
+            referencedRelation: "benchmark_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      benchmark_records: {
+        Row: {
+          asset_id: string
+          comparability_notes: string | null
+          created_at: string
+          currency: string
+          data_status: string
+          ebitda: number | null
+          financial_year: number
+          id: string
+          opex: number | null
+          organization_id: string
+          passengers: number | null
+          revenue: number | null
+          source: string | null
+          updated_at: string
+        }
+        Insert: {
+          asset_id: string
+          comparability_notes?: string | null
+          created_at?: string
+          currency?: string
+          data_status?: string
+          ebitda?: number | null
+          financial_year: number
+          id?: string
+          opex?: number | null
+          organization_id: string
+          passengers?: number | null
+          revenue?: number | null
+          source?: string | null
+          updated_at?: string
+        }
+        Update: {
+          asset_id?: string
+          comparability_notes?: string | null
+          created_at?: string
+          currency?: string
+          data_status?: string
+          ebitda?: number | null
+          financial_year?: number
+          id?: string
+          opex?: number | null
+          organization_id?: string
+          passengers?: number | null
+          revenue?: number | null
+          source?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "benchmark_records_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "benchmark_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "benchmark_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_invites: {
         Row: {
           accepted_at: string | null

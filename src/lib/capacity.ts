@@ -26,7 +26,7 @@ export function capacityTable(row: YearResult, c: Capacity) {
     const passengers = row.passengers * share;
     const capacity = c.hourlyCapacity * c.hoursPerDay * daysInMonth(row.calendarYear, i);
     const utilization = capacity > 0 ? passengers / capacity : null;
-    return { month, share, passengers, capacity, utilization, exceeds: capacity > 0 ? passengers > capacity : passengers > 0 && c.hourlyCapacity >= 0 && capacity === 0 && false };
+    return { month, share, passengers, capacity, utilization, exceeds: capacity > 0 && passengers > capacity };
   });
   const utils = months.map((m) => m.utilization).filter((u): u is number => u !== null);
   return { months, maxUtilization: utils.length ? Math.max(...utils) : null, monthsOver: months.filter((m) => m.exceeds).length };

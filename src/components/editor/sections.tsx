@@ -1,4 +1,3 @@
-import { safeCalculate } from "@/lib/model";
 import type { Assumptions } from "@/financialEngine";
 import { calculate } from "@/financialEngine";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Field, GrowthList, NumField } from "./inputs";
 import { cn } from "@/lib/utils";
 import { int, mult, nok, nokM, pct } from "@/lib/format";
-import { segmentNetPerGuest, shareSum, type ModelResult } from "@/lib/model";
+import { safeCalculate, segmentNetPerGuest, shareSum, type ModelResult } from "@/lib/model";
 import { isAdultRoundTrip, segmentTicketRatio, type PricedSegment } from "@/lib/ticket-pricing";
 import { forecastOpex } from "@/lib/forecast-opex";
 import { buildWaterfall, capexRows, segmentRows } from "@/lib/bridges";

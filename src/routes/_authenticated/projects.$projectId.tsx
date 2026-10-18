@@ -23,7 +23,7 @@ import { useAutosave } from "@/hooks/use-autosave";
 import { SaveControls } from "@/components/editor/save-controls";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
-  validateSearch: z.object({ scenario: z.string().optional(), tab: z.string().optional(), basis: z.string().optional() }),
+  validateSearch: z.object({ scenario: z.string().optional(), tab: z.string().optional(), basis: z.coerce.string().optional() }),
   head: () => ({ meta: [{ title: "Project editor — Cable Car Portfolio" }, { name: "description", content: "Edit project assumptions, forecast and exit analysis." }, { property: "og:title", content: "Project editor — Cable Car Portfolio" }, { property: "og:description", content: "Cable car project model." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: EditorPage,
 });

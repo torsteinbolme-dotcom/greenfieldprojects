@@ -231,7 +231,7 @@ export function ForecastSection({ r }: { r: ModelResult }) {
 const MULTIPLES = [10, 12.5, 15, 17.5, 20];
 
 export function ExitSection({ a, set, ro, r }: P & { r: ModelResult }) {
-  const exit = r.rows[a.exitYear - 1];
+  const exit = r.rows[a.exitYear - 1]!;
   const sens = MULTIPLES.map((m) => {
     const s = calculate({ ...a, exitMultiple: m });
     return { m, ev: s.enterpriseValue, eq: s.exitEquityValue, irr: s.equityIrr, moic: s.equityMultiple };

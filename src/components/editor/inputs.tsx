@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-type Props = { value: number; onChange: (v: number) => void; percent?: boolean; disabled?: boolean; className?: string; step?: string };
+type Props = { value: number; onChange: (v: number) => void; percent?: boolean | undefined; disabled?: boolean | undefined; className?: string | undefined; step?: string | undefined };
 
 /** Numeric input. With `percent`, the stored value is a decimal (0.12) and shown as 12. */
 export function NumField({ value, onChange, percent, disabled, className, step }: Props) {
@@ -39,7 +39,7 @@ export function Field({ label, hint, children }: { label: string; hint?: string;
   );
 }
 
-export function GrowthList({ values, onChange, disabled }: { values: number[]; onChange: (v: number[]) => void; disabled?: boolean }) {
+export function GrowthList({ values, onChange, disabled }: { values: number[]; onChange: (v: number[]) => void; disabled?: boolean | undefined }) {
   return (
     <div className="space-y-1">
       <div className="flex flex-wrap items-end gap-2">

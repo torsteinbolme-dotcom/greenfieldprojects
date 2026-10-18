@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { calculate } from "@/financialEngine";
-import { exampleProject } from "@/exampleProject";
+import { projectMountain as exampleProject } from "@/exampleProject";
 import { benchmarkSuggestions, deviation, equalWeights, projectMetrics, weightedBenchmark, weightsValid } from "@/lib/project-benchmarks";
 import type { BenchmarkAsset, BenchmarkRecord } from "@/lib/benchmarks";
 

@@ -37,7 +37,7 @@ export function BenchmarkingSection({ projectId, config, a, r, ro, apply }: Prop
   const { data } = useBenchmarks();
   const [cfg, setCfg] = useState<BenchmarkConfig>(config);
   const [preview, setPreview] = useState<Suggestion[] | null>(null);
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => setCfg(config), [projectId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const update = (next: BenchmarkConfig) => {
@@ -55,7 +55,7 @@ export function BenchmarkingSection({ projectId, config, a, r, ro, apply }: Prop
   if (!data) return <p className="text-muted-foreground">Loading benchmarks…</p>;
   if (!r) return <p className="text-muted-foreground">Fix the inputs to compare with benchmarks.</p>;
 
-  const benchYear = cfg.benchmarkYear ?? years[0];
+  const benchYear = cfg.benchmarkYear ?? years[0] ?? new Date().getFullYear() - 1;
   const mode = cfg.yearMode ?? "operating";
   const compareYear = cfg.compareYear ?? (mode === "operating" ? Math.min(DEFAULT_STABILISED_YEAR, a.years) : a.openingYear + DEFAULT_STABILISED_YEAR - 1);
   const row = mode === "operating" ? r.rows[compareYear - 1] : r.rows.find((x) => x.calendarYear === compareYear);
@@ -89,7 +89,7 @@ export function BenchmarkingSection({ projectId, config, a, r, ro, apply }: Prop
                 <Checkbox id={`b-${asset.id}`} checked={on} disabled={ro} onCheckedChange={(c) => toggle(group, asset.id, !!c)} />
                 <Label htmlFor={`b-${asset.id}`} className="flex-1 font-normal">{asset.name}</Label>
                 {on && <div className="flex items-center gap-1">
-                  <Input key={`${asset.id}-${w[asset.id]}`} className="h-8 w-20 text-right" disabled={ro} defaultValue={formatNumber(w[asset.id] * 100, 0, 1, false)}
+                  <Input key={`${asset.id}-${w[asset.id]}`} className="h-8 w-20 text-right" disabled={ro} defaultValue={formatNumber((w[asset.id] ?? 0) * 100, 0, 1, false)}
                     onBlur={(e) => setWeight(group, asset.id, e.target.value)} aria-label={`Weight for ${asset.name}`} /><span className="text-sm">%</span>
                 </div>}
               </div>
@@ -125,7 +125,7 @@ export function BenchmarkingSection({ projectId, config, a, r, ro, apply }: Prop
               <SelectContent>{years.map((y) => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}</SelectContent>
             </Select></div>
           <div><Label className="text-xs">Project year type</Label>
-            <Select value={mode} onValueChange={(v) => update({ ...cfg, yearMode: v as "operating" | "calendar", compareYear: undefined })}>
+            <Select value={mode} onValueChange={(v) => update({ ...cfg, yearMode: v as "operating" | "calendar", compareYear: undefined } as BenchmarkConfig)}>
               <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
               <SelectContent><SelectItem value="operating">Operating year</SelectItem><SelectItem value="calendar">Calendar year</SelectItem></SelectContent>
             </Select></div>
@@ -206,7 +206,7 @@ function ApplyDialog({ suggestions, onClose, onApply }: { suggestions: Suggestio
           <thead><tr><th /><th>Assumption</th><th className="text-right">Current</th><th className="text-right">Suggested</th><th className="text-right">Change</th></tr></thead>
           <tbody>{suggestions.map((s) => (
             <tr key={s.key}>
-              <td><Checkbox checked={on[s.key]} onCheckedChange={(c) => setOn((o) => ({ ...o, [s.key]: !!c }))} aria-label={`Apply ${s.label}`} /></td>
+              <td><Checkbox checked={!!on[s.key]} onCheckedChange={(c) => setOn((o) => ({ ...o, [s.key]: !!c }))} aria-label={`Apply ${s.label}`} /></td>
               <td>{s.label}<div className="text-xs text-muted-foreground">{s.basis}</div></td>
               <td className="text-right tabular-nums">{nok(s.current)}</td>
               <td className="text-right tabular-nums">{nok(s.suggested)}</td>

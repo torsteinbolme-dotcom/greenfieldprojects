@@ -15,4 +15,4 @@
 - [x] Remove the variable cost per passenger and maintenance capex inputs from the operating costs card; verify the Revenue tab.
 - [x] Display years without a thousands separator; verify the opening year displays, edits and saves as 2030.
 - [x] Take variable cost per passenger and maintenance capex out of the calculation itself; verify results and add an engine test.
-- [x] Default the model horizon to 10 years and set the open project's Base scenario to 10; verify it saves and reloads.
+- [x] Default the model horizon to 15 years everywhere (new projects, example, new-account sample) and set the open project's Base scenario to 15; verify it saves and reloads.

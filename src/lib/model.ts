@@ -27,7 +27,7 @@ export const shareSum = (a: Assumptions) => a.segments.reduce((s, x) => s + x.sh
 
 export function blankAssumptions(name: string): Assumptions {
   return {
-    name, openingYear: new Date().getFullYear() + 3, years: 10, initialPassengers: 100000,
+    name, openingYear: new Date().getFullYear() + 3, years: 15, initialPassengers: 100000,
     segments: [{ name: "Adult roundtrip", share: 1, grossPrice: 500, vatRate: 0.12, commission: 0, boardingsPerGuest: 2 }],
     passengerGrowth: [0.05, 0.03, 0.02], priceGrowth: [0.03, 0.03, 0.025],
     fbRevenueYear1: 0, merchRevenueYear1: 0, ancillaryGrowth: [0.03, 0.03, 0.02],

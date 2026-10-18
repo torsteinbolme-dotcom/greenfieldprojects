@@ -1,7 +1,7 @@
 import type {Assumptions} from './financialEngine';
 /** Editable seed based on visible Project Mountain workbook inputs. Unspecified assumptions are illustrative. */
 export const projectMountain:Assumptions={
- name:'Project Mountain',openingYear:2030,years:30,initialPassengers:225000,
+ name:'Project Mountain',openingYear:2030,years:15,initialPassengers:225000,
  segments:[
  {name:'Roundtrip adult',share:.39,grossPrice:699,vatRate:.12,commission:0,boardingsPerGuest:2},
  {name:'Roundtrip child',share:.07,grossPrice:349.5,vatRate:.12,commission:0,boardingsPerGuest:2},

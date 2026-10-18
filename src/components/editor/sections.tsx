@@ -136,7 +136,7 @@ export function RevenueOpexSection({ a, set, ro }: P) {
     <div className="grid gap-4 lg:grid-cols-2">
       <Card title="Passengers & pricing">
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Opening year"><NumField value={a.openingYear} disabled={ro} step="1" onChange={(v) => set({ openingYear: Math.round(v) })} /></Field>
+          <Field label="Opening year"><NumField plain value={a.openingYear} disabled={ro} step="1" onChange={(v) => set({ openingYear: Math.round(v) })} /></Field>
           <Field label="Model years"><NumField value={a.years} disabled={ro} step="1" onChange={(v) => set({ years: Math.round(v) })} /></Field>
           <Field label="Year-1 passengers (guests)"><NumField value={a.initialPassengers} disabled={ro} onChange={(v) => set({ initialPassengers: v })} /></Field>
         </div>

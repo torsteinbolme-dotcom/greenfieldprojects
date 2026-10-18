@@ -39,9 +39,9 @@ describe("Year 3 vs benchmarks", () => {
   it("normalizes money only: 300 × 1.025^5 from 2025 to 2030", () => {
     expect(normalize(300, 2025, 2030, 0.025)).toBeCloseTo(300 * 1.025 ** 5, 8);
     const v = normalizeValues({ passengers: 1000, revPax: 300, margin: 0.5, revenue: 1e6 }, CABLE, 2025, 2030, 0.025);
-    expect(v.passengers).toBe(1000);
-    expect(v.margin).toBe(0.5);
-    expect(v.revPax).toBeCloseTo(339.42, 2);
+    expect(v['passengers']).toBe(1000);
+    expect(v['margin']).toBe(0.5);
+    expect(v['revPax']).toBeCloseTo(339.42, 2);
   });
   it("project returns: NPV at 0% equals the sum of flows", () => {
     const r = calculate(projectMountain);

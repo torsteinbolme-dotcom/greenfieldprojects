@@ -44,7 +44,7 @@ function AuthPage() {
           else if (data === "invalid") toast.error("This invite link has expired or was already used.");
         });
       }
-      navigate({ to: "/portfolio" });
+      navigate({ to: "/projects" });
     };
     supabase.auth.getSession().then(({ data }) => { if (data.session) go(); });
     const { data } = supabase.auth.onAuthStateChange((e, s) => { if (s && (e === "SIGNED_IN" || e === "INITIAL_SESSION")) go(); });
@@ -60,7 +60,7 @@ function AuthPage() {
         if (error) throw error;
       } else {
         const inviteToken = sessionStorage.getItem("invite_token");
-        const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + "/portfolio", ...(inviteToken ? { data: { invite_token: inviteToken } } : {}) } });
+        const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + "/projects", ...(inviteToken ? { data: { invite_token: inviteToken } } : {}) } });
         if (error) throw error;
         if (!data.session) toast.success("Check your email to confirm your account.");
       }

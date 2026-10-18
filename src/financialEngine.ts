@@ -13,7 +13,7 @@ export type Assumptions = {
   capexItems:CapexItem[];contingencyRate:number;
   debtShare:number;interestRate:number;loanYears:number;taxRate:number;
   depreciationYears:number;maintenanceCapexRate:number;
-  exitYear:number;exitMultiple:number;exitTransactionCostRate:number;
+  exitYear:number;exitMultiple:number;exitTransactionCostRate:number;performanceYear?:number;
   distributeCashAnnually:boolean;
   fbFollowsPassengers?:boolean;
   fbBenchmark?:{adjust:boolean;revenue?:{assetId:string;year:number;adjust?:boolean}|null;opex?:{assetId:string;year:number;adjust?:boolean}|null};

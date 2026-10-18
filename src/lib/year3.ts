@@ -6,6 +6,13 @@ import type { ModelResult } from "./model";
 export const YEAR3 = 3;
 export const year3Row = (r: ModelResult): YearResult | null => r.rows[YEAR3 - 1] ?? null;
 
+/** Investment Summary performance year chosen in the scenario (presentation-only; defaults to Year 3). */
+export const performanceYearOf = (a: Pick<Assumptions, "performanceYear">, r: ModelResult): number => {
+  const chosen = a.performanceYear ?? YEAR3;
+  if (!r.rows.length) return chosen;
+  return Math.min(Math.max(Math.round(chosen), 1), r.rows.length);
+};
+
 /** Splits one forecast year into cable car, restaurant (F&B) and other (merchandise) parts; parts sum to the engine totals. */
 export function splitYear(a: Assumptions, row: YearResult) {
   const inflate = Math.pow(1 + a.costInflation, row.year - 1);

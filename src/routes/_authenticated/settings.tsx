@@ -1,0 +1,63 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/editor/sections";
+import { useMembership } from "@/lib/data";
+
+export const Route = createFileRoute("/_authenticated/settings")({
+  head: () => ({ meta: [{ title: "Settings — Cable Car Portfolio" }, { name: "description", content: "Organization, members and activity log." }, { property: "og:title", content: "Settings" }, { property: "og:description", content: "Organization settings." }] }),
+  component: SettingsPage,
+});
+
+function SettingsPage() {
+  const qc = useQueryClient();
+  const { data: m } = useMembership();
+  const members = useQuery({ enabled: !!m, queryKey: ["members"], queryFn: async () => (await supabase.from("organization_members").select("*").order("created_at")).data ?? [] });
+  const audit = useQuery({ enabled: !!m, queryKey: ["audit"], queryFn: async () => (await supabase.from("audit_events").select("*").order("created_at", { ascending: false }).limit(50)).data ?? [] });
+  if (!m) return null;
+  const admin = m.role === "admin";
+  return (
+    <div className="space-y-6">
+      <div><p className="eyebrow">Settings</p><h1 className="mt-1 text-3xl font-semibold">Organization</h1></div>
+      <Card title="Organization name">
+        <form className="flex max-w-md gap-2" onSubmit={async (e) => {
+          e.preventDefault();
+          const name = String(new FormData(e.currentTarget).get("name") ?? "").trim();
+          const { error } = await supabase.from("organizations").update({ name }).eq("id", m.organization_id);
+          if (error) return toast.error(error.message);
+          toast.success("Saved"); qc.invalidateQueries({ queryKey: ["membership"] });
+        }}>
+          <Input name="name" defaultValue={m.org_name} disabled={!admin} />
+          {admin && <Button type="submit">Save</Button>}
+        </form>
+      </Card>
+      <Card title="Members">
+        <table className="fin-table">
+          <thead><tr><th>Email</th><th>Role</th></tr></thead>
+          <tbody>{members.data?.map((x) => (
+            <tr key={x.user_id}><td>{x.email}</td><td>
+              {admin && x.user_id !== m.user_id ? (
+                <select className="h-8 rounded-md border bg-background px-2 text-sm" defaultValue={x.role} onChange={async (e) => {
+                  const { error } = await supabase.from("organization_members").update({ role: e.target.value as "admin" | "editor" | "viewer" }).eq("organization_id", x.organization_id).eq("user_id", x.user_id);
+                  if (error) toast.error(error.message); else toast.success("Role updated");
+                }}><option value="admin">admin</option><option value="editor">editor</option><option value="viewer">viewer</option></select>
+              ) : x.role}
+            </td></tr>
+          ))}</tbody>
+        </table>
+        <p className="mt-3 text-xs text-muted-foreground">Each new account gets its own organization. Inviting colleagues into an existing organization is not yet available.</p>
+      </Card>
+      <Card title="Activity log (latest 50)">
+        <table className="fin-table">
+          <thead><tr><th>When</th><th>Entity</th><th>Action</th><th>Details</th></tr></thead>
+          <tbody>{audit.data?.map((a) => (
+            <tr key={a.id}><td>{new Date(a.created_at).toLocaleString()}</td><td>{a.entity_type}</td><td>{a.action}</td><td className="text-xs text-muted-foreground">{a.details ? JSON.stringify(a.details) : ""}</td></tr>
+          ))}</tbody>
+        </table>
+      </Card>
+    </div>
+  );
+}

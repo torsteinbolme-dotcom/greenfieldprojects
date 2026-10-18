@@ -1,4 +1,8 @@
 # Tasks
+- [x] Format all numbers with spaced thousands, decimal commas and no more than two decimals, including editable fields and graphs.
+- [x] Limit side-by-side comparisons to 15 years and add an EBITDA graph below the first graph.
+- [x] Apply Outfit and the selected blue, white and supplemental colours throughout the site.
+- [x] Test the comparison horizon and verify graphs and styling in the signed-in app.
 - [x] Automatically save scenario assumptions, project details and organization name; provide undo for edits.
 - [x] Verify automatic saving, undo, version isolation and editing during saves with tests and signed-in checks.
 - [x] Link child, one-way, annual pass, cruise and tour fares to adult round-trip pricing across editing, saving and forecasts.

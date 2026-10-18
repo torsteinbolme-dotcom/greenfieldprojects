@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { comparisonYears, sortByMetric } from "@/lib/portfolio";
+import { comparisonYears, devValue, sortByMetric } from "@/lib/portfolio";
 
 const forecast = (start: number, length: number) => ({
   rows: Array.from({ length }, (_, i) => ({ calendarYear: start + i })),
@@ -40,5 +40,23 @@ describe("comparison table sorting", () => {
     expect(sortByMetric(rows, (r) => r.name, "asc").map((r) => r.name))
       .toEqual(["Alpha Ridge", "Project Heaven", "Project Mountain"]);
     expect(rows.map((r) => r.name)).toEqual(["Project Mountain", "Project Heaven", "Alpha Ridge"]);
+  });
+});
+
+describe("comparison development chart metrics", () => {
+  const row = { passengers: 200_000, revenue: 120_000_000, ebitda: 40_000_000 };
+  it("plots revenue and EBITDA per passenger as NOK per guest", () => {
+    expect(devValue("revPax", row, 0)).toBe(600);
+    expect(devValue("ebitdaPax", row, 0)).toBe(200);
+  });
+  it("plots money totals in NOK m and free cash flow from the returns series", () => {
+    expect(devValue("revenue", row, 0)).toBe(120);
+    expect(devValue("ebitda", row, 0)).toBe(40);
+    expect(devValue("fcf", row, 15_000_000)).toBe(15);
+  });
+  it("leaves a year with no passengers or no forecast row unplotted", () => {
+    expect(devValue("revPax", { ...row, passengers: 0 }, 0)).toBeNull();
+    expect(devValue("ebitdaPax", { ...row, passengers: 0 }, 0)).toBeNull();
+    expect(devValue("revPax", null, 0)).toBeNull();
   });
 });

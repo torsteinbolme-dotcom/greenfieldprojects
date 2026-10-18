@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { COLORS, encodeSc, ProjectPicker, useSelection, type Entry } from "@/components/comparison/selection";
-import { sortByMetric } from "@/lib/portfolio";
+import { devValue, sortByMetric } from "@/lib/portfolio";
 import { formatNumber, mult, nok, nokM, pct } from "@/lib/format";
 import { projectReturns, splitYear, year3Row } from "@/lib/year3";
 
@@ -60,7 +60,6 @@ const METRICS: Metric[] = [
   { key: "margin", label: "EBITDA margin", group: "operations", fmt: "pct", get: (r) => r.y3?.margin ?? null },
   { key: "revPax", label: "Revenue / passenger (NOK)", group: "operations", fmt: "nok", get: (r) => r.y3?.revenuePerPax ?? null },
   { key: "ebitdaPax", label: "EBITDA / passenger (NOK)", group: "operations", fmt: "nok", get: (r) => r.y3?.ebitdaPerPax ?? null },
-  { key: "projectIrr", label: "Project IRR", group: "returns", fmt: "pct", get: (r) => r.ret.projectIrr },
   { key: "irr", label: "Equity IRR", group: "returns", fmt: "pct", get: (r) => r.result.equityIrr },
   { key: "payback", label: "Payback period", group: "returns", fmt: "years", get: (r) => r.ret.payback },
   { key: "exitYear", label: "Exit year", group: "returns", fmt: "year", get: (r) => r.a.exitYear },
@@ -69,8 +68,8 @@ const METRICS: Metric[] = [
   { key: "exitEv", label: "Exit enterprise value (NOK m)", group: "returns", fmt: "nokM", get: (r) => r.result.enterpriseValue },
   { key: "exitEq", label: "Exit equity value (NOK m)", group: "returns", fmt: "nokM", get: (r) => r.result.exitEquityValue },
 ];
-const CHARTS = ["capex", "pax", "rev", "ebitda", "margin", "ebitdaPax", "irr", "moic"];
-const DEV = { passengers: "Passengers", revenue: "Revenue (NOK m)", ebitda: "EBITDA (NOK m)", fcf: "Free cash flow (NOK m)" } as const;
+const CHARTS = ["irr", "moic", "capex", "pax", "rev", "ebitda", "margin", "ebitdaPax"];
+const DEV = { passengers: "Passengers", revenue: "Revenue (NOK m)", ebitda: "EBITDA (NOK m)", fcf: "Free cash flow (NOK m)", revPax: "Revenue / passenger (NOK)", ebitdaPax: "EBITDA / passenger (NOK)" } as const;
 
 /** Contiguous blocks of the same group, so the header spans match the column order. */
 function groupRuns(ms: Metric[]) {
@@ -117,10 +116,7 @@ function ProjectVsProject() {
   const years = Array.from({ length: Math.min(40, Math.max(0, ...rows.map((r) => r.result.rows.length))) }, (_, i) => i + 1);
   const devData = years.map((y) => {
     const pt: Record<string, number | string | null> = { year: `Y${y}` };
-    for (const r of rows) {
-      const row = r.result.rows[y - 1];
-      pt[label(r)] = !row ? null : dev === "passengers" ? row.passengers : dev === "fcf" ? (r.ret.fcf[y - 1] ?? 0) / 1e6 : row[dev] / 1e6;
-    }
+    for (const r of rows) pt[label(r)] = devValue(dev, r.result.rows[y - 1], r.ret.fcf[y - 1]);
     return pt;
   });
 
@@ -164,7 +160,7 @@ function ProjectVsProject() {
               ))}</tbody>
             </table>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">Year 3 = third full operating year after opening. Project IRR and payback use unlevered free cash flow (EBITDA minus tax on operating profit, losses carried forward) against total CAPEX, with the exit value net of transaction costs; payback ignores the exit.</p>
+          <p className="mt-3 text-xs text-muted-foreground">Year 3 = third full operating year after opening. Payback uses unlevered free cash flow (EBITDA minus tax on operating profit, losses carried forward) against total CAPEX and ignores the exit value.</p>
         </Card>
 
         <div className="grid gap-4 md:grid-cols-2">
@@ -183,7 +179,7 @@ function ProjectVsProject() {
         </div>
 
         <Card title={`Financial development — ${DEV[dev]} by operating year`}>
-          <div className="mb-3 flex flex-wrap gap-1">{(Object.keys(DEV) as (keyof typeof DEV)[]).map((k) => <Button key={k} size="sm" variant={k === dev ? "default" : "outline"} onClick={() => setDev(k)}>{DEV[k].replace(" (NOK m)", "")}</Button>)}</div>
+          <div className="mb-3 flex flex-wrap gap-1">{(Object.keys(DEV) as (keyof typeof DEV)[]).map((k) => <Button key={k} size="sm" variant={k === dev ? "default" : "outline"} onClick={() => setDev(k)}>{DEV[k].replace(" (NOK m)", "").replace(" (NOK)", "")}</Button>)}</div>
           <div className="h-80"><ResponsiveContainer>
             <LineChart data={devData}>
               <CartesianGrid stroke="var(--border)" vertical={false} />

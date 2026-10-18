@@ -42,6 +42,22 @@ export function metricsAt(e: PortfolioEntry, mode: YearMode, year: number) {
   };
 }
 
+/** Metric plotted by the comparison development chart. */
+export type DevMetric = "passengers" | "revenue" | "ebitda" | "fcf" | "revPax" | "ebitdaPax";
+
+/** Value plotted for one operating year: NOK m for money totals, per guest for the /passenger metrics. */
+export function devValue(metric: DevMetric, row: { passengers: number; revenue: number; ebitda: number } | null | undefined, fcf: number | null | undefined): number | null {
+  if (!row) return null;
+  switch (metric) {
+    case "passengers": return row.passengers;
+    case "revenue": return row.revenue / 1e6;
+    case "ebitda": return row.ebitda / 1e6;
+    case "fcf": return (fcf ?? 0) / 1e6;
+    case "revPax": return row.passengers ? row.revenue / row.passengers : null;
+    case "ebitdaPax": return row.passengers ? row.ebitda / row.passengers : null;
+  }
+}
+
 /** Sort presentation rows by one metric: strings compare locale-aware, numbers numerically. Never mutates the input. */
 export function sortByMetric<T>(items: T[], value: (item: T) => number | string, dir: "asc" | "desc"): T[] {
   const factor = dir === "asc" ? 1 : -1;

@@ -1,0 +1,2 @@
+ALTER TABLE public.benchmark_records DROP CONSTRAINT IF EXISTS benchmark_records_data_status_check;
+ALTER TABLE public.benchmark_records ADD CONSTRAINT benchmark_records_data_status_check CHECK (data_status IN ('actual','budget','forecast','estimate'));

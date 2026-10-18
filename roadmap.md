@@ -31,3 +31,4 @@
 - [x] Phase 2: Benchmarking tab in each project (comparable selection, weights summing to 100%, calendar vs stabilised years).
 - [x] Phase 3: Apply Benchmark Assumptions (preview + confirm, undoable) and deviation flags with configurable threshold. Engine OPEX split declined by user (2026-10-18).
 - [ ] New accounts don't get the 2025 benchmark seed yet.
+- [x] Comparison split into Project vs. Project and Year 3 vs. Benchmarks with expandable sidebar menu; verified signed in.

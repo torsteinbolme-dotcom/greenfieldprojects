@@ -88,7 +88,7 @@ function PortfolioPage() {
         </table>
       </div>
       <div className="flex items-center gap-3">
-        <Button disabled={selected.length < 2} onClick={() => navigate({ to: "/comparison", search: { ids: selected.join(","), mode } })}>Compare selected ({selected.length})</Button>
+        <Button disabled={selected.length < 2} onClick={() => navigate({ to: "/comparison/projects", search: { ids: selected.join(",") } })}>Compare selected ({selected.length})</Button>
         <span className="text-xs text-muted-foreground">IRR and exit equity use each project's own exit year and multiple.</span>
       </div>
     </div>

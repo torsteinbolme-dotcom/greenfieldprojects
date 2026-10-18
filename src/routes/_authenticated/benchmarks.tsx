@@ -151,7 +151,7 @@ function BenchmarksPage() {
           <div><Label className="text-xs">Data status</Label>
             <Select value={status} onValueChange={(v) => setStatus(v as DataStatus | "all")}>
               <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
-              <SelectContent>{["all", "actual", "budget", "estimate"].map((s) => <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>)}</SelectContent>
+              <SelectContent>{["all", "actual", "budget", "forecast", "estimate"].map((s) => <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>)}</SelectContent>
             </Select></div>
           {canEdit && <>
             <Button variant="outline" onClick={() => setImportOpen(true)}><Upload className="mr-1 h-4 w-4" />Import Excel</Button>
@@ -278,7 +278,7 @@ function RecordDialog({ orgId, assets, init, onClose }: { orgId: string; assets:
           <div><Label className="text-xs">Financial year</Label><Input inputMode="numeric" value={f.year} onChange={(e) => set("year", Number(e.target.value) || f.year)} /></div>
           <div><Label className="text-xs">Data status</Label>
             <Select value={f.status} onValueChange={(v) => set("status", v as DataStatus)}><SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{["actual", "budget", "estimate"].map((s) => <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>)}</SelectContent></Select></div>
+              <SelectContent>{["actual", "budget", "forecast", "estimate"].map((s) => <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>)}</SelectContent></Select></div>
           <NumInput label="Revenue (NOK)" value={f.revenue} onChange={(v) => set("revenue", v)} />
           <NumInput label="OPEX (NOK)" value={f.opex} onChange={(v) => set("opex", v)} />
           <NumInput label="EBITDA (NOK, blank = revenue − OPEX)" value={f.ebitda} onChange={(v) => set("ebitda", v)} />
@@ -336,7 +336,7 @@ function ImportDialog({ orgId, assets, onClose }: { orgId: string; assets: Bench
           <div><Label className="text-xs">Financial year</Label><Input inputMode="numeric" value={year} onChange={(e) => setYear(Number(e.target.value) || year)} /></div>
           <div><Label className="text-xs">Data status</Label>
             <Select value={status} onValueChange={(v) => setStatus(v as DataStatus)}><SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{["actual", "budget", "estimate"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select></div>
+              <SelectContent>{["actual", "budget", "forecast", "estimate"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select></div>
           <div><Label className="text-xs">Source</Label><Input value={source} onChange={(e) => setSource(e.target.value)} /></div>
         </div>
         {rows && rows.length > 0 && (

@@ -37,6 +37,7 @@ export function metricsAt(e: PortfolioEntry, mode: YearMode, year: number) {
     ebitda: row?.ebitda ?? null,
     margin: row && row.revenue ? row.ebitda / row.revenue : null,
     irr: e.result?.equityIrr ?? null,
+    moic: e.result?.equityMultiple ?? null,
     exitEquity: e.result?.exitEquityValue ?? null,
   };
 }

@@ -1,4 +1,7 @@
 # Tasks
+- [ ] Final refinements: explicit monthly distribution Save/Cancel and missing-capacity warnings.
+- [ ] Final refinements: audit canonical maintenance assumptions; flag ambiguous legacy values without overwriting history.
+- [ ] Final refinements: independent financial regression tests, signed-in verification and final validation report.
 - [x] Stage 2: engine-based operating and cash passenger break-even with annual selection and comparison chart.
 - [x] Stage 2: Investment Summary tab and executive charts, preserving engine and Stage 1.
 - [x] Stage 2: financial tests, signed-in verification and explicit unsupported-funding disclosure.

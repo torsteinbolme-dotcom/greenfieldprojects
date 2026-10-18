@@ -49,3 +49,28 @@ describe("Year 3 vs benchmarks", () => {
     expect(ret.projectIrr).not.toBeNull();
   });
 });
+
+describe("Investment Summary performance year", () => {
+  const r = calculate(projectMountain);
+  it("defaults to Year 3 when no choice is stored", () => {
+    expect(performanceYearOf(projectMountain, r)).toBe(3);
+  });
+  it("uses the year chosen in the scenario assumptions", () => {
+    expect(performanceYearOf({ ...projectMountain, performanceYear: 5 }, r)).toBe(5);
+  });
+  it("stays inside the forecast horizon", () => {
+    expect(performanceYearOf({ ...projectMountain, performanceYear: 0 }, r)).toBe(1);
+    expect(performanceYearOf({ ...projectMountain, performanceYear: 999 }, r)).toBe(r.rows.length);
+  });
+  it("the chosen year drives the displayed row and its calendar year", () => {
+    const year = performanceYearOf({ ...projectMountain, performanceYear: 5 }, r);
+    expect(r.rows[year - 1]!.year).toBe(5);
+    expect(r.rows[year - 1]!.calendarYear).toBe(projectMountain.openingYear + 4);
+  });
+  it("engine results are unchanged by the performance-year choice", () => {
+    const without = calculate(projectMountain);
+    const withChoice = calculate({ ...projectMountain, performanceYear: 7 });
+    expect(withChoice.equityIrr).toBe(without.equityIrr);
+    expect(withChoice.equityMultiple).toBe(without.equityMultiple);
+  });
+});

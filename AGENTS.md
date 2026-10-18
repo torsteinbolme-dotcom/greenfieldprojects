@@ -30,3 +30,4 @@
 
 - Break-even is a read-only engine sensitivity in `src/lib/break-even.ts`: vary the full passenger forecast to target a selected annual volume, rederive frozen passenger-linked F&B, and solve EBITDA/cashAfterDebt coverage without changing debt or tax formulas. Why: costs retain their actual classification and tax-loss history is recomputed consistently; unresolved passenger snapshots block estimates.
 - Investment Summary reads engine outputs directly and discloses initial-equity-only returns and unsupported funding gaps. Why: additional equity is not modelled and must never be fabricated or silently included in IRR/MOIC.
+- Per-cost OPEX growth lists (`opexGrowth.cable/fb`) and `merchOpexRate` (merch OPEX = % of merch revenue) are optional scenario fields read via `costIndex`/`merchOpexAt` in the engine; absent fields fall back to `costInflation` and the legacy ratio (user-approved 2026-10-18). Why: old versions keep identical results.

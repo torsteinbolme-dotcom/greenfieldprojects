@@ -15,12 +15,19 @@ export type Assumptions = {
   depreciationYears:number;maintenanceCapexRate:number;
   exitYear:number;exitMultiple:number;exitTransactionCostRate:number;performanceYear?:number;
   distributeCashAnnually:boolean;
+  // Optional per-cost yearly growth lists (fall back to costInflation) and merchandise OPEX as share of merchandise revenue.
+  opexGrowth?:{cable?:number[];fb?:number[];merch?:number[]};
+  merchOpexRate?:number|null;
   fbFollowsPassengers?:boolean;
   fbBenchmark?:{adjust:boolean;revenue?:{assetId:string;year:number;adjust?:boolean}|null;opex?:{assetId:string;year:number;adjust?:boolean}|null};
 };
 export type YearResult={year:number;calendarYear:number;passengers:number;ticketNetPrice:number;ticketRevenue:number;fbRevenue:number;merchRevenue:number;revenue:number;opex:number;ebitda:number;depreciation:number;ebit:number;openingDebt:number;interest:number;principal:number;closingDebt:number;tax:number;cashAfterDebt:number;distribution:number;retainedCash:number;dscr:number|null};
 const growth=(values:number[],year:number)=>values[Math.min(year-2,values.length-1)]??0;
 const safe=(v:number)=>Number.isFinite(v)?v:0;
+/** Cumulative cost index for a year: product of (1+growth) over years 2..year; defaults to costInflation every year. */
+export function costIndex(a:Pick<Assumptions,'costInflation'|'opexGrowth'>,kind:'cable'|'fb'|'merch',year:number):number{const list=a.opexGrowth?.[kind];if(!list||!list.length)return Math.pow(1+a.costInflation,year-1);let x=1;for(let y=2;y<=year;y++)x*=1+growth(list,y);return x}
+/** Merchandise OPEX for a year: fixed % of merchandise revenue when merchOpexRate is set, else legacy year-1 ratio with cost growth. */
+export function merchOpexAt(a:Assumptions,year:number,merch:number):number{if(a.merchOpexRate!=null)return merch*a.merchOpexRate;return (a.merchRevenueYear1>0?a.merchOpexYear1*merch/a.merchRevenueYear1:0)*costIndex(a,'merch',year)}
 export function xnpv(rate:number,cashflows:number[]):number{return cashflows.reduce((sum,cf,i)=>sum+cf/Math.pow(1+rate,i),0)}
 export function irr(cashflows:number[]):number|null {
   if(!cashflows.some(x=>x<0)||!cashflows.some(x=>x>0))return null;
@@ -48,10 +55,9 @@ export function calculate(a:Assumptions){
     const fbOpexLinked=a.fbBenchmark?.opex ? (a.fbBenchmark.opex.adjust??a.fbBenchmark.adjust) : a.fbFollowsPassengers;
     if(fbRevenueLinked)fb=a.fbRevenueYear1*paxIndex*priceIndex;
     const ticketRevenue=passengers*price,revenue=ticketRevenue+fb+merch;
-    const inflate=Math.pow(1+a.costInflation,year-1);
-    const opex=a.cableFixedOpex*inflate+
-      (a.fbBenchmark?.opex ? a.fbOpexYear1*(fbOpexLinked?paxIndex:1) : (fbOpexLinked? a.fbOpexYear1*paxIndex:(a.fbRevenueYear1>0? a.fbOpexYear1*fb/a.fbRevenueYear1:0)))*inflate+
-      (a.merchRevenueYear1>0?a.merchOpexYear1*merch/a.merchRevenueYear1:0)*inflate;
+    const opex=a.cableFixedOpex*costIndex(a,'cable',year)+
+      (a.fbBenchmark?.opex ? a.fbOpexYear1*(fbOpexLinked?paxIndex:1) : (fbOpexLinked? a.fbOpexYear1*paxIndex:(a.fbRevenueYear1>0? a.fbOpexYear1*fb/a.fbRevenueYear1:0)))*costIndex(a,'fb',year)+
+      merchOpexAt(a,year,merch);
     const ebitda=revenue-opex,depreciation=capex/a.depreciationYears,ebit=ebitda-depreciation;
     const interest=openingDebt*a.interestRate,principal=year<=a.loanYears?Math.min(openingDebt,debt/a.loanYears):0;
     const closingDebt=Math.max(0,openingDebt-principal);

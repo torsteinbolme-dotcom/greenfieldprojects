@@ -1,12 +1,11 @@
 import { fbOpexAt } from "@/lib/fb-opex";
-import type { Assumptions, YearResult } from "@/financialEngine";
+import { costIndex, merchOpexAt, type Assumptions, type YearResult } from "@/financialEngine";
 
 // Presentation breakdown of the authoritative engine's OPEX; never replaces its totals.
 export function forecastOpex(a: Assumptions, row: YearResult) {
-  const inflation = Math.pow(1 + a.costInflation, row.year - 1);
   return {
-    cableFixed: a.cableFixedOpex * inflation,
+    cableFixed: a.cableFixedOpex * costIndex(a, "cable", row.year),
     fb: fbOpexAt(a, row),
-    merchandise: (a.merchRevenueYear1 > 0 ? a.merchOpexYear1 * row.merchRevenue / a.merchRevenueYear1 : 0) * inflation,
+    merchandise: merchOpexAt(a, row.year, row.merchRevenue),
   };
 }

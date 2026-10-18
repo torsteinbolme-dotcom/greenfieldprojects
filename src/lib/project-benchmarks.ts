@@ -61,7 +61,6 @@ export function weightedBenchmark(cfg: BenchmarkConfig, assets: BenchmarkAsset[]
  * cable car = tickets + merchandise and its costs; restaurant = F&B revenue and F&B OPEX only.
  */
 export function projectMetrics(a: Assumptions, row: YearResult): Metrics {
-  const inflate = Math.pow(1 + a.costInflation, row.year - 1);
   const fbOpex = fbOpexAt(a, row);
   const cableRevenue = row.ticketRevenue + row.merchRevenue;
   const cableOpex = row.opex - fbOpex;

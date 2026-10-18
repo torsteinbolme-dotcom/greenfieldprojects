@@ -63,12 +63,13 @@ export function SegmentsSection({ a, set, ro }: P) {
       )}
       <div className="overflow-x-auto">
         <table className="fin-table [&_td]:min-w-24">
-          <thead><tr><th>Segment</th><th>Share</th><th>% of adult round trip</th><th>Ticket gross incl VAT (NOK)</th><th>VAT</th><th>Commission</th><th className="text-right">Net realized / guest (NOK)</th><th /></tr></thead>
+          <thead><tr><th>Segment</th><th>Share</th><th className="text-right">Passengers year 1</th><th>% of adult round trip</th><th>Ticket gross incl VAT (NOK)</th><th>VAT</th><th>Commission</th><th className="text-right">Net realized / guest (NOK)</th><th /></tr></thead>
           <tbody>
             {a.segments.map((s, i) => (
               <tr key={i}>
                 <td><Input className="h-8 min-w-40" value={s.name} disabled={ro} onChange={(e) => upd(i, { name: e.target.value })} /></td>
                 <td className="w-24"><NumField percent value={s.share} disabled={ro} onChange={(v) => upd(i, { share: v })} /></td>
+                <td className="num text-right">{int(s.share * a.initialPassengers)}</td>
                 <td className="w-28">
                   {adultFare ? (isAdultRoundTrip(s.name) ? <span className="num block text-right">100%</span> : <NumField percent value={segmentTicketRatio(s, adultFare.grossPrice)} disabled={ro} onChange={(v) => upd(i, { roundTripAdultRatio: v })} />) : <span className="block text-right text-muted-foreground">—</span>}
                 </td>

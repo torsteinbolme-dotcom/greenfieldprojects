@@ -60,7 +60,7 @@ function AuthPage() {
         if (error) throw error;
       } else {
         const inviteToken = sessionStorage.getItem("invite_token");
-        const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + "/portfolio", data: inviteToken ? { invite_token: inviteToken } : undefined } });
+        const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + "/portfolio", ...(inviteToken ? { data: { invite_token: inviteToken } } : {}) } });
         if (error) throw error;
         if (!data.session) toast.success("Check your email to confirm your account.");
       }

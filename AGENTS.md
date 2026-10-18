@@ -15,3 +15,4 @@
 - Every table has `organization_id`; RLS uses `is_org_member` / `can_edit_org` / `is_org_admin` (security definer). Why: one organization must never see another's data.
 - Saving a scenario inserts a new version row; the Base scenario is a separate row, so edits elsewhere never overwrite it. Why: scenario isolation and version history.
 - New signups get their own organization plus a seeded Project Mountain (`handle_new_user` trigger). Why: every account starts with a working example.
+- Ticket percentages are optional segment inputs stored in scenario JSON and applied through `src/lib/ticket-pricing.ts` before editing, calculating and saving; keep the authoritative engine and example unchanged. Why: user-editable fare relationships persist per version without rewriting historical inputs or engine formulas.

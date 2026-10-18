@@ -11,7 +11,7 @@ import type { YearMode } from "@/lib/model";
 import { int, nokM, pct } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/portfolio")({
-  head: () => ({ meta: [{ title: "Portfolio — Cable Car Portfolio" }, { name: "description", content: "Portfolio overview of all cable car projects on a common year basis." }, { property: "og:title", content: "Portfolio" }, { property: "og:description", content: "Compare cable car projects." }] }),
+  head: () => ({ meta: [{ title: "Portfolio — Cable Car Portfolio" }, { name: "description", content: "Portfolio overview of all cable car projects on a common year basis." }, { property: "og:title", content: "Portfolio — Cable Car Portfolio" }, { property: "og:description", content: "Compare cable car projects." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: PortfolioPage,
 });
 

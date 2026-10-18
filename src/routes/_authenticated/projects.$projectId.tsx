@@ -15,11 +15,12 @@ import { Field } from "@/components/editor/inputs";
 import { Card, CapexSection, ExitSection, FinancingSection, ForecastSection, Kpi, Limitations, RevenueOpexSection, SegmentsSection } from "@/components/editor/sections";
 import { createScenario, logAudit, saveAssumptionVersion, useMembership, useProjects, useScenarios, type Membership, type ProjectRow } from "@/lib/data";
 import { safeCalculate } from "@/lib/model";
+import { withLinkedTicketPrices } from "@/lib/ticket-pricing";
 import { int, mult, nokM, pct } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
   validateSearch: z.object({ scenario: z.string().optional(), tab: z.string().optional() }),
-  head: () => ({ meta: [{ title: "Project editor — Cable Car Portfolio" }, { name: "description", content: "Edit project assumptions, forecast and exit analysis." }, { property: "og:title", content: "Project editor" }, { property: "og:description", content: "Cable car project model." }] }),
+  head: () => ({ meta: [{ title: "Project editor — Cable Car Portfolio" }, { name: "description", content: "Edit project assumptions, forecast and exit analysis." }, { property: "og:title", content: "Project editor — Cable Car Portfolio" }, { property: "og:description", content: "Cable car project model." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: EditorPage,
 });
 
@@ -51,14 +52,14 @@ function EditorPage() {
   const [loadedKey, setLoadedKey] = useState<string | null>(null);
   useEffect(() => {
     if (latest && loadedKey !== `${scenario?.id}:${latest.version}`) {
-      setDraft(latest.assumptions as unknown as Assumptions);
+      setDraft(withLinkedTicketPrices(latest.assumptions as unknown as Assumptions));
       setLoadedKey(`${scenario?.id}:${latest.version}`);
     }
   }, [latest, scenario?.id, loadedKey]);
 
   const dirty = !!draft && !!latest && JSON.stringify(draft) !== JSON.stringify(latest.assumptions);
   const { result: r, error } = useMemo(() => (draft ? safeCalculate(draft) : { result: null, error: null }), [draft]);
-  const set = (patch: Partial<Assumptions>) => setDraft((d) => (d ? { ...d, ...patch } : d));
+  const set = (patch: Partial<Assumptions>) => setDraft((d) => (d ? withLinkedTicketPrices({ ...d, ...patch }) : d));
   const [newScenOpen, setNewScenOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -102,7 +103,7 @@ function EditorPage() {
             navigate({ search: (s) => ({ ...s, scenario: undefined }) });
             qc.invalidateQueries();
           }}>Delete scenario</Button>}
-          {dirty && <Button variant="ghost" onClick={() => setDraft(latest!.assumptions as unknown as Assumptions)}>Discard</Button>}
+          {dirty && latest && <Button variant="ghost" onClick={() => setDraft(withLinkedTicketPrices(latest.assumptions as unknown as Assumptions))}>Discard</Button>}
           {!ro && <Button onClick={save} disabled={!dirty || saving}>{saving ? "Saving…" : dirty ? "Save new version" : `Saved · v${latest?.version}`}</Button>}
         </div>
       </div>
@@ -110,7 +111,7 @@ function EditorPage() {
       {error && <div className="rounded-md bg-warning p-3 text-sm text-warning-foreground">Cannot calculate: {error}</div>}
 
       <Tabs value={search.tab ?? "overview"} onValueChange={(t) => navigate({ search: (s) => ({ ...s, tab: t }), replace: true })}>
-        <TabsList className="flex-wrap">
+        <TabsList className="h-auto flex-wrap">
           {([["overview", "Overview"], ["segments", "Passenger segments"], ["capex", "CAPEX"], ["revenue", "Revenue & OPEX"], ["financing", "Financing"], ["forecast", "Forecast"], ["exit", "Exit analysis"], ["history", "Version history"]] as const).map(([k, l]) => (
             <TabsTrigger key={k} value={k}>{l}</TabsTrigger>
           ))}
@@ -147,7 +148,7 @@ function EditorPage() {
                 {versions.data?.map((v) => (
                   <tr key={v.id}>
                     <td className="num">v{v.version}</td><td>{new Date(v.created_at).toLocaleString()}</td><td>{v.note ?? "—"}</td><td className="num">{v.calculation_version}</td>
-                    <td className="text-right">{!ro && v.version !== latest?.version && <Button size="sm" variant="ghost" onClick={() => { setDraft(v.assumptions as unknown as Assumptions); toast.info(`Loaded v${v.version} — save to restore it as a new version`); }}>Load</Button>}</td>
+                    <td className="text-right">{!ro && v.version !== latest?.version && <Button size="sm" variant="ghost" onClick={() => { setDraft(withLinkedTicketPrices(v.assumptions as unknown as Assumptions)); toast.info(`Loaded v${v.version} — save to restore it as a new version`); }}>Load</Button>}</td>
                   </tr>
                 ))}
               </tbody>

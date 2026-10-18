@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Assumptions } from "@/financialEngine";
 import { CALCULATION_VERSION } from "./model";
+import { withLinkedTicketPrices } from "./ticket-pricing";
 
 export type Role = "admin" | "editor" | "viewer";
 export type Membership = { organization_id: string; role: Role; user_id: string; email: string | null; org_name: string };
@@ -86,7 +87,7 @@ export async function saveAssumptionVersion(orgId: string, scenarioId: string, a
   const version = (last?.version ?? 0) + 1;
   const u = { user: (await supabase.auth.getSession()).data.session?.user };
   const { error } = await supabase.from("scenario_assumptions").insert({
-    organization_id: orgId, scenario_id: scenarioId, version, assumptions: a as never,
+    organization_id: orgId, scenario_id: scenarioId, version, assumptions: withLinkedTicketPrices(a) as never,
     calculation_version: CALCULATION_VERSION, note: note ?? null, created_by: (u.user?.id ?? null),
   });
   if (error) throw error;

@@ -2,7 +2,7 @@ export function formatNumber(v: number | null | undefined, minimumDecimals = 0, 
   if (v == null || !Number.isFinite(v)) return "—";
   const min = Math.max(0, Math.min(2, Math.trunc(minimumDecimals)));
   const max = Math.max(min, Math.min(2, Math.trunc(maximumDecimals)));
-  return v.toLocaleString("nb-NO", { minimumFractionDigits: min, maximumFractionDigits: max }).replace(/[\u00a0\u202f]/g, " ");
+  return v.toLocaleString("nb-NO", { minimumFractionDigits: min, maximumFractionDigits: max }).replace(/[\u00a0\u202f]/g, " ").replace(/\u2212/g, "-");
 }
 
 export const nokM = (v: number | null | undefined, d = 1) => formatNumber(v == null ? v : v / 1e6, d, d);

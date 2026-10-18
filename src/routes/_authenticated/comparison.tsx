@@ -8,7 +8,7 @@ import { Card } from "@/components/editor/sections";
 import { useLatestAssumptions, useProjects, useScenarios } from "@/lib/data";
 import { buildEntries, comparisonYears } from "@/lib/portfolio";
 import { rowAt, type YearMode } from "@/lib/model";
-import { mult, nokM, pct } from "@/lib/format";
+import { formatNumber, mult, nokM, pct } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/comparison")({
   validateSearch: z.object({ ids: z.string().optional(), mode: z.enum(["operating", "calendar"]).optional() }),
@@ -69,35 +69,35 @@ function ComparisonPage() {
       {chosen.length === 0 ? <p className="text-muted-foreground">Select at least one project to compare.</p> : (
         <>
           <Card title={`${METRICS[metric]}${metric === "passengers" ? "" : " (NOK m)"} by ${mode} year`}>
-            <div className="h-80">
+            <div className="h-80 overflow-hidden">
               <ResponsiveContainer>
                 <LineChart data={data}>
                   <CartesianGrid stroke="var(--border)" vertical={false} />
-                  <XAxis dataKey="year" fontSize={11} /><YAxis fontSize={11} />
-                  <Tooltip /><Legend />
+                  <XAxis dataKey="year" fontSize={11} /><YAxis fontSize={11} tickFormatter={(v) => formatNumber(Number(v))} />
+                  <Tooltip formatter={(v) => formatNumber(Number(v))} /><Legend />
                   {chosen.map((e, i) => <Line key={e.project.id} dataKey={e.project.name} stroke={COLORS[i % 5]} strokeWidth={2} dot={false} connectNulls={false} />)}
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </Card>
           <Card title={`EBITDA (NOK m) by ${mode} year`}>
-            <div className="h-80">
+            <div className="h-80 overflow-hidden">
               <ResponsiveContainer>
                 <LineChart data={ebitdaData}>
                   <CartesianGrid stroke="var(--border)" vertical={false} />
-                  <XAxis dataKey="year" fontSize={11} /><YAxis fontSize={11} />
-                  <Tooltip /><Legend />
+                  <XAxis dataKey="year" fontSize={11} /><YAxis fontSize={11} tickFormatter={(v) => formatNumber(Number(v))} />
+                  <Tooltip formatter={(v) => formatNumber(Number(v))} /><Legend />
                   {chosen.map((e, i) => <Line key={e.project.id} dataKey={e.project.name} stroke={COLORS[i % COLORS.length]} strokeWidth={2} dot={false} connectNulls={false} />)}
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </Card>
           <Card title="Returns">
-            <div className="h-64">
+            <div className="h-64 overflow-hidden">
               <ResponsiveContainer>
-                <BarChart data={chosen.map((e) => ({ name: e.project.name, IRR: +(((e.result.equityIrr ?? 0) * 100).toFixed(2)) }))}>
+                <BarChart data={chosen.map((e) => ({ name: e.project.name, IRR: (e.result.equityIrr ?? 0) * 100 }))}>
                   <CartesianGrid stroke="var(--border)" vertical={false} />
-                  <XAxis dataKey="name" fontSize={11} /><YAxis unit="%" fontSize={11} /><Tooltip />
+                  <XAxis dataKey="name" fontSize={11} /><YAxis unit="%" fontSize={11} tickFormatter={(v) => formatNumber(Number(v))} /><Tooltip formatter={(v) => `${formatNumber(Number(v))}%`} />
                   <Bar dataKey="IRR" fill="var(--chart-2)" />
                 </BarChart>
               </ResponsiveContainer>
@@ -105,7 +105,7 @@ function ComparisonPage() {
             <div className="overflow-x-auto"><table className="fin-table mt-4">
               <thead><tr><th>Project</th><th className="text-right">Investment (NOK m)</th><th className="text-right">Exit</th><th className="text-right">Equity IRR</th><th className="text-right">MOIC</th><th className="text-right">Exit equity (NOK m)</th></tr></thead>
               <tbody>{chosen.map((e) => (
-                <tr key={e.project.id}><td>{e.project.name}</td><td className="num text-right">{nokM(e.result.capex)}</td><td className="num text-right">Y{e.a.exitYear} @ {e.a.exitMultiple}x</td>
+                <tr key={e.project.id}><td>{e.project.name}</td><td className="num text-right">{nokM(e.result.capex)}</td><td className="num text-right">Y{e.a.exitYear} @ {mult(e.a.exitMultiple)}</td>
                   <td className="num text-right">{pct(e.result.equityIrr)}</td><td className="num text-right">{mult(e.result.equityMultiple)}</td><td className="num text-right">{nokM(e.result.exitEquityValue)}</td></tr>
               ))}</tbody>
             </table></div>

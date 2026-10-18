@@ -183,7 +183,7 @@ function ProjectVsProject() {
           <div className="h-80"><ResponsiveContainer>
             <LineChart data={devData}>
               <CartesianGrid stroke="var(--border)" vertical={false} />
-              <XAxis dataKey="year" fontSize={11} /><YAxis fontSize={11} tickFormatter={(v) => formatNumber(Number(v), 0, 0)} />
+              <XAxis dataKey="year" fontSize={11} /><YAxis fontSize={11} width={88} tickFormatter={(v) => formatNumber(Number(v), 0, 0)} />
               <Tooltip formatter={(v) => formatNumber(Number(v), 0, 1)} /><Legend />
               {rows.map((r) => <Line key={r.project.id} dataKey={label(r)} stroke={colorFor(r.project.id)} strokeWidth={2} dot={false} />)}
             </LineChart>

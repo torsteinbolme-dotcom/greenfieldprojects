@@ -10,17 +10,17 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
-- `src/financialEngine.ts` and `src/exampleProject.ts` are the user's authoritative files, kept verbatim; never change formulas without asking the user first. Why: these are the investment calculations the user signed off on.
+- Keep authoritative `src/financialEngine.ts` and `src/exampleProject.ts` verbatim; ask before changing formulas. Why: the user signed off on these investment calculations.
 - All outputs are computed client-side from stored inputs (`scenario_assumptions` JSONB, append-only versions); never store outputs edited by hand. Why: results stay deterministic and every version can be audited.
 - Every table has `organization_id`; RLS uses `is_org_member` / `can_edit_org` / `is_org_admin` (security definer). Why: one organization must never see another's data.
 - Saving a scenario inserts a new version row; the Base scenario is a separate row, so edits elsewhere never overwrite it. Why: scenario isolation and version history.
 - New signups get their own organization plus a seeded Project Mountain (`handle_new_user` trigger). Why: every account starts with a working example.
-- Ticket percentages are optional segment inputs stored in scenario JSON and applied through `src/lib/ticket-pricing.ts` before editing, calculating and saving; keep the authoritative engine and example unchanged. Why: user-editable fare relationships persist per version without rewriting historical inputs or engine formulas.
+- Optional ticket percentages live in scenario JSON; apply `src/lib/ticket-pricing.ts` before editing, calculating and saving, without changing the engine or example. Why: fare relationships persist per version without rewriting history or formulas.
 - Use the scoped serial autosave controller for editable assumptions and text details; undo creates a new saved snapshot and never deletes version history. Why: edits during requests must survive and scenario histories stay isolated.
 - Comparison display years are derived through `comparisonYears` in `src/lib/portfolio.ts`, independently of full forecast lengths. Why: shortening comparison graphs must not change authoritative financial calculations.
-- Numeric displays and text-based numeric inputs share `src/lib/format.ts`; format presentation only and retain stored numeric precision. Why: consistent locale formatting must not rewrite signed-off calculations or historical assumptions.
+- Numeric displays and text inputs share `src/lib/format.ts`; retain stored precision. Why: locale formatting must not rewrite calculations or historical assumptions.
 - Forecast expense detail is derived for presentation through `src/lib/forecast-opex.ts` from current assumptions and engine rows; retain the engine's authoritative total. Why: expose individual costs without modifying signed-off formulas or stored outputs.
-- The engine excludes per-passenger variable cable car cost and revenue-based maintenance capex (removed from the formulas at the user's request on 2026-10-18); both keys remain in the `Assumptions` type and stored JSON only so earlier versions and the example file still load, and new saves tag `mountain-v2`. Why: the user wants those costs out of the calculation entirely, while historical inputs must still open.
+- The engine excludes variable cable car cost and revenue-based maintenance capex (user-approved 2026-10-18); retain their keys in `Assumptions`/JSON and tag new saves `mountain-v2`. Why: removed costs must not affect results, but historical inputs and the example must still load.
 
 - The engine carries tax losses forward indefinitely: negative taxable income (EBIT minus interest) accumulates and offsets later profits before tax is charged (added 2026-10-18 at user request).
 - Project benchmarking selections (comparables, weights, years, threshold) live in `projects.benchmark_config`; benchmark records stay in `benchmark_assets`/`benchmark_records`, and suggestions are applied only through the normal autosave as a new scenario version. Why: benchmarks stay separate from project assumptions and every applied change is versioned and undoable.

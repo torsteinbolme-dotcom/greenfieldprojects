@@ -54,3 +54,6 @@
 - [x] Comparison table: MOIC moved to the first column after Project; verified header spans stay aligned.
 - [x] Comparison table: removed the CAPEX per Y3 passenger column.
 - [x] Year 3 vs. Benchmarks: cable car and restaurant benchmarks deselected by default; verified in the signed-in preview.
+- [x] Investment Summary charts: axes, year labels and legend now render (shared axis fragment broken recharts children); verified in the signed-in preview.
+- [x] Segment bridge on the Passenger segments tab: waterfall of year-1 passengers per segment plus table (net/guest, net revenue, share); verified.
+- [x] CAPEX bridge on the CAPEX tab: waterfall of line items + contingency + total investment; verified.

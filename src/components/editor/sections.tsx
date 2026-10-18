@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Field, GrowthList, NumField } from "./inputs";
+import { cn } from "@/lib/utils";
 import { int, mult, nok, nokM, pct } from "@/lib/format";
 import { segmentNetPerGuest, shareSum, type ModelResult } from "@/lib/model";
 import { isAdultRoundTrip, segmentTicketRatio, type PricedSegment } from "@/lib/ticket-pricing";

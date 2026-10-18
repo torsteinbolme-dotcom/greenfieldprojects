@@ -103,9 +103,9 @@ function ComparisonPage() {
               </ResponsiveContainer>
             </div>
             <div className="overflow-x-auto"><table className="fin-table mt-4">
-              <thead><tr><th>Project</th><th className="text-right">Investment (NOK m)</th><th className="text-right">Invested equity (NOK m)</th><th className="text-right">Exit</th><th className="text-right">Equity IRR</th><th className="text-right">MOIC</th><th className="text-right">Exit equity (NOK m)</th></tr></thead>
+              <thead><tr><th>Project</th><th className="text-right">Invested equity (NOK m)</th><th className="text-right">Investment (NOK m)</th><th className="text-right">Exit</th><th className="text-right">Equity IRR</th><th className="text-right">MOIC</th><th className="text-right">Exit equity (NOK m)</th></tr></thead>
               <tbody>{chosen.map((e) => (
-                <tr key={e.project.id}><td>{e.project.name}</td><td className="num text-right">{nokM(e.result.capex)}</td><td className="num text-right">{nokM(e.result.equity)}</td><td className="num text-right">Y{e.a.exitYear} @ {mult(e.a.exitMultiple)}</td>
+                <tr key={e.project.id}><td>{e.project.name}</td><td className="num text-right">{nokM(e.result.equity)}</td><td className="num text-right">{nokM(e.result.capex)}</td><td className="num text-right">Y{e.a.exitYear} @ {mult(e.a.exitMultiple)}</td>
                   <td className="num text-right">{pct(e.result.equityIrr)}</td><td className="num text-right">{mult(e.result.equityMultiple)}</td><td className="num text-right">{nokM(e.result.exitEquityValue)}</td></tr>
               ))}</tbody>
             </table></div>

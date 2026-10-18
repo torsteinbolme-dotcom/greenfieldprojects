@@ -2,6 +2,8 @@ import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContai
 import type { Assumptions } from '@/financialEngine';
 import type { ModelResult } from '@/lib/model';
 import { bridgeValues } from '@/lib/ebitda-bridge';
+import { performanceYearOf } from '@/lib/year3';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { int, mult, nok, nokM, pct } from '@/lib/format';
 import { Kpi } from './sections';
 import { EbitdaBridge } from './ebitda-bridge';

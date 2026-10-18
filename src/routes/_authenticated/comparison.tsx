@@ -116,10 +116,10 @@ function ComparisonPage() {
           <Card title="Returns">
             <div className="h-64 overflow-hidden">
               <ResponsiveContainer>
-                <BarChart data={rows.map((e) => ({ name: e.project.name, IRR: (e.result.equityIrr ?? 0) * 100 }))}>
+                <BarChart data={rows.map((e) => ({ name: e.project.name, MOIC: e.result.equityMultiple ?? 0 }))}>
                   <CartesianGrid stroke="var(--border)" vertical={false} />
-                  <XAxis dataKey="name" fontSize={11} /><YAxis unit="%" fontSize={11} tickFormatter={(v) => formatNumber(Number(v))} /><Tooltip formatter={(v) => `${formatNumber(Number(v))}%`} />
-                  <Bar dataKey="IRR">{rows.map((e) => <Cell key={e.project.id} fill={colorFor(e.project.id)} />)}</Bar>
+                  <XAxis dataKey="name" fontSize={11} /><YAxis unit="x" fontSize={11} tickFormatter={(v) => formatNumber(Number(v))} /><Tooltip formatter={(v) => mult(Number(v))} />
+                  <Bar dataKey="MOIC">{rows.map((e) => <Cell key={e.project.id} fill={colorFor(e.project.id)} />)}</Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>

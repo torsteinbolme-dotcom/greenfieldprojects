@@ -153,7 +153,7 @@ function Year3VsBenchmarks() {
                   <div className="h-56"><ResponsiveContainer>
                     <BarChart data={chart}>
                       <CartesianGrid stroke="var(--border)" vertical={false} />
-                      <XAxis dataKey="name" fontSize={10} interval={0} /><YAxis fontSize={11} tickFormatter={(v) => formatNumber(Number(v), 0, 0)} />
+                      <XAxis dataKey="name" fontSize={10} interval={0} /><YAxis fontSize={11} width={72} tickFormatter={(v) => formatNumber(Number(v), 0, 0)} />
                       <RTooltip formatter={(v) => (m.kind === "ratio" ? `${formatNumber(Number(v), 1, 1)}%` : formatNumber(Number(v), 0, 0))} />
                       {med != null && <ReferenceLine y={scale(med) ?? 0} stroke="var(--muted-foreground)" strokeDasharray="4 4" label={{ value: "Median", fontSize: 10, position: "insideTopRight" }} />}
                       <Bar dataKey="v" name={m.label}>{chart.map((c, j) => <Cell key={j} fill={c.proj ? "var(--color-primary)" : "#DABE86"} />)}</Bar>

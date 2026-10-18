@@ -30,4 +30,5 @@
 - Investment Summary reads engine outputs directly (incl. additional/total equity). Why: no second calculation path.
 - Per-cost OPEX growth lists (`opexGrowth.cable/fb`) and `merchOpexRate` (merch OPEX = % of merch revenue) are optional scenario fields read via `costIndex`/`merchOpexAt`; absent fields fall back to `costInflation` and the legacy ratio (user-approved 2026-10-18). Why: old versions keep identical results.
 - Project photos: private `project-covers` bucket, path `<org>/<project>.<ext>`; `projects.cover_image_url` stores that path and the UI signs URLs (`src/lib/covers*.ts`). Why: public buckets are blocked.
-- Capacity & seasonality is validation-only: optional `capacity` in scenario JSON, derived in `src/lib/capacity.ts`, never read by the engine; allocation saves only when it totals 100%. Why: capacity must not change forecasts or returns.
+- Capacity stays outside the engine in scenario JSON; distributions are local drafts until valid explicit Save; key the editor by scenario. Why: protect forecasts and isolate drafts.
+- `src/lib/maintenance.ts` flags ambiguous legacy rates without migration; only the active engine field calculates maintenance. Why: inert revenue-based rates cannot safely become CAPEX percentages.

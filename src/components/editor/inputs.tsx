@@ -3,10 +3,10 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { formatNumber, formatNumberInput, parseNumberInput } from "@/lib/format";
 
-type Props = { value: number; onChange: (v: number) => void; percent?: boolean | undefined; disabled?: boolean | undefined; className?: string | undefined; step?: string | undefined; plain?: boolean | undefined };
+type Props = { value: number; onChange: (v: number) => void; percent?: boolean | undefined; disabled?: boolean | undefined; className?: string | undefined; step?: string | undefined; plain?: boolean | undefined; "aria-label"?: string };
 
 /** Numeric input. With `percent`, the stored value is a decimal (0.12) and shown as 12. With `plain`, thousands are not grouped (years). */
-export function NumField({ value, onChange, percent, disabled, className, step, plain }: Props) {
+export function NumField({ value, onChange, percent, disabled, className, step, plain, "aria-label": ariaLabel }: Props) {
   const toText = (v: number) => (Number.isFinite(v) ? formatNumber(percent ? v * 100 : v, 0, 2, !plain) : "");
   const [text, setText] = useState(toText(value));
   const [focused, setFocused] = useState(false);
@@ -14,6 +14,7 @@ export function NumField({ value, onChange, percent, disabled, className, step, 
   return (
     <div className={cn("relative", className)}>
       <Input
+        aria-label={ariaLabel}
         type="text"
         inputMode={step === "1" ? "numeric" : "decimal"}
         disabled={disabled}

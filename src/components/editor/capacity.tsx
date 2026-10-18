@@ -6,7 +6,7 @@ import { Field, NumField } from "@/components/editor/inputs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { int, pct } from "@/lib/format";
-import { allocationValid, capacityOf, capacityTable, EQUAL_ALLOCATION, MONTHS, type Capacity } from "@/lib/capacity";
+import { allocationValid, capacityInputsValid, capacityOf, capacityTable, EQUAL_ALLOCATION, MONTHS, type Capacity } from "@/lib/capacity";
 
 type Props = { a: Assumptions; r: ModelResult | null; ro: boolean; set: (patch: Partial<Assumptions>) => void };
 
@@ -19,7 +19,8 @@ export function CapacitySection({ a, r, ro, set }: Props) {
   const commit = (c: Capacity) => set({ capacity: c } as Partial<Assumptions>);
   const total = alloc.reduce((s, x) => s + x, 0);
   const valid = allocationValid(alloc);
-  const editAlloc = (next: number[]) => { setAlloc(next); if (allocationValid(next)) commit({ ...saved, monthlyAllocation: next }); };
+  const dirty = JSON.stringify(alloc) !== savedKey;
+  const enabled = capacityInputsValid(saved);
 
   const rows = r?.rows ?? [];
   const row = rows[Math.min(yearIdx, rows.length - 1)];
@@ -42,11 +43,12 @@ export function CapacitySection({ a, r, ro, set }: Props) {
       </Card>
 
       <Card>
-        {table && (
+        {!enabled && <p role="status" className="mb-4 text-sm text-warning-foreground">Enter hourly capacity and operating hours to enable capacity validation.</p>}
+        {table && row && (
           <div className="mb-4 grid gap-3 sm:grid-cols-3">
-            <Summary label="Annual forecast passengers" value={int(row!.passengers)} />
+            <Summary label="Annual forecast passengers" value={int(row.passengers)} />
             <Summary label="Highest monthly utilization" value={table.maxUtilization === null ? "–" : pct(table.maxUtilization)} warn={(table.maxUtilization ?? 0) > 1} />
-            <Summary label="Months exceeding capacity" value={String(table.monthsOver)} warn={table.monthsOver > 0} />
+            <Summary label="Months exceeding capacity" value={enabled ? String(table.monthsOver) : "–"} warn={table.monthsOver > 0} />
           </div>
         )}
         <div className="overflow-x-auto">
@@ -60,7 +62,7 @@ export function CapacitySection({ a, r, ro, set }: Props) {
                 return (
                   <tr key={mName} className={`border-b ${m?.exceeds ? "bg-destructive/10" : ""}`}>
                     <td className="py-1">{mName}</td>
-                    <td className="py-1"><NumField percent value={alloc[i] ?? 0} disabled={ro} onChange={(v) => editAlloc(alloc.map((x, j) => (j === i ? v : x)))} /></td>
+                    <td className="py-1"><NumField aria-label={`${mName} allocation`} percent value={alloc[i] ?? 0} disabled={ro} onChange={(v) => setAlloc(alloc.map((x, j) => (j === i ? v : x)))} /></td>
                     <td className="num text-right">{m ? int(m.passengers) : "–"}</td>
                     <td className="num text-right">{m && m.capacity > 0 ? int(m.capacity) : "–"}</td>
                     <td className={`num text-right ${m?.exceeds ? "font-semibold text-destructive" : ""}`}>{m?.utilization == null ? "–" : pct(m.utilization)}</td>
@@ -71,14 +73,18 @@ export function CapacitySection({ a, r, ro, set }: Props) {
                 <td className="py-2">Total</td>
                 <td className={`num text-right ${valid ? "" : "text-destructive"}`}>{pct(total)}</td>
                 <td className="num text-right">{table ? int(table.months.reduce((s, m) => s + m.passengers, 0)) : "–"}</td>
-                <td className="num text-right">{table ? int(table.months.reduce((s, m) => s + m.capacity, 0)) : "–"}</td>
+                <td className="num text-right">{table && enabled ? int(table.months.reduce((s, m) => s + m.capacity, 0)) : "–"}</td>
                 <td />
               </tr>
             </tbody>
           </table>
         </div>
         {!valid && <p className="mt-2 text-xs text-destructive">Monthly allocation must total exactly 100% before it is saved (currently {pct(total)}).</p>}
-        {!ro && <Button size="sm" variant="ghost" className="mt-2" onClick={() => editAlloc(EQUAL_ALLOCATION)}>Reset to equal distribution</Button>}
+        {!ro && <div className="mt-3 flex flex-wrap gap-2">
+          <Button size="sm" disabled={!valid || !dirty} onClick={() => { if (allocationValid(alloc)) commit({ ...saved, monthlyAllocation: [...alloc] }); }}>Save Distribution</Button>
+          <Button size="sm" variant="outline" disabled={!dirty} onClick={() => setAlloc([...saved.monthlyAllocation])}>Cancel Changes</Button>
+          <Button size="sm" variant="ghost" onClick={() => setAlloc([...EQUAL_ALLOCATION])}>Reset to equal distribution</Button>
+        </div>}
       </Card>
     </div>
   );

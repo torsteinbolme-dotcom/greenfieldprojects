@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
-- Keep authoritative `src/financialEngine.ts` and `src/exampleProject.ts` verbatim; ask before changing formulas. Why: the user signed off on these investment calculations.
+- Preserve `src/financialEngine.ts` and `src/exampleProject.ts` except explicitly requested formula changes. Why: calculations are signed off.
 - All outputs are computed client-side from stored inputs (`scenario_assumptions` JSONB, append-only versions); never store outputs edited by hand. Why: results stay deterministic and every version can be audited.
 - Every table has `organization_id`; RLS uses `is_org_member` / `can_edit_org` / `is_org_admin` (security definer). Why: one organization must never see another's data.
 - Scenario saves insert new versions; Base is separate and never overwritten by other scenarios. Why: isolation and version history.
@@ -28,7 +28,7 @@
 - The overview EBITDA bridge derives from engine rows and forecastOpex in `src/lib/ebitda-bridge.ts`, never from a second calculation engine. Why: every business split reconciles with authoritative totals and unavailable categories stay unallocated.
 - Break-even is a read-only engine sensitivity in `src/lib/break-even.ts` (scale the passenger forecast, rederive passenger-linked F&B, solve EBITDA/cashAfterDebt). Why: costs and tax-loss history stay consistent with the engine.
 - Summary/PPTX read engine outputs; `presentation-*` isolates data, layout and OOXML repair. Why: deterministic outputs and valid editable charts.
-- Per-cost OPEX growth lists (`opexGrowth.cable/fb`) and `merchOpexRate` (merch OPEX = % of merch revenue) are optional scenario fields read via `costIndex`/`merchOpexAt`; absent fields fall back to `costInflation` and the legacy ratio (user-approved 2026-10-18). Why: old versions keep identical results.
+- `costIndex`/`merchOpexAt` read optional OPEX growth and merch revenue shares. Explicit manual F&B growth uses year-1 OPEX only; benchmark passenger flags and absent-list legacy scaling remain; mirror precedence in F&B helpers and sensitivity. Why: prevent revenue growth compounding costs, preserving legacy cases.
 - Project photos: private `project-covers` bucket, path `<org>/<project>.<ext>`; `projects.cover_image_url` stores that path and the UI signs URLs (`src/lib/covers*.ts`). Why: public buckets are blocked.
 - Capacity stays outside the engine in scenario JSON; distributions are local drafts until valid explicit Save; key the editor by scenario. Why: protect forecasts and isolate drafts.
 - Only the active maintenance CAPEX percentage calculates maintenance; inert legacy revenue-based rates stay untouched in saved history and are never surfaced as UI warnings. Why: they cannot safely become CAPEX percentages and the user removed the conflict banner.

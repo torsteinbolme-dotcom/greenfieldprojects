@@ -216,7 +216,7 @@ export function RevenueOpexSection({ a, set, ro }: P) {
           <Field label="F&B revenue year 1 (NOK, ex VAT)"><NumField value={a.fbRevenueYear1} disabled={ro || !!fbSel?.revenue} onChange={(v) => set({ fbRevenueYear1: v })} /></Field>
           <Field label="Merchandise revenue year 1 (NOK, ex VAT)"><NumField value={a.merchRevenueYear1} disabled={ro} onChange={(v) => set({ merchRevenueYear1: v })} /></Field>
         </div>
-        <div className="mt-4"><Field label="Ancillary growth"><GrowthList values={a.ancillaryGrowth} disabled={ro} onChange={(v) => set({ ancillaryGrowth: v })} /></Field></div>
+        <div className="mt-4"><Field label="Ancillary revenue growth"><GrowthList values={a.ancillaryGrowth} disabled={ro} onChange={(v) => set({ ancillaryGrowth: v })} /></Field></div>
       </Card>
       <Card title="F&B from restaurant benchmarks" className="lg:col-span-2"><FbBenchmarkPanel a={a} set={set} ro={ro} /></Card>
       <Card title="Operating costs" className="lg:col-span-2">
@@ -224,7 +224,7 @@ export function RevenueOpexSection({ a, set, ro }: P) {
           <Field label="Cable car fixed OPEX year 1 (NOK)"><NumField value={a.cableFixedOpex} disabled={ro} onChange={(v) => set({ cableFixedOpex: v })} /></Field>
           <Field label="Cable car variable OPEX per passenger (NOK)" hint="Year-1 price level; grows with cable car OPEX"><NumField value={a.cableVariableCostPerPassenger ?? 0} disabled={ro} onChange={(v) => set({ cableVariableCostPerPassenger: v })} /></Field>
           <Field label="Annual maintenance CAPEX (% of initial CAPEX)" hint="Investing cash outflow, not OPEX; grows with cable car OPEX"><NumField percent value={a.maintenanceCapexPct ?? 0} disabled={ro} onChange={(v) => set({ maintenanceCapexPct: v })} /></Field>
-          <Field label="F&B OPEX year 1 (NOK)" hint="Scales with F&B revenue"><NumField value={a.fbOpexYear1} disabled={ro || !!fbSel?.opex} onChange={(v) => set({ fbOpexYear1: v })} /></Field>
+          <Field label="F&B OPEX year 1 (NOK)"><NumField value={a.fbOpexYear1} disabled={ro || !!fbSel?.opex} onChange={(v) => set({ fbOpexYear1: v, opexGrowth: { ...a.opexGrowth, fb: a.opexGrowth?.fb?.length ? a.opexGrowth.fb : [a.costInflation, a.costInflation, a.costInflation] } })} /></Field>
           <Field label="Merchandise OPEX (% of merchandise revenue)" hint="Always this share of merchandise revenue, every year"><NumField percent value={a.merchOpexRate ?? (a.merchRevenueYear1 > 0 ? a.merchOpexYear1 / a.merchRevenueYear1 : 0)} disabled={ro} onChange={(v) => set({ merchOpexRate: v, merchOpexYear1: v * a.merchRevenueYear1 })} /><span className="block text-xs text-muted-foreground">= {nok((a.merchOpexRate ?? (a.merchRevenueYear1 > 0 ? a.merchOpexYear1 / a.merchRevenueYear1 : 0)) * a.merchRevenueYear1)} NOK in year 1</span></Field>
         </div>
         <div className="mt-4 grid gap-4 md:grid-cols-2">

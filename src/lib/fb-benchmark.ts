@@ -41,7 +41,7 @@ export function fbEscalator(a: Assumptions, kind: "revenue" | "opex", year = FB_
   const revenueLinked = sel?.revenue ? sourceAdjust(sel, sel.revenue) : a.fbFollowsPassengers;
   const revenue = revenueLinked ? pax * price : ancillary;
   if (kind === "revenue") return revenue;
-  const opex = sel?.opex ? (sourceAdjust(sel, sel.opex) ? pax : 1) : a.fbFollowsPassengers ? pax : revenue;
+  const opex = sel?.opex ? (sourceAdjust(sel, sel.opex) ? pax : 1) : a.opexGrowth?.fb?.length ? 1 : a.fbFollowsPassengers ? pax : revenue;
   return opex * costIndex(a, "fb", year);
 }
 

@@ -22,4 +22,30 @@ describe("OPEX growth and merchandise cost share", () => {
     const a = { ...projectMountain, merchOpexRate: 0.4, opexGrowth: { cable: [0.05], fb: [0.03] } };
     for (const row of calculate(a).rows) { const o = forecastOpex(a, row); expect(o.cableFixed + o.fb + o.merchandise).toBeCloseTo(row.opex, 2); }
   });
+  it("develops manual F&B OPEX from 9 million using 20%, 15%, then 3% only", () => {
+    const a = { ...projectMountain, fbRevenueYear1: 9500000, fbOpexYear1: 9000000,
+      ancillaryGrowth: [0.2, 0.15, 0.04], opexGrowth: { fb: [0.2, 0.15, 0.03] } };
+    const expected = [9000000, 10800000, 12420000, 12792600];
+    for (const ancillaryGrowth of [a.ancillaryGrowth, [0.9]]) {
+      const input = { ...a, ancillaryGrowth };
+      for (const row of calculate(input).rows.slice(0, 4)) {
+        const costs = forecastOpex(input, row);
+        expect(costs.fb).toBeCloseTo(expected[row.year - 1] ?? 0, 6);
+        expect(costs.cableFixed + costs.cableVariable + costs.fb + costs.merchandise).toBeCloseTo(row.opex, 6);
+      }
+    }
+  });
+  it("keeps explicit manual F&B costs even with zero F&B revenue", () => {
+    const a = { ...projectMountain, fbRevenueYear1: 0, fbOpexYear1: 9000000, opexGrowth: { fb: [0.2] } };
+    const row = calculate(a).rows[1];
+    if (!row) throw new Error("Missing year 2");
+    expect(forecastOpex(a, row).fb).toBeCloseTo(10800000, 6);
+  });
+  it("keeps benchmark passenger adjustment with an explicit OPEX growth list", () => {
+    const a = { ...projectMountain, fbOpexYear1: 9000000, passengerGrowth: [0.2],
+      opexGrowth: { fb: [0.1] }, fbBenchmark: { adjust: true, opex: { assetId: "restaurant", year: 2025 } } };
+    const row = calculate(a).rows[1];
+    if (!row) throw new Error("Missing year 2");
+    expect(forecastOpex(a, row).fb).toBeCloseTo(11880000, 6);
+  });
 });

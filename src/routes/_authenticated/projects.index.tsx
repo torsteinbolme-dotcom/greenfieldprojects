@@ -76,9 +76,10 @@ function ProjectsPage() {
                 className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
               />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-primary/85 via-primary/25 to-transparent" />
-              <span className="absolute left-3 top-3 rounded-full bg-card/85 px-2.5 py-1 text-xs font-medium text-card-foreground">
-                {p.location ?? "No location"}
-              </span>
+              <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+                <span className="rounded-full bg-card/85 px-2.5 py-1 text-xs font-medium text-card-foreground">{p.location ?? "No location"}</span>
+                <span className={p.status === "archived" ? "rounded-full bg-card/85 px-2.5 py-1 text-xs font-medium text-muted-foreground" : "rounded-full bg-card/85 px-2.5 py-1 text-xs font-medium text-success"}>{p.status}</span>
+              </div>
               {canEdit && (
                 <label className="absolute right-3 top-3 cursor-pointer rounded-full bg-card/85 px-2.5 py-1 text-xs font-medium text-card-foreground transition hover:bg-card">
                   {uploading === p.id ? "Saving…" : p.cover_image_url ? "Change photo" : "Add photo"}
@@ -102,8 +103,7 @@ function ProjectsPage() {
                 <p className="text-xs text-primary-foreground/80">Updated {new Date(p.updated_at).toLocaleDateString()}</p>
               </div>
             </div>
-            <div className="flex flex-wrap items-center justify-between gap-2 p-3">
-              <span className={p.status === "archived" ? "text-xs text-muted-foreground" : "text-xs text-success"}>{p.status}</span>
+            <div className="flex flex-wrap items-center justify-end gap-1 p-3">
               {canEdit && m && (
                 <div className="flex flex-wrap justify-end gap-1">
                   <Button size="sm" variant="ghost" asChild><Link to="/projects/$projectId" params={{ projectId: p.id }}>Open</Link></Button>

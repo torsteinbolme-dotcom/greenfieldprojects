@@ -46,7 +46,7 @@ export function parseWideSheet(rows: unknown[][]): ImportRow[] {
   const norm = (v: unknown) => String(v ?? "").trim();
   const sectionRow = rows.findIndex((r) => r.some((c) => /cable/i.test(norm(c))));
   if (sectionRow < 0) return [];
-  const sec = rows[sectionRow];
+  const sec = rows[sectionRow] ?? [];
   const names = rows[sectionRow + 1] ?? [];
   const typeAt = (col: number): BusinessType => {
     let t: BusinessType = "cable_car";

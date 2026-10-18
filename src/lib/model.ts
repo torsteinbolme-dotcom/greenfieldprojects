@@ -33,7 +33,7 @@ export function blankAssumptions(name: string): Assumptions {
     fbRevenueYear1: 0, merchRevenueYear1: 0, ancillaryGrowth: [0.03, 0.03, 0.02],
     cableFixedOpex: 10000000, cableVariableCostPerPassenger: 0, fbOpexYear1: 0, merchOpexYear1: 0, costInflation: 0.025,
     capexItems: [{ name: "Cable car", quantity: 1, unitCost: 200000000 }], contingencyRate: 0.15,
-    debtShare: 0.6, interestRate: 0.06, loanYears: 15, taxRate: 0.22, depreciationYears: 25, maintenanceCapexRate: 0.01,
+    debtShare: 0.6, interestRate: 0.06, loanYears: 15, taxRate: 0.22, depreciationYears: 25, maintenanceCapexRate: 0.01, maintenanceCapexPct: 0.01,
     exitYear: 8, exitMultiple: 15, exitTransactionCostRate: 0.01, distributeCashAnnually: false,
   };
 }

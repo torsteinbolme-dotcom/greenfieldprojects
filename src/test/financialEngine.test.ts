@@ -117,7 +117,7 @@ describe("reliability update (mountain-v3)", () => {
   const deficit = () => base({ cableFixedOpex: 200_000_000, years: 10, exitYear: 8 });
 
   it("injects equity only when needed", () => {
-    const ok = calculate(base({ maintenanceCapexRate: 0 }));
+    const ok = calculate(base({ maintenanceCapexPct: 0 }));
     expect(ok.rows.every((r) => r.equityInjection === 0 || r.cashAfterDebt + (ok.rows[r.year - 2]?.retainedCash ?? 0) < 0)).toBe(true);
     const r = calculate(deficit());
     expect(r.additionalEquity).toBeGreaterThan(0);
@@ -137,12 +137,19 @@ describe("reliability update (mountain-v3)", () => {
   });
 
   it("maintenance CAPEX reduces cash but not EBITDA", () => {
-    const a = calculate(base({ maintenanceCapexRate: 0 }));
-    const b = calculate(base({ maintenanceCapexRate: 0.01 }));
+    const a = calculate(base({ maintenanceCapexPct: 0 }));
+    const b = calculate(base({ maintenanceCapexPct: 0.01 }));
     expect(b.rows[2]!.ebitda).toBeCloseTo(a.rows[2]!.ebitda, 6);
     expect(b.rows[0]!.maintenanceCapex).toBeCloseTo(b.capex * 0.01, 4);
     expect(b.rows[2]!.cashAfterDebt).toBeLessThan(a.rows[2]!.cashAfterDebt);
     expect(b.equityIrr!).toBeLessThan(a.equityIrr!);
+  });
+
+  it("legacy maintenance rate is inert so existing valuations are unchanged", () => {
+    const a = calculate(base({ maintenanceCapexRate: 0 }));
+    const b = calculate(base({ maintenanceCapexRate: 0.5 }));
+    expect(b.equityIrr).toBe(a.equityIrr);
+    expect(b.rows[0]!.maintenanceCapex).toBe(0);
   });
 
   it("variable OPEX follows passengers", () => {

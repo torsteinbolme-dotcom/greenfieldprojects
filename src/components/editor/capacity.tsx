@@ -28,7 +28,7 @@ export function CapacitySection({ a, r, ro, set }: Props) {
   return (
     <div className="space-y-4">
       <Card title="Capacity & seasonality">
-        <p className="mb-4 text-xs text-muted-foreground">Validation only — checks the passenger forecast against cable car capacity. It never changes passengers, revenue, EBITDA, IRR, MOIC or exit values.</p>
+        <p className="mb-4 text-xs text-muted-foreground">Validation only — theoretical capacity (hourly capacity × hours × days), not practical capacity. Checks the passenger forecast against cable car capacity. It never changes passengers, revenue, EBITDA, IRR, MOIC or exit values.</p>
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="Hourly cable car capacity (passengers/hour)"><NumField value={saved.hourlyCapacity} disabled={ro} step="1" onChange={(v) => commit({ ...saved, hourlyCapacity: v })} /></Field>
           <Field label="Operating hours per day (average)"><NumField value={saved.hoursPerDay} disabled={ro} onChange={(v) => commit({ ...saved, hoursPerDay: v })} /></Field>

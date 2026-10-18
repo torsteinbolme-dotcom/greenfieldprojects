@@ -62,4 +62,4 @@
 - [x] Comparison charts: each bar now shows its actual value; axis labels no longer wrap (explicit value-axis width, also applied to benchmarks and the EBITDA bridge); verified in the signed-in preview.
 - [x] Projects page: cover-card grid with one photo per project (generated starting photos, upload/replace from the card, private storage with short-lived signed URLs); verified in the signed-in preview.
 - [x] Capacity & seasonality tab (validation only)
-- [ ] Portfolio: MOIC column after Scenario
+- [x] Portfolio: MOIC column after Scenario

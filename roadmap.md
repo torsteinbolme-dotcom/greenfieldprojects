@@ -11,5 +11,6 @@
 - [x] Link child, one-way, annual pass, cruise and tour fares to adult round-trip pricing across editing, saving and forecasts.
 - [x] Add an editable percentage-of-adult-round-trip column and preserve each percentage in scenario versions.
 - [x] Remove the Boardings / guest column from passenger segments.
-- [x] Test fare rules and verify changing and saving prices in the signed-in app.- [x] Remove the variable cost per passenger and maintenance capex inputs from the operating costs card; verify the Revenue tab.
+- [x] Test fare rules and verify changing and saving prices in the signed-in app.
+- [x] Remove the variable cost per passenger and maintenance capex inputs from the operating costs card; verify the Revenue tab.
 - [x] Display years without a thousands separator; verify the opening year displays, edits and saves as 2030.

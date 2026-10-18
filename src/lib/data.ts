@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Assumptions } from "@/financialEngine";
 import { CALCULATION_VERSION } from "./model";
 import { withLinkedTicketPrices } from "./ticket-pricing";
+import { COVER_BUCKET, coverPath } from "./covers";
 
 export type Role = "admin" | "editor" | "viewer";
 export type Membership = { organization_id: string; role: Role; user_id: string; email: string | null; org_name: string };
@@ -35,6 +36,7 @@ export function useMembership() {
 export type ProjectRow = {
   id: string; organization_id: string; name: string; location: string | null; description: string | null;
   status: string; assumption_notes: string | null; benchmark_config?: unknown; created_at: string; updated_at: string;
+  cover_image_url: string | null;
 };
 export type ScenarioRow = { id: string; project_id: string; organization_id: string; name: string; kind: string; created_at: string };
 
@@ -127,6 +129,14 @@ export async function duplicateProject(orgId: string, p: ProjectRow) {
     if (!latest) continue;
     await createScenario(orgId, np.id, s.name, s.kind, latest.assumptions as unknown as Assumptions);
   }
+  if (p.cover_image_url) {
+    const { data: photo } = await supabase.storage.from(COVER_BUCKET).download(p.cover_image_url);
+    if (photo) {
+      const to = coverPath(orgId, np.id, p.cover_image_url);
+      const { error: up } = await supabase.storage.from(COVER_BUCKET).upload(to, photo, { upsert: true, contentType: photo.type || "image/jpeg" });
+      if (!up) await supabase.from("projects").update({ cover_image_url: to }).eq("id", np.id);
+    }
+  }
   await logAudit(orgId, "project", np.id, "duplicated", { from: p.id });
   return np;
 }
@@ -134,6 +144,8 @@ export async function duplicateProject(orgId: string, p: ProjectRow) {
 export async function deleteProject(orgId: string, projectId: string) {
   const { data: files } = await supabase.from("project_files").select("storage_path").eq("project_id", projectId);
   if (files?.length) await supabase.storage.from("project-files").remove(files.map((f) => f.storage_path));
+  const { data: own } = await supabase.from("projects").select("cover_image_url").eq("id", projectId).maybeSingle();
+  if (own?.cover_image_url) await supabase.storage.from(COVER_BUCKET).remove([own.cover_image_url]);
   const { error } = await supabase.from("projects").delete().eq("id", projectId);
   if (error) throw error;
   await logAudit(orgId, "project", projectId, "deleted");

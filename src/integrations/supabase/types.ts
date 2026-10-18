@@ -312,6 +312,7 @@ export type Database = {
         Row: {
           assumption_notes: string | null
           benchmark_config: Json
+          cover_image_url: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -325,6 +326,7 @@ export type Database = {
         Insert: {
           assumption_notes?: string | null
           benchmark_config?: Json
+          cover_image_url?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -338,6 +340,7 @@ export type Database = {
         Update: {
           assumption_notes?: string | null
           benchmark_config?: Json
+          cover_image_url?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null

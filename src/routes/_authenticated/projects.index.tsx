@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createProject, deleteProject, duplicateProject, logAudit, useMembership, useProjects, type ProjectRow } from "@/lib/data";
+import { coverSrc } from "@/lib/covers";
+import { uploadCover, useCoverUrls } from "@/lib/covers-client";
 import { projectMountain } from "@/exampleProject";
 import { blankAssumptions } from "@/lib/model";
 
@@ -25,6 +27,7 @@ function ProjectsPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [rename, setRename] = useState<ProjectRow | null>(null);
   const [confirmDel, setConfirmDel] = useState<ProjectRow | null>(null);
+  const [uploading, setUploading] = useState<string | null>(null);
   const canEdit = m?.role !== "viewer";
   const refresh = () => qc.invalidateQueries();
 
@@ -33,6 +36,21 @@ function ProjectsPage() {
   };
 
   const list = projects.filter((p) => (showArchived ? true : p.status === "active"));
+  const { data: signed = {} } = useCoverUrls(list.map((p) => p.cover_image_url));
+
+  const setPhoto = async (p: ProjectRow, file: File) => {
+    if (!m) return;
+    setUploading(p.id);
+    try {
+      await uploadCover(m.organization_id, p.id, file);
+      toast.success("Photo updated");
+      refresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not save the photo");
+    } finally {
+      setUploading(null);
+    }
+  };
 
   return (
     <div>
@@ -43,38 +61,66 @@ function ProjectsPage() {
           {canEdit && <Button onClick={() => setCreateOpen(true)}>New project</Button>}
         </div>
       </div>
-      <div className="mt-6 overflow-x-auto rounded-md border bg-card">
-        <table className="fin-table">
-          <thead><tr><th>Name</th><th>Location</th><th>Status</th><th>Updated</th><th className="text-right">Actions</th></tr></thead>
-          <tbody>
-            {isLoading && <tr><td colSpan={5} className="text-muted-foreground">Loading…</td></tr>}
-            {!isLoading && list.length === 0 && <tr><td colSpan={5} className="text-muted-foreground">No projects yet.</td></tr>}
-            {list.map((p) => (
-              <tr key={p.id}>
-                <td><Link to="/projects/$projectId" params={{ projectId: p.id }} className="font-medium text-primary hover:underline">{p.name}</Link></td>
-                <td>{p.location ?? "—"}</td>
-                <td><span className={p.status === "archived" ? "text-muted-foreground" : "text-success"}>{p.status}</span></td>
-                <td className="num">{new Date(p.updated_at).toLocaleDateString()}</td>
-                <td className="text-right">
-                  {canEdit && m && (
-                    <div className="flex justify-end gap-1">
-                      <Button size="sm" variant="ghost" asChild><Link to="/projects/$projectId" params={{ projectId: p.id }}>Edit</Link></Button>
-                      <Button size="sm" variant="ghost" onClick={() => setRename(p)}>Rename</Button>
-                      <Button size="sm" variant="ghost" onClick={() => run(() => duplicateProject(m.organization_id, p), "Project duplicated")}>Duplicate</Button>
-                      <Button size="sm" variant="ghost" onClick={() => run(async () => {
-                        const status = p.status === "active" ? "archived" : "active";
-                        const { error } = await supabase.from("projects").update({ status, updated_at: new Date().toISOString() }).eq("id", p.id);
-                        if (error) throw error;
-                        await logAudit(m.organization_id, "project", p.id, status);
-                      }, p.status === "active" ? "Archived" : "Restored")}>{p.status === "active" ? "Archive" : "Unarchive"}</Button>
-                      <Button size="sm" variant="ghost" className="text-destructive" onClick={() => setConfirmDel(p)}>Delete</Button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+      {isLoading && <p className="mt-6 text-muted-foreground">Loading…</p>}
+      {!isLoading && list.length === 0 && <p className="mt-6 text-muted-foreground">No projects yet.</p>}
+
+      <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        {list.map((p) => (
+          <article key={p.id} className="group overflow-hidden rounded-md border bg-card shadow-sm transition hover:shadow-md">
+            <div className="relative aspect-[16/9] overflow-hidden bg-muted">
+              <img
+                src={coverSrc(p, signed)}
+                alt={`${p.name} photo`}
+                loading="lazy"
+                className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-primary/85 via-primary/25 to-transparent" />
+              <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+                <span className="rounded-full bg-card/85 px-2.5 py-1 text-xs font-medium text-card-foreground">{p.location ?? "No location"}</span>
+                <span className={p.status === "archived" ? "rounded-full bg-card/85 px-2.5 py-1 text-xs font-medium text-muted-foreground" : "rounded-full bg-card/85 px-2.5 py-1 text-xs font-medium text-success"}>{p.status}</span>
+              </div>
+              {canEdit && (
+                <label className="absolute right-3 top-3 cursor-pointer rounded-full bg-card/85 px-2.5 py-1 text-xs font-medium text-card-foreground transition hover:bg-card">
+                  {uploading === p.id ? "Saving…" : p.cover_image_url ? "Change photo" : "Add photo"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    disabled={uploading === p.id}
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) void setPhoto(p, f);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              )}
+              <div className="absolute inset-x-0 bottom-0 p-4">
+                <Link to="/projects/$projectId" params={{ projectId: p.id }} className="text-lg font-semibold text-primary-foreground hover:underline">
+                  {p.name}
+                </Link>
+                <p className="text-xs text-primary-foreground/80">Updated {new Date(p.updated_at).toLocaleDateString()}</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-end p-2">
+              {canEdit && m && (
+                <div className="flex flex-nowrap items-center justify-end gap-0 overflow-x-auto">
+                  <Button size="sm" variant="ghost" className="px-2 text-xs" asChild><Link to="/projects/$projectId" params={{ projectId: p.id }}>Open</Link></Button>
+                  <Button size="sm" variant="ghost" className="px-2 text-xs" onClick={() => setRename(p)}>Rename</Button>
+                  <Button size="sm" variant="ghost" className="px-2 text-xs" onClick={() => run(() => duplicateProject(m.organization_id, p), "Project duplicated")}>Duplicate</Button>
+                  <Button size="sm" variant="ghost" className="px-2 text-xs" onClick={() => run(async () => {
+                    const status = p.status === "active" ? "archived" : "active";
+                    const { error } = await supabase.from("projects").update({ status, updated_at: new Date().toISOString() }).eq("id", p.id);
+                    if (error) throw error;
+                    await logAudit(m.organization_id, "project", p.id, status);
+                  }, p.status === "active" ? "Archived" : "Restored")}>{p.status === "active" ? "Archive" : "Unarchive"}</Button>
+                  <Button size="sm" variant="ghost" className="px-2 text-xs text-destructive" onClick={() => setConfirmDel(p)}>Delete</Button>
+                </div>
+              )}
+            </div>
+          </article>
+        ))}
       </div>
 
       {m && <CreateDialog open={createOpen} onOpenChange={setCreateOpen} onCreate={(name, loc, tpl) => run(async () => {
@@ -107,7 +153,7 @@ function ProjectsPage() {
       <Dialog open={!!confirmDel} onOpenChange={(o) => !o && setConfirmDel(null)}>
         <DialogContent>
           <DialogHeader><DialogTitle>Delete {confirmDel?.name}?</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">This permanently removes the project, all scenarios, version history and attached files.</p>
+          <p className="text-sm text-muted-foreground">This permanently removes the project, all scenarios, version history, attached files and its photo.</p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmDel(null)}>Cancel</Button>
             <Button variant="destructive" onClick={() => confirmDel && m && run(async () => { await deleteProject(m.organization_id, confirmDel.id); setConfirmDel(null); }, "Deleted")}>Delete</Button>
@@ -141,6 +187,7 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
               </SelectContent>
             </Select>
           </div>
+          <p className="text-xs text-muted-foreground">New projects start with a neutral mountain photo — add your own with the “Add photo” button on the card.</p>
           <DialogFooter><Button type="submit">Create</Button></DialogFooter>
         </form>
       </DialogContent>

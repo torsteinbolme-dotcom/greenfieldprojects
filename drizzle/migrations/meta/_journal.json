@@ -36,6 +36,20 @@
       "when": 1792330223794,
       "tag": "0004_benchmark_forecast_status",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792348839224,
+      "tag": "0005_project_cover_image",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792348894487,
+      "tag": "0006_project_cover_url_comment",
+      "breakpoints": true
     }
   ]
 }

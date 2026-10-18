@@ -39,7 +39,7 @@
 - [ ] New accounts don't get the 2025 benchmark seed yet.
 - [x] Comparison split into Project vs. Project and Year 3 vs. Benchmarks with expandable sidebar menu; verified signed in.
 - [x] Display differences with an explicit sign and colour them: + green, - red, zero and missing neutral; verified in the signed-in preview.
-- [x] Use Benchmark as Project Basis (project tab + Year 3 comparison)
+- [x] Removed "Use Benchmark as Project Basis" (user request 2026-10-18)
 - [x] F&B revenue/OPEX "Use Benchmark" selectors with passenger adjustment
 - [x] F&B following annual passengers in every year
 - [x] F&B benchmarks scaled to year-3 passengers (year 1 back-computed so year 3 lands on the scaled amount)

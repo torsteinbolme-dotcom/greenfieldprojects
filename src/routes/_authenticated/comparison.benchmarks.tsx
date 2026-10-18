@@ -4,7 +4,6 @@ import { z } from "zod";
 import { Info } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, Cell, ReferenceLine, ResponsiveContainer, Tooltip as RTooltip, XAxis, YAxis } from "recharts";
 import { Card } from "@/components/editor/sections";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -95,12 +94,6 @@ function Year3VsBenchmarks() {
 
         <ProjectPicker projects={projects} scenarios={scenarios} ids={ids} scMap={scMap} onChange={onPick} />
 
-        {projRows.length > 0 && <div className="flex flex-wrap items-center gap-3 rounded-md border p-3">
-          <span className="text-sm">Build a project's forecast from benchmarks, using its Year 3 passengers:</span>
-          <Select value={focus?.e.project.id ?? ""} onValueChange={setFocus}><SelectTrigger className="w-60"><SelectValue /></SelectTrigger>
-            <SelectContent>{projRows.map((p) => <SelectItem key={p.e.project.id} value={p.e.project.id}>{p.e.project.name} — {p.e.scenario.name}</SelectItem>)}</SelectContent></Select>
-          <Button disabled={!focus} onClick={() => focus && navigate({ to: "/projects/$projectId", params: { projectId: focus.e.project.id }, search: { tab: "benchmarking", basis: "1", scenario: focus.e.scenario.id } })}>Use Benchmark as Project Basis</Button>
-        </div>}
 
         <div className="grid gap-4 md:grid-cols-2">
           <AssetPicker title="Cable car benchmarks" items={assetsOf(assets, "cable_car")} sel={cableIds} onChange={setCableSel} year={year} status={status} records={records} />

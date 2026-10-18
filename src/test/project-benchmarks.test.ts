@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { calculate } from "@/financialEngine";
 import { projectMountain as exampleProject } from "@/exampleProject";
 import { benchmarkSuggestions, DEFAULT_STABILISED_YEAR, deviation, equalWeights, projectMetrics, weightedBenchmark, weightsValid } from "@/lib/project-benchmarks";
-import { DEFAULT_TARGET_YEAR } from "@/lib/benchmark-basis";
+const DEFAULT_TARGET_YEAR = 3; // was the basis dialog default; kept to pin the stabilised-year default
 import { YEAR3 } from "@/lib/year3";
 import type { BenchmarkAsset, BenchmarkRecord } from "@/lib/benchmarks";
 

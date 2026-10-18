@@ -28,7 +28,7 @@ import { BreakEvenPanel } from "@/components/editor/break-even";
 import { SaveControls } from "@/components/editor/save-controls";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
-  validateSearch: z.object({ scenario: z.string().optional(), tab: z.string().optional(), basis: z.coerce.string().optional() }),
+  validateSearch: z.object({ scenario: z.string().optional(), tab: z.string().optional() }),
   head: () => ({ meta: [{ title: "Project editor — Cable Car Portfolio" }, { name: "description", content: "Edit project assumptions, forecast and exit analysis." }, { property: "og:title", content: "Project editor — Cable Car Portfolio" }, { property: "og:description", content: "Cable car project model." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: EditorPage,
 });
@@ -158,9 +158,7 @@ function EditorPage() {
         <TabsContent value="financing"><FinancingSection a={draft} set={set} ro={ro} r={r} /></TabsContent>
         <TabsContent value="forecast">{r ? <ForecastSection r={r} a={draft} /> : <p className="text-muted-foreground">Fix the inputs above to see the forecast.</p>}</TabsContent>
         <TabsContent value="exit">{r ? <ExitSection a={draft} set={set} ro={ro} r={r} /> : <p className="text-muted-foreground">Fix the inputs to see exit analysis.</p>}</TabsContent>
-        <TabsContent value="benchmarking"><BenchmarkingSection projectId={project.id} config={(project.benchmark_config ?? {}) as BenchmarkConfig} a={draft} r={r} ro={ro} apply={set}
-          scenarios={scenarios} scenarioId={scenario.id} onScenario={(id) => navigate({ search: (s) => ({ ...s, scenario: id }), replace: true })}
-          basisOpen={search.basis === "1"} setBasisOpen={(o) => navigate({ search: (s) => ({ ...s, basis: o ? "1" : undefined }), replace: true })} /></TabsContent>
+        <TabsContent value="benchmarking"><BenchmarkingSection projectId={project.id} config={(project.benchmark_config ?? {}) as BenchmarkConfig} a={draft} r={r} ro={ro} apply={set} /></TabsContent>
         <TabsContent value="history">
           <Card title={`Version history — ${scenario.name}`}>
             <table className="fin-table">

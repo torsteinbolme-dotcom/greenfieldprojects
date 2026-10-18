@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { COLORS, encodeSc, ProjectPicker, useSelection, type Entry } from "@/components/comparison/selection";
-import { sortByMetric } from "@/lib/portfolio";
+import { devValue, sortByMetric } from "@/lib/portfolio";
 import { formatNumber, mult, nok, nokM, pct } from "@/lib/format";
 import { projectReturns, splitYear, year3Row } from "@/lib/year3";
 

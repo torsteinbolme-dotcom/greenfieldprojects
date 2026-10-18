@@ -49,7 +49,8 @@ function solve(evaluate: (passengers: number) => number, forecast: number): Thre
     const mid = (lo + hi) / 2;
     if (evaluate(mid) >= 0) hi = mid; else lo = mid;
   }
-  return { passengers: Math.ceil(hi), message: null };
+  const floor = Math.floor(hi);
+  return { passengers: evaluate(floor) >= 0 ? floor : Math.ceil(hi), message: null };
 }
 export function breakEven(a: Assumptions, year = DEFAULT_BREAK_EVEN_YEAR): BreakEven {
   const forecast = passengersAt(a, year);

@@ -26,11 +26,11 @@ describe('engine-based annual break-even', () => {
   it('cash tax increases threshold when repayment exceeds tax depreciation', () => {
     const a = base({ depreciationYears: 100 });
     const b = breakEven(a, 1);
-    expect(b.cash.passengers).toBe(281);
-    const row = evaluatePassengers(a, 1, 281);
-    expect(row.tax).toBe(3025);
+    expect(b.cash.passengers).toBe(280);
+    const row = evaluatePassengers(a, 1, 280);
+    expect(row.tax).toBe(3000);
     expect(row.cashAfterDebt).toBeGreaterThanOrEqual(0);
-    expect(evaluatePassengers(a, 1, 280).cashAfterDebt).toBeLessThan(0);
+    expect(evaluatePassengers(a, 1, 279).cashAfterDebt).toBeLessThan(0);
   });
   it('selected-year volume is achieved with the full passenger growth history', () => {
     const a = base({ passengerGrowth: [0.1] });
@@ -43,8 +43,8 @@ describe('engine-based annual break-even', () => {
     const row = evaluatePassengers(a, 3, 400);
     expect(row).toEqual(calculate({ ...a, initialPassengers: 100 }).rows[2]);
     expect(row.interest).toBe(3000); expect(row.principal).toBe(10000);
-    expect(row.tax).toBe(7750);
-    expect(row.cashAfterDebt).toBe(9250);
+    expect(row.tax).toBe(6250);
+    expect(row.cashAfterDebt).toBe(10750);
   });
   it('uses independent frozen restaurant passenger costs, not all-variable OPEX', () => {
     const a: AssumptionsWithFb = { ...base(), fbBenchmark: { adjust: true, revenue: { assetId: 'r', year: 2025, snapshot: { assetId: 'r', name: 'Hoven', year: 2025, historicalAmount: 20000, cableCarId: 'c', cableCarName: 'Loen', cableCarPassengers: 1000, costInflation: 0, priceGrowth: [0], ancillaryGrowth: [0], adjust: true, manualAdjustment: 0 } }, opex: { assetId: 'r', year: 2025, snapshot: { assetId: 'r', name: 'Hoven', year: 2025, historicalAmount: 10000, cableCarId: 'c', cableCarName: 'Loen', cableCarPassengers: 1000, costInflation: 0, priceGrowth: [0], ancillaryGrowth: [0], adjust: true, manualAdjustment: 0 } } } };

@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Assumptions } from "@/financialEngine";
 import { CALCULATION_VERSION } from "./model";
 import { withLinkedTicketPrices } from "./ticket-pricing";
+import { COVER_BUCKET, coverPath } from "./covers";
 
 export type Role = "admin" | "editor" | "viewer";
 export type Membership = { organization_id: string; role: Role; user_id: string; email: string | null; org_name: string };
@@ -128,6 +129,11 @@ export async function duplicateProject(orgId: string, p: ProjectRow) {
     if (!latest) continue;
     await createScenario(orgId, np.id, s.name, s.kind, latest.assumptions as unknown as Assumptions);
   }
+  if (p.cover_image_url) {
+    const to = coverPath(orgId, np.id, p.cover_image_url.split(".").pop() ?? "jpg");
+    const { error: copyErr } = await supabase.storage.from(COVER_BUCKET).copy(COVER_BUCKET, p.cover_image_url, to);
+    if (!copyErr) await supabase.from("projects").update({ cover_image_url: to }).eq("id", np.id);
+  }
   await logAudit(orgId, "project", np.id, "duplicated", { from: p.id });
   return np;
 }
@@ -135,6 +141,8 @@ export async function duplicateProject(orgId: string, p: ProjectRow) {
 export async function deleteProject(orgId: string, projectId: string) {
   const { data: files } = await supabase.from("project_files").select("storage_path").eq("project_id", projectId);
   if (files?.length) await supabase.storage.from("project-files").remove(files.map((f) => f.storage_path));
+  const { data: own } = await supabase.from("projects").select("cover_image_url").eq("id", projectId).maybeSingle();
+  if (own?.cover_image_url) await supabase.storage.from(COVER_BUCKET).remove([own.cover_image_url]);
   const { error } = await supabase.from("projects").delete().eq("id", projectId);
   if (error) throw error;
   await logAudit(orgId, "project", projectId, "deleted");

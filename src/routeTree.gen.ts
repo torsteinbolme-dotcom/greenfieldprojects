@@ -17,6 +17,7 @@ import { Route as AuthenticatedComparisonRouteImport } from './routes/_authentic
 import { Route as AuthenticatedPortfolioRouteImport } from './routes/_authenticated/portfolio'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedComparisonIndexRouteImport } from './routes/_authenticated/comparison.index'
+import { Route as AuthenticatedComparisonProjectsRouteImport } from './routes/_authenticated/comparison.projects'
 import { Route as AuthenticatedProjectsIndexRouteImport } from './routes/_authenticated/projects.index'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated/projects.$projectId'
 
@@ -60,6 +61,12 @@ const AuthenticatedComparisonIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedComparisonRoute,
   } as any)
+const AuthenticatedComparisonProjectsRoute =
+  AuthenticatedComparisonProjectsRouteImport.update({
+    id: '/projects',
+    path: '/projects',
+    getParentRoute: () => AuthenticatedComparisonRoute,
+  } as any)
 const AuthenticatedProjectsIndexRoute =
   AuthenticatedProjectsIndexRouteImport.update({
     id: '/projects/',
@@ -80,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/comparison': typeof AuthenticatedComparisonRouteWithChildren
   '/portfolio': typeof AuthenticatedPortfolioRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/comparison/projects': typeof AuthenticatedComparisonProjectsRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/comparison/': typeof AuthenticatedComparisonIndexRoute
   '/projects/': typeof AuthenticatedProjectsIndexRoute
@@ -90,6 +98,7 @@ export interface FileRoutesByTo {
   '/benchmarks': typeof AuthenticatedBenchmarksRoute
   '/portfolio': typeof AuthenticatedPortfolioRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/comparison/projects': typeof AuthenticatedComparisonProjectsRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/comparison': typeof AuthenticatedComparisonIndexRoute
   '/projects': typeof AuthenticatedProjectsIndexRoute
@@ -103,6 +112,7 @@ export interface FileRoutesById {
   '/_authenticated/comparison': typeof AuthenticatedComparisonRouteWithChildren
   '/_authenticated/portfolio': typeof AuthenticatedPortfolioRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/comparison/projects': typeof AuthenticatedComparisonProjectsRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/_authenticated/comparison/': typeof AuthenticatedComparisonIndexRoute
   '/_authenticated/projects/': typeof AuthenticatedProjectsIndexRoute
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/comparison'
     | '/portfolio'
     | '/settings'
+    | '/comparison/projects'
     | '/projects/$projectId'
     | '/comparison/'
     | '/projects/'
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '/benchmarks'
     | '/portfolio'
     | '/settings'
+    | '/comparison/projects'
     | '/projects/$projectId'
     | '/comparison'
     | '/projects'
@@ -138,6 +150,7 @@ export interface FileRouteTypes {
     | '/_authenticated/comparison'
     | '/_authenticated/portfolio'
     | '/_authenticated/settings'
+    | '/_authenticated/comparison/projects'
     | '/_authenticated/projects/$projectId'
     | '/_authenticated/comparison/'
     | '/_authenticated/projects/'
@@ -207,6 +220,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedComparisonIndexRouteImport
       parentRoute: typeof AuthenticatedComparisonRoute
     }
+    '/_authenticated/comparison/projects': {
+      id: '/_authenticated/comparison/projects'
+      path: '/projects'
+      fullPath: '/comparison/projects'
+      preLoaderRoute: typeof AuthenticatedComparisonProjectsRouteImport
+      parentRoute: typeof AuthenticatedComparisonRoute
+    }
     '/_authenticated/projects/': {
       id: '/_authenticated/projects/'
       path: '/projects'
@@ -225,11 +245,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedComparisonRouteChildren {
+  AuthenticatedComparisonProjectsRoute: typeof AuthenticatedComparisonProjectsRoute
   AuthenticatedComparisonIndexRoute: typeof AuthenticatedComparisonIndexRoute
 }
 
 const AuthenticatedComparisonRouteChildren: AuthenticatedComparisonRouteChildren =
   {
+    AuthenticatedComparisonProjectsRoute: AuthenticatedComparisonProjectsRoute,
     AuthenticatedComparisonIndexRoute: AuthenticatedComparisonIndexRoute,
   }
 

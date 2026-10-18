@@ -25,19 +25,27 @@ describe("F&B from restaurant benchmarks (year-3 basis)", () => {
     const a: AssumptionsWithFb = { ...base, fbBenchmark: { adjust: true, revenue: { assetId: "hoven", year: 2025 }, opex: { assetId: "eggen", year: 2025 } } };
     const n = withFbBenchmark(a, assets, records);
     const rev3 = 26368000 * pax3 / 190000, opex3 = 17583879 * pax3 / 116505;
-    expect(n.fbRevenueYear1).toBe(Math.round(rev3 / fbEscalator(a, "revenue")));
-    expect(n.fbOpexYear1).toBe(Math.round(opex3 / fbEscalator(a, "opex")));
+    expect(n.fbRevenueYear1).toBe(Math.round(rev3 / fbEscalator(n, "revenue")));
+    expect(n.fbOpexYear1).toBe(Math.round(opex3 / fbEscalator(n, "opex")));
   });
-  it("uses original figures when the passenger adjustment is off", () => {
+  it("always scales a selected restaurant's revenue per passenger, including previously unadjusted selections", () => {
     const n = withFbBenchmark({ ...base, fbBenchmark: { adjust: false, revenue: { assetId: "hoven", year: 2025 } } } as AssumptionsWithFb, assets, records);
-    expect(n.fbRevenueYear1).toBe(26368000);
+    expect(n.fbBenchmark?.adjust).toBe(true);
+    expect(n.fbFollowsPassengers).toBe(true);
+    expect(calculate(n).rows[2]?.fbRevenue).toBeCloseTo(26368000 / 190000 * 345000, -1);
+  });
+  it("always scales a selected restaurant's OPEX per passenger to project year-3 passengers", () => {
+    const n = withFbBenchmark({ ...base, fbBenchmark: { adjust: false, opex: { assetId: "eggen", year: 2025 } } } as AssumptionsWithFb, assets, records);
+    const row = calculate(n).rows[2];
+    if (!row) throw new Error("Missing year 3");
+    expect(fbOpexAt(n, row)).toBeCloseTo(17583879 / 116505 * 345000, -1);
   });
   it("follows project passengers when they change", () => {
     const sel = { adjust: true, revenue: { assetId: "hoven", year: 2025 } };
     const a: AssumptionsWithFb = { ...base, initialPassengers: 380000, fbBenchmark: sel };
     const n = withFbBenchmark(a, assets, records);
     const target = 26368000 * passengersAt(a, FB_BASIS_YEAR) / 190000;
-    expect(n.fbRevenueYear1).toBe(Math.round(target / fbEscalator(a, "revenue")));
+    expect(n.fbRevenueYear1).toBe(Math.round(target / fbEscalator(n, "revenue")));
   });
   it("keeps the last value and warns when the benchmark is deleted", () => {
     const a = { ...base, fbBenchmark: { adjust: true, revenue: { assetId: "gone", year: 2025 } } } as AssumptionsWithFb;

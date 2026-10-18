@@ -82,7 +82,7 @@ function EditorPage() {
   useEffect(() => {
     if (!draft || ro || !bench.data || !(draft as AssumptionsWithFb).fbBenchmark) return;
     const next = withFbBenchmark(draft as AssumptionsWithFb, bench.data.assets, bench.data.records);
-    if (next.fbRevenueYear1 !== draft.fbRevenueYear1 || next.fbOpexYear1 !== draft.fbOpexYear1) controller?.edit(next, "fbBenchmark:passengers");
+    if (next.fbRevenueYear1 !== draft.fbRevenueYear1 || next.fbOpexYear1 !== draft.fbOpexYear1 || next.fbFollowsPassengers !== draft.fbFollowsPassengers || next.fbBenchmark?.adjust !== (draft as AssumptionsWithFb).fbBenchmark?.adjust) controller?.edit(next, "fbBenchmark:passengers");
   }, [draft, bench.data, ro, controller]);
   const [newScenOpen, setNewScenOpen] = useState(false);
 

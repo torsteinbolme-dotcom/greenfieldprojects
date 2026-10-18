@@ -75,11 +75,12 @@ export function fbLine(kind: "revenue" | "opex", source: FbSource, adjust: boole
 export function withFbBenchmark<T extends AssumptionsWithFb>(a: T, assets: BenchmarkAsset[], records: BenchmarkRecord[]): T {
   const sel = a.fbBenchmark;
   if (!sel) return a;
-  const next = { ...a };
+  if (!sel.revenue && !sel.opex) return a;
+  const next = { ...a, fbBenchmark: { ...sel, adjust: true }, fbFollowsPassengers: true };
   const paxBasis = passengersAt(a, FB_BASIS_YEAR);
   const year1 = (kind: "revenue" | "opex", adjusted: number) =>
-    Math.round(sel.adjust ? adjusted / fbEscalator(a, kind) : adjusted);
-  if (sel.revenue) { const l = fbLine("revenue", sel.revenue, sel.adjust, paxBasis, assets, records); if (l.adjusted != null) next.fbRevenueYear1 = year1("revenue", l.adjusted); }
-  if (sel.opex) { const l = fbLine("opex", sel.opex, sel.adjust, paxBasis, assets, records); if (l.adjusted != null) next.fbOpexYear1 = year1("opex", l.adjusted); }
+    Math.round(adjusted / fbEscalator(next, kind));
+  if (sel.revenue) { const l = fbLine("revenue", sel.revenue, true, paxBasis, assets, records); if (l.adjusted != null) next.fbRevenueYear1 = year1("revenue", l.adjusted); }
+  if (sel.opex) { const l = fbLine("opex", sel.opex, true, paxBasis, assets, records); if (l.adjusted != null) next.fbOpexYear1 = year1("opex", l.adjusted); }
   return next;
 }

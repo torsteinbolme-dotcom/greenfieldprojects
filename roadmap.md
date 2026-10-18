@@ -37,4 +37,5 @@
 - [x] F&B revenue/OPEX "Use Benchmark" selectors with passenger adjustment
 - [x] F&B following annual passengers in every year
 - [x] F&B benchmarks scaled to year-3 passengers (year 1 back-computed so year 3 lands on the scaled amount)
+- [ ] Automatically passenger-scale every selected restaurant's revenue and OPEX, including existing selections; verify saving and reload.
 - [x] Default the Benchmarking comparison to operating year 3 (stabilised), matching Year 3 everywhere; verified in the signed-in preview.

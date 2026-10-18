@@ -131,7 +131,7 @@ function EditorPage() {
             <TabsTrigger key={k} value={k}>{l}</TabsTrigger>
           ))}
         </TabsList>
-        <TabsContent value="summary">{r ? <InvestmentSummary key={scenario.id} a={draft} r={r} name={project.name} location={project.location} /> : <p className="text-muted-foreground">Fix the inputs to see the investment summary.</p>}</TabsContent>
+        <TabsContent value="summary">{r ? <InvestmentSummary key={scenario.id} a={draft} r={r} name={project.name} location={project.location} onPerformanceYear={(year) => set({ performanceYear: year })} onExitYear={(year) => set({ exitYear: year })} /> : <p className="text-muted-foreground">Fix the inputs to see the investment summary.</p>}</TabsContent>
         <TabsContent value="overview" className="space-y-4">
           {r && (
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-7">

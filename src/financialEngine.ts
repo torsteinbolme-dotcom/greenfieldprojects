@@ -15,6 +15,7 @@ export type Assumptions = {
   depreciationYears:number;maintenanceCapexRate:number;
   exitYear:number;exitMultiple:number;exitTransactionCostRate:number;
   distributeCashAnnually:boolean;
+  fbFollowsPassengers?:boolean;
 };
 export type YearResult={year:number;calendarYear:number;passengers:number;ticketNetPrice:number;ticketRevenue:number;fbRevenue:number;merchRevenue:number;revenue:number;opex:number;ebitda:number;depreciation:number;ebit:number;openingDebt:number;interest:number;principal:number;closingDebt:number;tax:number;cashAfterDebt:number;distribution:number;retainedCash:number;dscr:number|null};
 const growth=(values:number[],year:number)=>values[Math.min(year-2,values.length-1)]??0;
@@ -40,10 +41,13 @@ export function calculate(a:Assumptions){
   const rows:YearResult[]=[];let passengers=a.initialPassengers,price=weightedTicket,fb=a.fbRevenueYear1,merch=a.merchRevenueYear1,openingDebt=debt,retainedCash=0,lossCarryforward=0;
   for(let year=1;year<=a.years;year++){
     if(year>1){passengers*=1+growth(a.passengerGrowth,year);price*=1+growth(a.priceGrowth,year);fb*=1+growth(a.ancillaryGrowth,year);merch*=1+growth(a.ancillaryGrowth,year)}
+    // F&B linked to passengers (opt-in, set by restaurant benchmark selection): revenue follows passengers and ticket price growth, costs follow passengers and cost inflation.
+    const paxIndex=a.initialPassengers>0?passengers/a.initialPassengers:0,priceIndex=weightedTicket>0?price/weightedTicket:1;
+    if(a.fbFollowsPassengers)fb=a.fbRevenueYear1*paxIndex*priceIndex;
     const ticketRevenue=passengers*price,revenue=ticketRevenue+fb+merch;
     const inflate=Math.pow(1+a.costInflation,year-1);
     const opex=a.cableFixedOpex*inflate+
-      (a.fbRevenueYear1>0? a.fbOpexYear1*fb/a.fbRevenueYear1:0)*inflate+
+      (a.fbFollowsPassengers? a.fbOpexYear1*paxIndex:(a.fbRevenueYear1>0? a.fbOpexYear1*fb/a.fbRevenueYear1:0))*inflate+
       (a.merchRevenueYear1>0?a.merchOpexYear1*merch/a.merchRevenueYear1:0)*inflate;
     const ebitda=revenue-opex,depreciation=capex/a.depreciationYears,ebit=ebitda-depreciation;
     const interest=openingDebt*a.interestRate,principal=year<=a.loanYears?Math.min(openingDebt,debt/a.loanYears):0;

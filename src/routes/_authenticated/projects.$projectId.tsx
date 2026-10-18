@@ -140,8 +140,8 @@ function EditorPage() {
               <Kpi label="Y3 passengers" value={int(y3?.passengers)} />
               <Kpi label="Y3 EBITDA" value={nokM(y3?.ebitda)} sub={`Margin ${pct(y3 && y3.revenue ? y3.ebitda / y3.revenue : null)}`} />
               <Kpi label="Equity IRR" value={pct(r.equityIrr)} sub={`Exit Y${draft.exitYear} @ ${mult(draft.exitMultiple)}`} />
-              <Kpi label="MOIC" value={mult(r.equityMultiple)} />
-              <Kpi label="Exit equity" value={nokM(r.exitEquityValue)} sub="NOK m" />
+              <Kpi label={`MOIC Y${draft.exitYear}`} value={mult(r.equityMultiple)} />
+              <Kpi label={`Exit equity Y${draft.exitYear}`} value={nokM(r.exitEquityValue)} sub="NOK m" />
             </div>
           )}
           {r && <EbitdaBridge key={scenario.id} a={draft} r={r} />}

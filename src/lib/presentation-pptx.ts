@@ -50,7 +50,7 @@ export function buildPresentation(d: PresentationData, options: PresentationOpti
         { x: .6, y: 1.85, w: 12.1, h: 4.7, showLegend: kind !== 'passengers', legendPos: 'b',
           chartColors: [C.blue, C.gold], showValue: false, catAxisLabelFontSize: 12,
           valAxisLabelFontSize: 14, valAxisLabelFormatCode: kind === 'passengers' ? '#,##0' : '0.0',
-          valGridLine: { color: C.grey, size: .5 }, lineSize: 2, showMarker: false,
+          valGridLine: { color: C.grey, size: .5 }, lineSize: 2,
           showTitle: false, showBorder: false });
     } else {
       const chosen = rows.filter(x => x.year === 1 || x.year === 3 || x.year === a.exitYear || x.year === rows.length);

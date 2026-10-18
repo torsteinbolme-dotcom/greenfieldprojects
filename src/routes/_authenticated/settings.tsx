@@ -2,10 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
+import { useAutosave } from "@/hooks/use-autosave";
+import { SaveControls } from "@/components/editor/save-controls";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/editor/sections";
-import { useMembership } from "@/lib/data";
+import { useMembership, type Membership } from "@/lib/data";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — Cable Car Portfolio" }, { name: "description", content: "Organization, members and activity log." }, { property: "og:title", content: "Settings — Cable Car Portfolio" }, { property: "og:description", content: "Organization settings." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -23,16 +24,7 @@ function SettingsPage() {
     <div className="space-y-6">
       <div><p className="eyebrow">Settings</p><h1 className="mt-1 text-3xl font-semibold">Organization</h1></div>
       <Card title="Organization name">
-        <form className="flex max-w-md gap-2" onSubmit={async (e) => {
-          e.preventDefault();
-          const name = String(new FormData(e.currentTarget).get("name") ?? "").trim();
-          const { error } = await supabase.from("organizations").update({ name }).eq("id", m.organization_id);
-          if (error) { toast.error(error.message); return; }
-          toast.success("Saved"); qc.invalidateQueries({ queryKey: ["membership"] });
-        }}>
-          <Input name="name" defaultValue={m.org_name} disabled={!admin} />
-          {admin && <Button type="submit">Save</Button>}
-        </form>
+        <OrganizationName m={m} />
       </Card>
       <Card title="Members">
         <table className="fin-table">
@@ -60,4 +52,19 @@ function SettingsPage() {
       </Card>
     </div>
   );
+}
+
+function OrganizationName({ m }: { m: Membership }) {
+  const qc = useQueryClient();
+  const { controller, state } = useAutosave(m.organization_id, m.org_name, async (name) => {
+    if (!name.trim()) throw new Error("Organization name cannot be empty");
+    const { error } = await supabase.from("organizations").update({ name: name.trim() }).eq("id", m.organization_id);
+    if (error) throw error;
+    void qc.invalidateQueries({ queryKey: ["membership"] });
+  });
+  if (!controller || !state) return null;
+  return <div className="flex max-w-lg flex-wrap items-center gap-2">
+    <Input className="min-w-48 flex-1" name="name" value={state.value} disabled={m.role !== "admin"} onChange={(e) => controller.edit(e.target.value, "name")} />
+    {m.role === "admin" && <SaveControls state={state} undo={controller.undo} retry={() => { void controller.flush(); }} />}
+  </div>;
 }

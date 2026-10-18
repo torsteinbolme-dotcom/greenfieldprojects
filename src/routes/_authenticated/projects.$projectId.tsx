@@ -136,7 +136,7 @@ function EditorPage() {
           {r && (
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-7">
               <Kpi label="Investment" value={nokM(r.capex)} sub="NOK m incl. contingency" />
-              <Kpi label="Weighted ticket" value={nok(r.weightedTicket)} sub="NOK / guest, net" />
+              <Kpi label="Weighted ticket Y1" value={nok(r.weightedTicket)} sub="NOK / guest, net" />
               <Kpi label="Y3 passengers" value={int(y3?.passengers)} />
               <Kpi label="Y3 EBITDA" value={nokM(y3?.ebitda)} sub={`Margin ${pct(y3 && y3.revenue ? y3.ebitda / y3.revenue : null)}`} />
               <Kpi label="Equity IRR" value={pct(r.equityIrr)} sub={`Exit Y${draft.exitYear} @ ${mult(draft.exitMultiple)}`} />

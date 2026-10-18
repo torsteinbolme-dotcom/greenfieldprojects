@@ -60,7 +60,7 @@ export function SegmentsSection({ a, set, ro }: P) {
       )}
       <div className="overflow-x-auto">
         <table className="fin-table [&_td]:min-w-24">
-          <thead><tr><th>Segment</th><th>Share</th><th>% of adult round trip</th><th>Ticket gross incl VAT (NOK)</th><th>VAT</th><th>Commission</th><th>Boardings / guest</th><th className="text-right">Net realized / guest (NOK)</th><th /></tr></thead>
+          <thead><tr><th>Segment</th><th>Share</th><th>% of adult round trip</th><th>Ticket gross incl VAT (NOK)</th><th>VAT</th><th>Commission</th><th className="text-right">Net realized / guest (NOK)</th><th /></tr></thead>
           <tbody>
             {a.segments.map((s, i) => (
               <tr key={i}>
@@ -76,20 +76,19 @@ export function SegmentsSection({ a, set, ro }: P) {
                 </td>
                 <td className="w-24"><NumField percent value={s.vatRate} disabled={ro} onChange={(v) => upd(i, { vatRate: v })} /></td>
                 <td className="w-24"><NumField percent value={s.commission} disabled={ro} onChange={(v) => upd(i, { commission: v })} /></td>
-                <td className="w-24"><NumField value={s.boardingsPerGuest} disabled={ro} onChange={(v) => upd(i, { boardingsPerGuest: v })} /></td>
                 <td className="num text-right">{nok(segmentNetPerGuest(s), 2)}</td>
                 <td>{!ro && a.segments.length > 1 && <Button size="sm" variant="ghost" onClick={() => set({ segments: a.segments.filter((_, j) => j !== i) })}>Remove</Button>}</td>
               </tr>
             ))}
             <tr className="font-medium">
-              <td>Total / weighted</td><td className="num text-right">{pct(sum, 2)}</td><td colSpan={5} />
+              <td>Total / weighted</td><td className="num text-right">{pct(sum, 2)}</td><td colSpan={4} />
               <td className="num text-right">{nok(weighted, 2)}</td><td />
             </tr>
           </tbody>
         </table>
       </div>
       {!ro && <Button size="sm" variant="outline" className="mt-3" onClick={() => set({ segments: [...a.segments, { name: "New segment", share: 0, grossPrice: 0, vatRate: 0.12, commission: 0, boardingsPerGuest: 1 }] })}>Add segment</Button>}
-      <p className="mt-3 text-xs text-muted-foreground">Net realized revenue is per guest (ex VAT, after commission), not per boarding. Boardings per guest are informational in the V1 engine.</p>
+      <p className="mt-3 text-xs text-muted-foreground">Net realized revenue is per guest, excluding VAT and after commission.</p>
     </Card>
   );
 }

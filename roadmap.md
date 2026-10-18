@@ -20,3 +20,6 @@
 ## Open
 - [x] Tax-loss carryforward in the model (engine change, tested).
 - [x] Passengers-per-segment column in segment table (verified in preview).
+- [x] Move the whole Returns block to the top of the comparison page and put MOIC second in the table.
+- [x] Make comparison table columns sortable, sorted by MOIC by default; verified clicking re-sorts and reverses in the signed-in preview.
+- [x] Comparison table: Exit cell shows only the sale multiple, with the exit year in its own column immediately after Exit; verified in the signed-in preview.

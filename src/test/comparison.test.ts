@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { comparisonYears } from "@/lib/portfolio";
+import { comparisonYears, sortByMetric } from "@/lib/portfolio";
 
 const forecast = (start: number, length: number) => ({
   rows: Array.from({ length }, (_, i) => ({ calendarYear: start + i })),
@@ -19,5 +19,26 @@ describe("comparison display horizon", () => {
     expect(comparisonYears([forecast(2030, 3)], "calendar")).toEqual([2030, 2031, 2032]);
     expect(comparisonYears([], "calendar")).toEqual([]);
     expect(comparisonYears([], "operating")).toEqual([]);
+  });
+});
+
+describe("comparison table sorting", () => {
+  const rows = [
+    { name: "Project Mountain", moic: 2.4 },
+    { name: "Project Heaven", moic: 3.1 },
+    { name: "Alpha Ridge", moic: 1.05 },
+  ];
+  it("puts the highest MOIC first when sorted descending", () => {
+    expect(sortByMetric(rows, (r) => r.moic, "desc").map((r) => r.name))
+      .toEqual(["Project Heaven", "Project Mountain", "Alpha Ridge"]);
+  });
+  it("puts the lowest MOIC first when sorted ascending", () => {
+    expect(sortByMetric(rows, (r) => r.moic, "asc").map((r) => r.name))
+      .toEqual(["Alpha Ridge", "Project Mountain", "Project Heaven"]);
+  });
+  it("sorts text columns alphabetically without reordering the source rows", () => {
+    expect(sortByMetric(rows, (r) => r.name, "asc").map((r) => r.name))
+      .toEqual(["Alpha Ridge", "Project Heaven", "Project Mountain"]);
+    expect(rows.map((r) => r.name)).toEqual(["Project Mountain", "Project Heaven", "Alpha Ridge"]);
   });
 });

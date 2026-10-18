@@ -40,3 +40,14 @@ export function metricsAt(e: PortfolioEntry, mode: YearMode, year: number) {
     exitEquity: e.result?.exitEquityValue ?? null,
   };
 }
+
+/** Sort presentation rows by one metric: strings compare locale-aware, numbers numerically. Never mutates the input. */
+export function sortByMetric<T>(items: T[], value: (item: T) => number | string, dir: "asc" | "desc"): T[] {
+  const factor = dir === "asc" ? 1 : -1;
+  return [...items].sort((x, y) => {
+    const a = value(x);
+    const b = value(y);
+    if (typeof a === "string" || typeof b === "string") return String(a).localeCompare(String(b)) * factor;
+    return (a - b) * factor;
+  });
+}

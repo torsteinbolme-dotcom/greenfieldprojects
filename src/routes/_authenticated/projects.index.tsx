@@ -106,8 +106,8 @@ function ProjectsPage() {
                   />
                 </label>
               )}
-              <div className="absolute inset-x-0 bottom-0 p-4">
-                <Link to="/projects/$projectId" params={{ projectId: p.id }} className="text-lg font-semibold text-primary-foreground hover:underline">
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 p-4">
+                <Link to="/projects/$projectId" params={{ projectId: p.id }} className="pointer-events-auto text-lg font-semibold text-primary-foreground hover:underline">
                   {p.name}
                 </Link>
                 <p className="text-xs text-primary-foreground/80">Updated {new Date(p.updated_at).toLocaleDateString()}</p>

@@ -6,6 +6,7 @@ import { EQUAL_ALLOCATION } from "@/lib/capacity";
 import type { Assumptions } from "@/financialEngine";
 
 vi.mock("@/components/editor/sections", () => ({ Card: ({ children }: { children: React.ReactNode }) => <section>{children}</section> }));
+vi.mock("@/lib/seasonality", () => ({ useSeasonalityProfiles: () => ({ data: [] }), profileValid: () => true }));
 afterEach(cleanup);
 const saved: Assumptions = { ...projectMountain, capacity: { hourlyCapacity: 100, hoursPerDay: 10, monthlyAllocation: Array.from({ length: 12 }, (_, i) => i === 0 ? 0.45 : 0.05) } } as Assumptions;
 

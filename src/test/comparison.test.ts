@@ -137,7 +137,16 @@ describe("portfolioAverages", () => {
     ]);
     expect(a.count).toBe(2);
     expect(a.moic).toBeCloseTo(1.3, 10); // (1.0 + 1.6) / 2 — not the 99 exit-year MOIC
+    expect(a.irr).toBeCloseTo((Math.pow(1.6, 1 / 8) - 1) / 2, 10); // (0% + 6.0%) / 2 — Year 8 rates
     expect(a.ebitdaY3).toBe(200);
     expect(a.ebitdaPaxY3).toBeCloseTo(0.75, 10); // (0.5 + 1.0) / 2
+  });
+  it("skips projects without a Year 8 row from the Year 8 IRR average", () => {
+    const short = { a: exit as never, result: { equity: 100, rows: [{ year: 1, ebitda: 5, closingDebt: 0, retainedCash: 0, equityInjection: 0, distribution: 0 }] } };
+    const a = portfolioAverages([
+      mk({ ebitda: 0, passengers: 0 }, { ebitda: 20, closingDebt: 50, retainedCash: 10 }),
+      short,
+    ]);
+    expect(a.irr).toBeCloseTo(Math.pow(1.6, 1 / 8) - 1, 10); // only the project with a Year 8 row counts
   });
 });

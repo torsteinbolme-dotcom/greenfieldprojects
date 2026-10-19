@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/editor/sections";
 import { useMembership, type Membership } from "@/lib/data";
+import { addOrgUser } from "@/lib/invites.functions";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — Cable Car Portfolio" }, { name: "description", content: "Organization, members and activity log." }, { property: "og:title", content: "Settings — Cable Car Portfolio" }, { property: "og:description", content: "Organization settings." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -70,15 +71,12 @@ function InviteCard({ m }: { m: Membership }) {
     e.preventDefault();
     setBusy(true);
     try {
-      const { data, error } = await supabase.from("organization_invites").insert({ organization_id: m.organization_id, email: email.trim().toLowerCase(), role, invited_by: m.user_id }).select("token").single();
-      if (error) throw error;
-      const link = `${window.location.origin}/auth?invite=${data.token}`;
-      await navigator.clipboard.writeText(link).catch(() => undefined);
-      toast.success("Invite created — link copied to clipboard. Send it to " + email.trim() + ".");
+      const res = await addOrgUser({ data: { organizationId: m.organization_id, email: email.trim(), role, origin: window.location.origin } });
+      toast.success(res.emailed ? `Invitation emailed to ${email.trim()}.` : `${email.trim()} already has an account — they join this organization next time they sign in.`);
       setEmail("");
       void qc.invalidateQueries({ queryKey: ["invites"] });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not create invite");
+      toast.error(err instanceof Error ? err.message : "Could not add user");
     } finally {
       setBusy(false);
     }
@@ -86,15 +84,15 @@ function InviteCard({ m }: { m: Membership }) {
 
   const pending = invites.data?.filter((i) => !i.accepted_at && new Date(i.expires_at) > new Date()) ?? [];
   return (
-    <Card title="Invite a colleague">
+    <Card title="Add a user">
       <form onSubmit={createInvite} className="flex max-w-lg flex-wrap items-center gap-2">
         <Input className="min-w-48 flex-1" type="email" required placeholder="colleague@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
         <select className="h-9 rounded-md border bg-background px-2 text-sm" value={role} onChange={(e) => setRole(e.target.value as typeof role)}>
           <option value="viewer">viewer</option><option value="editor">editor</option><option value="admin">admin</option>
         </select>
-        <Button type="submit" disabled={busy}>Create invite link</Button>
+        <Button type="submit" disabled={busy}>{busy ? "Adding…" : "Add user"}</Button>
       </form>
-      <p className="mt-3 text-xs text-muted-foreground">Send the link to the person. When they create their account with that email address, they join this organization directly. Links expire after 14 days.</p>
+      <p className="mt-3 text-xs text-muted-foreground">An invitation is emailed automatically. The person chooses a password from the email and joins this organization directly. Invitations expire after 14 days.</p>
       {pending.length > 0 && (
         <table className="fin-table mt-4">
           <thead><tr><th>Email</th><th>Role</th><th>Expires</th><th></th></tr></thead>

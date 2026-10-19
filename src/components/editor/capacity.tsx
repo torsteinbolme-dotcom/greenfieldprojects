@@ -50,6 +50,37 @@ export function CapacitySection({ a, r, ro, set }: Props) {
 
       <Card>
         {!enabled && <p role="status" className="mb-4 text-sm text-warning-foreground">Enter hourly capacity and operating hours to enable capacity validation.</p>}
+        {!ro && usable.length > 0 && (
+          <div className="mb-4 rounded-md border p-3">
+            <div className="flex flex-wrap items-end gap-3">
+              <Field label="Distribution source">
+                <Select value={source} onValueChange={setSource}>
+                  <SelectTrigger className="h-8 w-72"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="manual">Manual</SelectItem>
+                    {usable.map((pr) => <SelectItem key={pr.label} value={pr.label}>{pr.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </Field>
+              {selected && <Button size="sm" variant="outline" onClick={() => setAlloc([...selected.allocation])}>Apply Distribution</Button>}
+            </div>
+            {selected && (
+              <div className="mt-3">
+                <p className="mb-2 text-xs text-muted-foreground">
+                  Preview of {selected.label}{selected.method ? ` · ${selected.method}` : ""}. Applying copies the percentages into the table below — they stay editable and are not linked to the benchmark.
+                </p>
+                <div className="flex items-end gap-1" aria-label={`Preview of ${selected.label}`}>
+                  {selected.allocation.map((share, i) => (
+                    <div key={MONTHS[i]} className="flex w-8 flex-col items-center gap-1" title={`${MONTHS[i]}: ${pct(share)}`}>
+                      <div className="w-full rounded-sm bg-primary/70" style={{ height: `${Math.max(share * 400, share > 0 ? 2 : 0)}px` }} />
+                      <span className="text-[10px] text-muted-foreground">{MONTHS[i]!.slice(0, 3)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
         {table && row && (
           <div className="mb-4 grid gap-3 sm:grid-cols-3">
             <Summary label="Annual forecast passengers" value={int(row.passengers)} />

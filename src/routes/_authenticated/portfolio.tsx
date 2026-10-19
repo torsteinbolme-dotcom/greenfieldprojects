@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { NumField } from "@/components/editor/inputs";
 import { Kpi } from "@/components/editor/sections";
 import { useLatestAssumptions, useProjects, useScenarios } from "@/lib/data";
-import { buildEntries, metricsAt, sortByMetric } from "@/lib/portfolio";
+import { MOIC_YEAR, buildEntries, metricsAt, sortByMetric } from "@/lib/portfolio";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import type { YearMode } from "@/lib/model";
 import { int, mult, nokM, pct } from "@/lib/format";

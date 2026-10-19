@@ -148,7 +148,7 @@ function ProjectsPage() {
       <Dialog open={!!confirmDel} onOpenChange={(o) => !o && setConfirmDel(null)}>
         <DialogContent>
           <DialogHeader><DialogTitle>Delete {confirmDel?.name}?</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">This permanently removes the project, all scenarios, version history, attached files and its photo.</p>
+          <p className="text-sm text-muted-foreground">The project, its scenarios and photo will disappear for everyone in your organization. Contact your administrator if it needs to be restored.</p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmDel(null)}>Cancel</Button>
             <Button variant="destructive" onClick={() => confirmDel && m && run(async () => { await deleteProject(m.organization_id, confirmDel.id); setConfirmDel(null); }, "Deleted")}>Delete</Button>

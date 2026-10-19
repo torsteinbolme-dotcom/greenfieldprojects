@@ -98,3 +98,4 @@
 - [x] Forecast: depreciation, interest, principal, tax, operating cash flow, maintenance CAPEX and debt service collapsed behind a "Below EBITDA" section that starts closed; 4 forecast tests pass and the open/close cycle was checked in the preview.
 - [x] Forecast: additional equity contributions, exit proceeds to equity, retained cash, closing debt and DSCR collapsed behind an "Equity, cash & debt" section that starts closed; 7 forecast tests pass and the open/close cycle plus independent collapse from "Below EBITDA" were checked in the preview.
 - [x] Hidden the "Edit with Lovable" badge on the published site (Pro plan); badge visibility confirmed hidden, propagates within ~30 seconds.
+- Project delete is soft (hidden, restorable)

@@ -148,12 +148,9 @@ export async function duplicateProject(orgId: string, p: ProjectRow) {
   return np;
 }
 
+// Soft delete: hides the project from everyone but keeps all data, files and photo so it can be restored.
 export async function deleteProject(orgId: string, projectId: string) {
-  const { data: files } = await supabase.from("project_files").select("storage_path").eq("project_id", projectId);
-  if (files?.length) await supabase.storage.from("project-files").remove(files.map((f) => f.storage_path));
-  const { data: own } = await supabase.from("projects").select("cover_image_url").eq("id", projectId).maybeSingle();
-  if (own?.cover_image_url) await supabase.storage.from(COVER_BUCKET).remove([own.cover_image_url]);
-  const { error } = await supabase.from("projects").delete().eq("id", projectId);
+  const { error } = await supabase.rpc("soft_delete_project", { _project: projectId });
   if (error) throw error;
   await logAudit(orgId, "project", projectId, "deleted");
 }

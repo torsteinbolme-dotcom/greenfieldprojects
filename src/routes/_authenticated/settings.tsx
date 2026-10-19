@@ -97,7 +97,12 @@ function InviteCard({ m }: { m: Membership }) {
         <table className="fin-table mt-4">
           <thead><tr><th>Email</th><th>Role</th><th>Expires</th><th></th></tr></thead>
           <tbody>{pending.map((i) => (
-            <tr key={i.id}><td>{i.email}</td><td>{i.role}</td><td>{new Date(i.expires_at).toLocaleDateString()}</td><td>
+            <tr key={i.id}><td>{i.email}</td><td>
+              <select className="h-8 rounded-md border bg-background px-2 text-sm" defaultValue={i.role} onChange={async (e) => {
+                const { error } = await supabase.from("organization_invites").update({ role: e.target.value }).eq("id", i.id);
+                if (error) toast.error(error.message); else { toast.success("Role updated"); void qc.invalidateQueries({ queryKey: ["invites"] }); }
+              }}><option value="viewer">viewer</option><option value="editor">editor</option><option value="admin">admin</option></select>
+            </td><td>{new Date(i.expires_at).toLocaleDateString()}</td><td>
               <button className="text-sm text-accent hover:underline" onClick={async () => {
                 const { error } = await supabase.from("organization_invites").delete().eq("id", i.id);
                 if (error) toast.error(error.message); else { toast.success("Invite revoked"); void qc.invalidateQueries({ queryKey: ["invites"] }); }

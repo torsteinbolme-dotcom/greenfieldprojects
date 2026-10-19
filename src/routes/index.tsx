@@ -38,8 +38,7 @@ function Index() {
           Passenger segments, CAPEX, 30-year forecasts, financing and exit analysis for every cable car in your portfolio — compared on equal terms.
         </p>
         <div className="mt-10 flex gap-3">
-          <Button asChild size="lg"><Link to="/portfolio">Open portfolio</Link></Button>
-          <Button asChild size="lg" variant="outline"><Link to="/auth">Sign in</Link></Button>
+          <Button asChild size="lg"><Link to="/auth">Sign in</Link></Button>
         </div>
         <p className="mt-6 max-w-xl border-l-2 border-accent pl-4 text-sm italic text-muted-foreground">
           “You shall not pass!” — the gatekeeper at the bottom station, to anyone without a login. (Ticket holders ride straight up.)

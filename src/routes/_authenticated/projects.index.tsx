@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { Loader2, MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,6 @@ function ProjectsPage() {
   const { data: projects = [], isLoading } = useProjects();
   const [showArchived, setShowArchived] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
-  const [rename, setRename] = useState<ProjectRow | null>(null);
   const [confirmDel, setConfirmDel] = useState<ProjectRow | null>(null);
   const [uploading, setUploading] = useState<string | null>(null);
   const canEdit = m?.role !== "viewer";
@@ -91,9 +91,15 @@ function ProjectsPage() {
                 <span className="rounded-full bg-card/90 px-3 py-1.5 text-xs font-medium text-card-foreground opacity-0 shadow-sm transition duration-200 group-hover:opacity-100">Open project</span>
               </div>
               {canEdit && (
-                <label className="absolute right-3 top-3 z-10 cursor-pointer rounded-full bg-card/85 px-2.5 py-1 text-xs font-medium text-card-foreground transition hover:bg-card">
-                  {uploading === p.id ? "Saving…" : p.cover_image_url ? "Change photo" : "Add photo"}
-                  <input
+                <div className="absolute right-3 top-3 z-10">
+                  <Button size="icon" variant="ghost" className="h-8 w-8 bg-card/85 text-card-foreground hover:bg-card"
+                    aria-label={`${p.cover_image_url ? "Change" : "Add"} photo for ${p.name}`}
+                    title={uploading === p.id ? "Saving photo…" : p.cover_image_url ? "Change photo" : "Add photo"}
+                    disabled={uploading === p.id}
+                    onClick={() => document.getElementById(`project-photo-${p.id}`)?.click()}>
+                    {uploading === p.id ? <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" /> : <MoreHorizontal className="h-5 w-5" />}
+                  </Button>
+                  <input id={`project-photo-${p.id}`}
                     type="file"
                     accept="image/*"
                     className="sr-only"
@@ -104,7 +110,7 @@ function ProjectsPage() {
                       e.target.value = "";
                     }}
                   />
-                </label>
+                </div>
               )}
               <div className="pointer-events-none absolute inset-x-0 bottom-0 p-4">
                 <Link to="/projects/$projectId" params={{ projectId: p.id }} className="pointer-events-auto text-lg font-semibold text-primary-foreground hover:underline">
@@ -117,7 +123,6 @@ function ProjectsPage() {
               {canEdit && m && (
                 <div className="flex flex-nowrap items-center justify-end gap-0 overflow-x-auto">
                   <Button size="sm" variant="ghost" className="px-2 text-xs" asChild><Link to="/projects/$projectId" params={{ projectId: p.id }}>Open</Link></Button>
-                  <Button size="sm" variant="ghost" className="px-2 text-xs" onClick={() => setRename(p)}>Rename</Button>
                   <Button size="sm" variant="ghost" className="px-2 text-xs" onClick={() => run(() => duplicateProject(m.organization_id, p), "Project duplicated")}>Duplicate</Button>
                   <Button size="sm" variant="ghost" className="px-2 text-xs" onClick={() => run(async () => {
                     const status = p.status === "active" ? "archived" : "active";
@@ -139,26 +144,6 @@ function ProjectsPage() {
         await createProject(m.organization_id, name, loc || null, a, notes ?? undefined);
         setCreateOpen(false);
       }, "Project created")} />}
-
-      <Dialog open={!!rename} onOpenChange={(o) => !o && setRename(null)}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Rename project</DialogTitle></DialogHeader>
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            const name = String(new FormData(e.currentTarget).get("name") ?? "").trim();
-            if (!name || !rename || !m) return;
-            run(async () => {
-              const { error } = await supabase.from("projects").update({ name, updated_at: new Date().toISOString() }).eq("id", rename.id);
-              if (error) throw error;
-              await logAudit(m.organization_id, "project", rename.id, "renamed", { name });
-              setRename(null);
-            }, "Renamed");
-          }}>
-            <Input name="name" defaultValue={rename?.name} autoFocus />
-            <DialogFooter className="mt-4"><Button type="submit">Save</Button></DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={!!confirmDel} onOpenChange={(o) => !o && setConfirmDel(null)}>
         <DialogContent>
@@ -197,7 +182,6 @@ function CreateDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenC
               </SelectContent>
             </Select>
           </div>
-          <p className="text-xs text-muted-foreground">New projects start with a neutral mountain photo — add your own with the “Add photo” button on the card.</p>
           <DialogFooter><Button type="submit">Create</Button></DialogFooter>
         </form>
       </DialogContent>

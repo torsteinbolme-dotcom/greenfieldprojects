@@ -18,7 +18,7 @@
 - Audit investment fixtures use independent literal financial references and explicit expected-failure tests for unresolved signed-off formula defects; the disposable browser security regression must never target existing records. Why: passing test execution must not conceal unresolved economics or endanger user data.
 - New signups get their own organization plus a seeded Project Mountain (`handle_new_user` trigger). Why: every account starts with a working example.
 - Ticket ratios live in scenario JSON; use `src/lib/ticket-pricing.ts` for edits/calculations/saves; `withDefaultProjectSegments` only for new templates. Why: preserve saved fares, history and the authoritative example.
-- Use the scoped serial autosave controller for editable assumptions and text details; undo creates a new saved snapshot, never deletes history. Why: edits during requests survive and histories stay isolated.
+- Use scoped serial autosave for assumptions and project details, including name (metadata only); undo saves a snapshot, never deletes history. Why: edits survive requests and stay isolated.
 - Comparison display years derive through `comparisonYears` in `src/lib/portfolio.ts`, independent of full forecast lengths. Why: shortening comparison graphs must not change authoritative calculations.
 - Numeric displays and text inputs share `src/lib/format.ts`; retain stored precision. Why: locale formatting must not rewrite calculations or saved assumptions.
 - Forecast expense detail derives for presentation through `src/lib/forecast-opex.ts`; the engine total stays authoritative. Why: expose costs without touching signed-off formulas.

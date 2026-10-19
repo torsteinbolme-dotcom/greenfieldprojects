@@ -141,9 +141,9 @@ function EditorPage() {
       {scenario.kind !== "base" && <p className="text-xs text-muted-foreground">Editing scenario “{scenario.name}”. Base is never modified by changes here.</p>}
       {error && <div className="rounded-md bg-warning p-3 text-sm text-warning-foreground">Cannot calculate: {error}</div>}
 
-      <Tabs value={search.tab ?? "summary"} onValueChange={(t) => navigate({ search: (s) => ({ ...s, tab: t }), replace: true })}>
+      <Tabs value={search.tab ?? "overview"} onValueChange={(t) => navigate({ search: (s) => ({ ...s, tab: t }), replace: true })}>
         <TabsList className="h-auto flex-wrap">
-          {([["summary", "Investment Summary"], ["overview", "Overview"], ["segments", "Passenger segments"], ["capex", "CAPEX"], ["revenue", "Revenue & OPEX"], ["financing", "Financing"], ["forecast", "Forecast"], ["exit", "Exit analysis"], ["capacity", "Capacity"], ["benchmarking", "Benchmarking"], ["history", "Version history"]] as const).map(([k, l]) => (
+          {([["overview", "Overview"], ["summary", "Investment Summary"], ["segments", "Passenger segments"], ["capex", "CAPEX"], ["revenue", "Revenue & OPEX"], ["financing", "Financing"], ["forecast", "Forecast"], ["exit", "Exit analysis"], ["capacity", "Capacity"], ["benchmarking", "Benchmarking"], ["history", "Version history"]] as const).map(([k, l]) => (
             <TabsTrigger key={k} value={k}>{l}</TabsTrigger>
           ))}
         </TabsList>
@@ -231,17 +231,20 @@ type Ctx = { ro: boolean; project: ProjectRow; m: Membership; projectId: string 
   function ProjectDetails({ ro, project, m }: Ctx) {
     const qc = useQueryClient();
     const p = project;
-    const { controller, state } = useAutosave(p.id, { location: p.location ?? "", description: p.description ?? "", assumption_notes: p.assumption_notes ?? "" }, async (value) => {
-      const { error } = await supabase.from("projects").update({ ...value, updated_at: new Date().toISOString() }).eq("id", p.id);
+    const { controller, state } = useAutosave(p.id, { name: p.name, location: p.location ?? "", description: p.description ?? "", assumption_notes: p.assumption_notes ?? "" }, async (value) => {
+      const name = value.name.trim();
+      if (!name) throw new Error("Project name is required");
+      const { error } = await supabase.from("projects").update({ ...value, name, updated_at: new Date().toISOString() }).eq("id", p.id);
       if (error) throw error;
       await logAudit(m.organization_id, "project", p.id, "details_updated");
       void qc.invalidateQueries({ queryKey: ["projects"] });
     });
     if (!controller || !state) return null;
-    const change = (key: "location" | "description" | "assumption_notes", value: string) => controller.edit({ ...state.value, [key]: value }, key);
+    const change = (key: "name" | "location" | "description" | "assumption_notes", value: string) => controller.edit({ ...state.value, [key]: value }, key);
     return (
       <Card title="Project details">
         <div className="space-y-3">
+          <Field label="Project name"><Input name="name" required value={state.value.name} disabled={ro} onChange={(e) => change("name", e.target.value)} /></Field>
           <Field label="Location"><Input name="location" value={state.value.location} disabled={ro} onChange={(e) => change("location", e.target.value)} /></Field>
           <Field label="Description"><Textarea name="description" value={state.value.description} disabled={ro} onChange={(e) => change("description", e.target.value)} /></Field>
           <Field label="Assumption notes (flag inputs not from the source workbook)"><Textarea name="notes" rows={4} value={state.value.assumption_notes} disabled={ro} onChange={(e) => change("assumption_notes", e.target.value)} /></Field>

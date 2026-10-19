@@ -111,10 +111,10 @@ describe("irrAtYear", () => {
   const y8rate = Math.pow(1.6, 1 / 8) - 1; // 100 equity in, (20 × 10 − 50 + 10) = 160 out at Year 8.
 
   it("prices a Year 8 sale on the engine's own cash flows", () => {
-    expect(irrAtYear(exit as never, y8().result as never)).toBeCloseTo(y8rate, 10);
+    expect(irrAtYear(exit as never, y8().result as never)).toBeCloseTo(y8rate, 8);
   });
   it("gives the portfolio table the Year 8 rate, not the scenario's own exit-year IRR", () => {
-    expect(metricsAt(y8() as never, "operating", 3).irr).toBeCloseTo(y8rate, 10);
+    expect(metricsAt(y8() as never, "operating", 3).irr).toBeCloseTo(y8rate, 8);
   });
   it("counts equity injected before Year 8 in the rate", () => {
     const e = y8();

@@ -223,7 +223,104 @@ function BenchmarksPage() {
 
       {editing && mem && <RecordDialog orgId={mem.organization_id} assets={assets} init={editing} onClose={() => setEditing(null)} />}
       {importOpen && mem && <ImportDialog orgId={mem.organization_id} assets={assets} onClose={() => setImportOpen(false)} />}
+      {seasonalityOpen && mem && <SeasonalityImportDialog orgId={mem.organization_id} onClose={() => setSeasonalityOpen(false)} />}
     </div>
+  );
+}
+
+function SeasonalityImportDialog({ orgId, onClose }: { orgId: string; onClose: () => void }) {
+  const qc = useQueryClient();
+  const { data: existing } = useSeasonalityProfiles();
+  const [rows, setRows] = useState<SeasonalityImportRow[] | null>(null);
+  const [fileName, setFileName] = useState("");
+  const [replace, setReplace] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  async function onFile(file: File) {
+    try {
+      const XLSX = await import("xlsx");
+      const wb = XLSX.read(await file.arrayBuffer());
+      const parsed = parseSeasonalitySheet(XLSX.utils.sheet_to_json<Record<string, unknown>>(wb.Sheets[wb.SheetNames[0] ?? ""]!, { defval: null }));
+      setFileName(file.name);
+      setReplace(false);
+      setRows(parsed);
+    } catch (e) { toast.error((e as Error).message); }
+  }
+
+  // Preview: group the parsed rows, then add equal-weighted averages for benchmarks with 2+ complete years.
+  const preview = useMemo(() => {
+    if (!rows) return [];
+    const grouped = groupProfiles(rows.map((r, i) => ({
+      id: String(i), organization_id: orgId, benchmark_name: r.benchmark, profile_name: r.profile,
+      month: r.month, allocation_pct: r.allocationPct ?? 0, historical_passengers: r.passengers, method: r.method,
+    })) as SeasonalityRow[]);
+    const benchmarks = [...new Set(grouped.map((g) => g.benchmark))];
+    const averages = benchmarks.map((b) => equalWeightedAverage(b, grouped)).filter(Boolean) as NonNullable<ReturnType<typeof equalWeightedAverage>>[];
+    return [...grouped, ...averages];
+  }, [rows, orgId]);
+
+  const duplicates = useMemo(() => {
+    const existingKeys = new Set((existing ?? []).map((p) => `${p.benchmark}${p.profile}`));
+    return preview.filter((p) => existingKeys.has(`${p.benchmark}${p.profile}`));
+  }, [preview, existing]);
+  const invalid = preview.filter((p) => !profileValid(p.totalPct, 12));
+
+  async function run() {
+    if (!rows || !preview.length) return;
+    setBusy(true);
+    try {
+      if (duplicates.length && replace) {
+        for (const d of duplicates) {
+          const { error } = await supabase.from("seasonality_profiles").delete().eq("organization_id", orgId).eq("benchmark_name", d.benchmark).eq("profile_name", d.profile);
+          if (error) throw error;
+        }
+      }
+      const insert = preview
+        .filter((p) => !duplicates.some((d) => d.benchmark === p.benchmark && d.profile === p.profile) || replace)
+        .flatMap((p) => p.allocation.map((share, i) => ({
+          organization_id: orgId, benchmark_name: p.benchmark, profile_name: p.profile, month: i + 1,
+          allocation_pct: share * 100, historical_passengers: p.passengers[i], method: p.method,
+        })));
+      const { error } = await supabase.from("seasonality_profiles").insert(insert);
+      if (error) throw error;
+      toast.success(`Imported ${preview.length} seasonality profile${preview.length === 1 ? "" : "s"}`);
+      await qc.invalidateQueries({ queryKey: ["seasonality-profiles"] });
+      onClose();
+    } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
+  }
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader><DialogTitle>Import passenger seasonality</DialogTitle></DialogHeader>
+        <Input type="file" accept=".csv,.xlsx,.xls" onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])} />
+        <p className="text-xs text-muted-foreground">CSV or Excel with columns: benchmark, profile, month, allocation_pct (0–100), historical_passengers, method. When only monthly passenger figures are given, percentages are calculated automatically. With two or more complete years, an equal-weighted average profile is added.</p>
+        {preview.length > 0 && (
+          <div className="max-h-64 overflow-auto">
+            <table className="fin-table fin-table-tight w-full"><thead><tr><th>Profile</th><th className="text-right">Months</th><th className="text-right">Total</th><th className="text-right">Passengers</th><th>Status</th></tr></thead>
+              <tbody>{preview.map((p) => {
+                const dup = duplicates.some((d) => d.benchmark === p.benchmark && d.profile === p.profile);
+                const ok = profileValid(p.totalPct, 12);
+                return <tr key={p.label}>
+                  <td>{p.label}</td>
+                  <td className="text-right">12</td>
+                  <td className={`text-right ${ok ? "" : "text-destructive"}`}>{formatNumber(p.totalPct, 2, 2)}%</td>
+                  <td className="text-right">{p.passengers.some((x) => x !== null) ? formatNumber(p.passengers.reduce((s, x) => s + (x ?? 0), 0), 0, 0) : "—"}</td>
+                  <td className="text-xs">{!ok ? <span className="text-destructive">Must total 100%</span> : dup ? <span className="text-warning-foreground">Replaces existing</span> : "New"}</td>
+                </tr>;
+              })}</tbody></table>
+          </div>
+        )}
+        {duplicates.length > 0 && (
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={replace} onChange={(e) => setReplace(e.target.checked)} />
+            Replace the existing profile{duplicates.length === 1 ? "" : "s"}: {duplicates.map((d) => d.label).join(", ")}
+          </label>
+        )}
+        {invalid.length > 0 && <p className="text-xs text-destructive">Each profile needs 12 months totalling 100% before it can be imported.</p>}
+        <DialogFooter><Button variant="outline" onClick={onClose}>Cancel</Button><Button disabled={busy || !preview.length || invalid.length > 0 || (duplicates.length > 0 && !replace)} onClick={run}>Import {preview.length} profile{preview.length === 1 ? "" : "s"}</Button></DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

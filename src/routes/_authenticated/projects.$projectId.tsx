@@ -133,6 +133,7 @@ function EditorPage() {
 
   const y3 = r?.rows[2];
   const moic8 = r ? moicAtYear(draft, r) : null;
+  const irr8 = r ? irrAtYear(draft, r) : null;
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">

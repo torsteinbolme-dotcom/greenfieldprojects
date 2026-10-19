@@ -7,5 +7,7 @@ export const RECOVERY_FLAG = "password_recovery";
 export function isRecoveryVisit(search: string, hash: string): boolean {
   const query = new URLSearchParams(search);
   const fragment = new URLSearchParams(hash.replace(/^#/, ""));
-  return query.get("type") === "recovery" || fragment.get("type") === "recovery";
+  // "invite" links from Add user also land here so the new user can choose a password.
+  const ok = (t: string | null) => t === "recovery" || t === "invite";
+  return ok(query.get("type")) || ok(fragment.get("type"));
 }

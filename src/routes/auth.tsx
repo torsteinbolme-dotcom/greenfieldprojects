@@ -56,6 +56,7 @@ function AuthPage() {
     setBusy(true);
     try {
       if (mode === "signin") {
+        startSession(remember);
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       } else if (mode === "recover") {
@@ -76,6 +77,7 @@ function AuthPage() {
   }
 
   async function google() {
+    startSession(remember);
     const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
     if (r.error) { toast.error(r.error.message ?? "Google sign-in failed"); return; }
     if (r.redirected) return;
@@ -104,6 +106,9 @@ function AuthPage() {
             <p className="text-xs text-muted-foreground">We email you a link to choose a new password.</p>
           ) : (
             <div className="space-y-2"><Label htmlFor="pw">Password</Label><Input id="pw" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} /></div>
+          )}
+          {mode !== "recover" && (
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="h-4 w-4 accent-primary" />Remember me (up to 14 days)</label>
           )}
           <Button type="submit" className="w-full" disabled={busy}>{mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Send reset link"}</Button>
           {mode === "signin" && (

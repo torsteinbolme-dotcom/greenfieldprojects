@@ -99,6 +99,11 @@ describe("moicAtYear", () => {
     const short = { a: exit, result: { equity: 100, rows: [{ year: 1, ebitda: 5, closingDebt: 0, retainedCash: 0, equityInjection: 0, distribution: 0 }] } } as unknown as AvgEntry;
     expect(moicAtYear(short.a as never, short.result as never)).toBeNull();
   });
+  it("gives the portfolio table the Year 8 multiple, not the scenario's own exit-year MOIC", () => {
+    const e = mk({ ebitda: 100, passengers: 200 }, { ebitda: 20, closingDebt: 50, retainedCash: 10 });
+    // metricsAt reads the same derivation the header chips use, so the column labelled Y8 is Y8.
+    expect(metricsAt(e as never, "operating", 3).moic).toBeCloseTo(1.6, 10);
+  });
 });
 
 describe("portfolioAverages", () => {

@@ -91,3 +91,4 @@
 - [x] Project header chips: gap to the portfolio average shown in green (+) or red (−); MOIC chip always reads Year 8 (`moicAtYear`), independent of the exit year; verified in the signed-in preview.
 - [x] Portfolio table: IRR moved to sit immediately right of MOIC Y8 and labelled IRR Y8 using a genuine Year 8 derivation (`irrAtYear`); values match each project's own figure, verified in the signed-in preview.
 - [x] Comparison table: IRR Y8 now sits immediately right of MOIC Y8 (and in "Rank by"); verified in the signed-in preview.
+- [x] Favicon now uses only the logo icon (no wordmark): icon-only SVG in src/assets/brand/logo-icon-dark.svg rendered to public/favicon.png; preview serves the new file, build OK.

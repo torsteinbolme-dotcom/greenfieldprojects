@@ -5,10 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { isRecoveryVisit, RECOVERY_FLAG } from "@/lib/recovery";
 
-// The emailed link is only valid once, and the client strips it from the address bar as soon as
-// it has been exchanged. This flag lets a reload of this page keep the form open.
-const RECOVERY_FLAG = "password_recovery";
 
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
@@ -34,13 +32,11 @@ function ResetPasswordPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    // Newer reset links carry the token as ?token_hash=…&type=recovery, older ones as a #…type=recovery
-    // fragment; the client exchanges either one for a session and then cleans the address bar.
-    const query = new URLSearchParams(window.location.search);
-    const fragment = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-    const isRecovery = query.get("type") === "recovery" || fragment.get("type") === "recovery";
+    // The flag lets a reload keep the form open after the client strips the link from the address bar.
+    const isRecovery = isRecoveryVisit(window.location.search, window.location.hash);
     if (isRecovery) sessionStorage.setItem(RECOVERY_FLAG, "1");
     const allowed = isRecovery || sessionStorage.getItem(RECOVERY_FLAG) === "1";
+
 
     let settled = false;
     const finish = (next: Stage) => {

@@ -14,6 +14,7 @@
 - Outputs are computed client-side from stored inputs (`scenario_assumptions` JSONB, append-only versions); never store hand-edited outputs. Why: deterministic, auditable results.
 - Every table has `organization_id`; RLS uses `is_org_member` / `can_edit_org` / `is_org_admin` (security definer). Why: organizations must never see each other's data.
 - Scenario saves insert new versions; Base is never overwritten by other scenarios. Why: isolation and version history.
+- Scenario version reads must fail explicitly and unique-version collisions retry within a bounded limit; organization relationships and Base identity are guarded in the database. Why: concurrent saves and raw requests must not corrupt history or tenant relationships.
 - New signups get their own organization plus a seeded Project Mountain (`handle_new_user` trigger). Why: every account starts with a working example.
 - Ticket ratios live in scenario JSON; use `src/lib/ticket-pricing.ts` for edits/calculations/saves; `withDefaultProjectSegments` only for new templates. Why: preserve saved fares, history and the authoritative example.
 - Use the scoped serial autosave controller for editable assumptions and text details; undo creates a new saved snapshot, never deletes history. Why: edits during requests survive and histories stay isolated.

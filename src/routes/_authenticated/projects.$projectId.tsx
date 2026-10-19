@@ -144,8 +144,9 @@ function EditorPage() {
             <p className="text-sm text-muted-foreground">{project.location ?? "No location"} · {project.status}</p>
           </div>
           {r && y3 && (
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-4 gap-2">
               <Kpi compact label={`MOIC Y${MOIC_YEAR}`} value={mult(moic8)} sub={avgSub(moic8 ?? NaN, avg?.moic, mult)} />
+              <Kpi compact label={`IRR Y${MOIC_YEAR}`} value={pct(irr8)} sub={avgSub(irr8 ?? NaN, avg?.irr, pct)} />
               <Kpi compact label="EBITDA Y3" value={nokM(y3.ebitda)} sub={avgSub(y3.ebitda, avg?.ebitdaY3, nokM)} />
               <Kpi compact label="EBITDA / pax Y3" value={nok(y3.passengers > 0 ? y3.ebitda / y3.passengers : 0)} sub={avgSub(y3.passengers > 0 ? y3.ebitda / y3.passengers : 0, avg?.ebitdaPaxY3, nok)} />
             </div>

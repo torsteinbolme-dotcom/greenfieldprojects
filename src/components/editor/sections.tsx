@@ -265,7 +265,7 @@ export function FinancingSection({ a, set, ro, r }: P & { r: ModelResult | null 
 }
 
 const safeExit = (a: Assumptions) => safeCalculate(a).result?.exitEquityValue ?? null;
-type ForecastGroup = "revenue" | "opex" | "financing";
+type ForecastGroup = "revenue" | "opex" | "financing" | "capital";
 const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) => string, ForecastGroup?][] = [
   ["Passengers", (y) => int(y.passengers)],
   ["Avg. realized ticket ex VAT, after commission (NOK)", (y) => nok(y.ticketNetPrice, 1)],
@@ -289,18 +289,19 @@ const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) =>
   ["Maintenance CAPEX", (y) => nokM(-y.maintenanceCapex), "financing"],
   ["Debt service (interest + principal)", (y) => nokM(-(y.interest + y.principal)), "financing"],
   ["Cash flow after debt service", (y) => nokM(y.cashAfterDebt)],
-  ["Additional equity contributions", (y) => nokM(y.equityInjection)],
-  ["Exit proceeds to equity", (y, a) => (y.year === a.exitYear ? nokM(safeExit(a)) : "–")],
-  ["Retained cash (cumulative)", (y) => nokM(y.retainedCash)],
-  ["Closing debt", (y) => nokM(y.closingDebt)],
-  ["DSCR", (y) => mult(y.dscr)],
+  ["Equity, cash & debt", () => ""],
+  ["Additional equity contributions", (y) => nokM(y.equityInjection), "capital"],
+  ["Exit proceeds to equity", (y, a) => (y.year === a.exitYear ? nokM(safeExit(a)) : "–"), "capital"],
+  ["Retained cash (cumulative)", (y) => nokM(y.retainedCash), "capital"],
+  ["Closing debt", (y) => nokM(y.closingDebt), "capital"],
+  ["DSCR", (y) => mult(y.dscr), "capital"],
 ];
-const bold = new Set(["Total revenue", "Total OPEX", "EBITDA", "Cash flow after debt service", "Below EBITDA"]);
+const bold = new Set(["Total revenue", "Total OPEX", "EBITDA", "Cash flow after debt service", "Below EBITDA", "Equity, cash & debt"]);
 const key = new Set(["EBITDA"]);
-const groupHint: Record<ForecastGroup, string> = { revenue: "revenue items", opex: "operating expenses", financing: "items below EBITDA" };
+const groupHint: Record<ForecastGroup, string> = { revenue: "revenue items", opex: "operating expenses", financing: "items below EBITDA", capital: "equity, cash and debt items" };
 
 export function ForecastSection({ r, a }: { r: ModelResult; a: Assumptions | undefined }) {
-  const [expanded, setExpanded] = useState<Record<ForecastGroup, boolean>>({ revenue: true, opex: true, financing: false });
+  const [expanded, setExpanded] = useState<Record<ForecastGroup, boolean>>({ revenue: true, opex: true, financing: false, capital: false });
   // A live module update can briefly render the previous caller without the new
   // assumptions prop. Wait for real inputs rather than inventing expense values.
   if (!a) return <p role="status" className="text-muted-foreground">Loading forecast inputs…</p>;
@@ -313,7 +314,7 @@ export function ForecastSection({ r, a }: { r: ModelResult; a: Assumptions | und
           </thead>
           <tbody>
             {forecastRows.filter(([, , group]) => !group || expanded[group]).map(([label, f, group]) => {
-              const toggleGroup = label === "Total revenue" ? "revenue" : label === "Total OPEX" ? "opex" : label === "Below EBITDA" ? "financing" : null;
+              const toggleGroup = label === "Total revenue" ? "revenue" : label === "Total OPEX" ? "opex" : label === "Below EBITDA" ? "financing" : label === "Equity, cash & debt" ? "capital" : null;
               return (
               <tr key={label} className={`${bold.has(label) ? "font-semibold" : ""} ${key.has(label) ? "fin-key" : ""}`}>
                 <td className={`sticky left-0 z-10 ${key.has(label) ? "bg-keyrow hover:bg-keyrow-hover" : "bg-card"}`}>

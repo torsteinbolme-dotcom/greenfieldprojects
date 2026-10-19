@@ -109,7 +109,7 @@ function EditorPage() {
           </div>
           {r && y3 && (
             <div className="grid grid-cols-3 gap-2">
-              <Kpi compact label={`MOIC Y${draft.exitYear}`} value={mult(r.equityMultiple)} sub={avgSub(r.equityMultiple, avg?.moic, mult)} />
+              <Kpi compact label={`MOIC Y${draft.exitYear}`} value={mult(r.equityMultiple)} sub={avgSub(r.equityMultiple ?? NaN, avg?.moic, mult)} />
               <Kpi compact label="EBITDA Y3" value={nokM(y3.ebitda)} sub={avgSub(y3.ebitda, avg?.ebitdaY3, nokM)} />
               <Kpi compact label="EBITDA / pax Y3" value={nok(y3.passengers > 0 ? y3.ebitda / y3.passengers : 0)} sub={avgSub(y3.passengers > 0 ? y3.ebitda / y3.passengers : 0, avg?.ebitdaPaxY3, nok)} />
             </div>
@@ -308,6 +308,7 @@ type Ctx = { ro: boolean; project: ProjectRow; m: Membership; projectId: string 
 /** "Avg 3,84x · +0,75x" — portfolio average of all projects' Base scenarios, with this project's difference. */
 function avgSub(value: number, average: number | null | undefined, fmt: (v: number) => string): string {
   if (average == null || !Number.isFinite(average)) return "Portfolio avg –";
+  if (!Number.isFinite(value)) return `Avg ${fmt(average)}`;
   const d = value - average;
   return `Avg ${fmt(average)} · ${d >= 0 ? "+" : "−"}${fmt(Math.abs(d))}`;
 }

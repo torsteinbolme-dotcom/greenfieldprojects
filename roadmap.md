@@ -96,3 +96,4 @@
 - [x] Front-page footer: say "The site and its contents" instead of "The document and its contents".
 - [x] Forecast: depreciation, interest, principal, tax, operating cash flow, maintenance CAPEX and debt service collapsed behind a "Below EBITDA" section that starts closed; 4 forecast tests pass and the open/close cycle was checked in the preview.
 - [x] Forecast: additional equity contributions, exit proceeds to equity, retained cash, closing debt and DSCR collapsed behind an "Equity, cash & debt" section that starts closed; 7 forecast tests pass and the open/close cycle plus independent collapse from "Below EBITDA" were checked in the preview.
+- [ ] Hide the "Edit with Lovable" badge on the published site (requires a paid plan); visibility question answered, hiding pending.

@@ -32,5 +32,5 @@
 - `costIndex`/`merchOpexAt` read OPEX growth and merch shares; manual F&B grows year-1 costs only. Templates/insert triggers default missing F&B growth from cost inflation; preserve history and benchmark flags. Why: no revenue/cost double growth.
 - Project photos: private `project-covers` bucket, path `<org>/<project>.<ext>`; `projects.cover_image_url` stores that path and the UI signs URLs (`src/lib/covers*.ts`). Why: public buckets are blocked.
 - Capacity stays outside the engine in scenario JSON; distributions are local drafts until valid explicit Save; key the editor by scenario. Why: protect forecasts and isolate drafts.
-- Seasonality uses validated 12-month profiles and an org-scoped transactional import RPC; annual/normalized profiles count once in averages. Applying copies normalized percentages plus frozen source attribution into the capacity draft, never read by the engine. Why: atomic replacement, provenance and financial isolation.
-- Project deletion is soft (`projects.deleted_at` via `soft_delete_project` RPC); RLS hides deleted projects and their scenarios; restore by clearing `deleted_at`. Why: deleted projects must be recoverable.
+- Seasonality uses validated 12-month profiles and an org-scoped transactional import RPC; annual/normalized profiles count once in averages. Applying copies percentages plus frozen attribution into the capacity draft only. Why: atomic replacement, provenance and financial isolation.
+- Project delete is soft (`soft_delete_project` sets `deleted_at`; RLS hides it and its scenarios). Why: recoverable.

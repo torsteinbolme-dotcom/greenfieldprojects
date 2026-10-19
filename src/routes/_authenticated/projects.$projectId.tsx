@@ -198,7 +198,6 @@ function EditorPage() {
           {r && <BreakEvenPanel key={`break-even:${scenario.id}`} a={draft} />}
           <div className="grid gap-4 lg:grid-cols-2">
             <ProjectDetails ro={ro} project={project} m={m} projectId={projectId} />
-            <FilesCard ro={ro} project={project} m={m} projectId={projectId} />
           </div>
           <Limitations />
         </TabsContent>
@@ -289,59 +288,6 @@ type Ctx = { ro: boolean; project: ProjectRow; m: Membership; projectId: string 
     );
   }
 
-  function FilesCard({ ro, m, projectId }: Ctx) {
-    const files = useQuery({
-      queryKey: ["files", projectId],
-      queryFn: async () => {
-        const { data, error } = await supabase.from("project_files").select("*").eq("project_id", projectId).order("created_at", { ascending: false });
-        if (error) throw error;
-        return data;
-      },
-    });
-    const [busy, setBusy] = useState(false);
-    return (
-      <Card title="Source workbooks">
-        <p className="mb-3 text-sm text-muted-foreground">Original Excel files are stored securely as attachments. Formula import and reconciliation against the model are planned for phase 2 — uploads do not change assumptions.</p>
-        {!ro && (
-          <Input type="file" accept=".xlsx,.xls,.xlsm,.csv" disabled={busy} onChange={async (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            setBusy(true);
-            try {
-              const path = `${m.organization_id}/${projectId}/${Date.now()}-${file.name.replace(/[^\w.\-]/g, "_")}`;
-              const up = await supabase.storage.from("project-files").upload(path, file);
-              if (up.error) throw up.error;
-              const u = { user: (await supabase.auth.getSession()).data.session?.user };
-              const { error } = await supabase.from("project_files").insert({ organization_id: m.organization_id, project_id: projectId, storage_path: path, file_name: file.name, size_bytes: file.size, uploaded_by: (u.user?.id ?? null) });
-              if (error) throw error;
-              await logAudit(m.organization_id, "project_file", projectId, "uploaded", { file: file.name });
-              toast.success("File uploaded"); files.refetch();
-            } catch (err) { toast.error(err instanceof Error ? err.message : "Upload failed"); } finally { setBusy(false); e.target.value = ""; }
-          }} />
-        )}
-        <ul className="mt-3 divide-y text-sm">
-          {files.data?.length === 0 && <li className="py-2 text-muted-foreground">No files attached.</li>}
-          {files.data?.map((f) => (
-            <li key={f.id} className="flex items-center justify-between gap-2 py-2">
-              <span className="truncate">{f.file_name} <span className="text-xs text-muted-foreground">({int((f.size_bytes ?? 0) / 1024)} KB)</span></span>
-              <span className="flex gap-1">
-                <Button size="sm" variant="ghost" onClick={async () => {
-                  const { data, error } = await supabase.storage.from("project-files").createSignedUrl(f.storage_path, 60);
-                  if (error) { toast.error(error.message); return; }
-                  window.open(data.signedUrl, "_blank");
-                }}>Download</Button>
-                {!ro && <Button size="sm" variant="ghost" className="text-destructive" onClick={async () => {
-                  await supabase.storage.from("project-files").remove([f.storage_path]);
-                  await supabase.from("project_files").delete().eq("id", f.id);
-                  files.refetch();
-                }}>Remove</Button>}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </Card>
-    );
-  }
 
 
 /** "Avg 3,84x · +0,75x" — portfolio average of all projects' Base scenarios; the gap is green above average, red below. */

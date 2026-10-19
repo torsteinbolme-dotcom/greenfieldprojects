@@ -26,7 +26,7 @@ describe('Independent F&B OPEX defaults for every project', () => {
   });
   it('gives both starter templates explicit F&B cost growth', () => {
     for (const a of [blankAssumptions('New'), withDefaultProjectSegments(projectMountain)]) {
-      expect(a.opexGrowth?.fb).toEqual([0.025, 0.025, 0.025]);
+      expect(a.opexGrowth?.fb).toEqual([0.025, 0.025, 0.025, 0.025, 0.025]);
     }
   });
   it('retains existing rates and other cost settings', () => {

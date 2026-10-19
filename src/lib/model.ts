@@ -29,8 +29,8 @@ export function blankAssumptions(name: string): Assumptions {
   return withDefaultProjectSegments({
     name, openingYear: new Date().getFullYear() + 3, years: 15, initialPassengers: 100000,
     segments: [{ name: "Adult roundtrip", share: 1, grossPrice: 500, vatRate: 0.12, commission: 0, boardingsPerGuest: 2 }],
-    passengerGrowth: [0.05, 0.03, 0.02], priceGrowth: [0.03, 0.03, 0.025],
-    fbRevenueYear1: 0, merchRevenueYear1: 0, ancillaryGrowth: [0.03, 0.03, 0.02],
+    passengerGrowth: [0.05, 0.03, 0.02, 0.02, 0.02], priceGrowth: [0.03, 0.03, 0.025, 0.025, 0.025],
+    fbRevenueYear1: 0, merchRevenueYear1: 0, ancillaryGrowth: [0.03, 0.03, 0.02, 0.02, 0.02],
     cableFixedOpex: 10000000, cableVariableCostPerPassenger: 0, fbOpexYear1: 0, merchOpexYear1: 0, costInflation: 0.025,
     capexItems: [{ name: "Cable car", quantity: 1, unitCost: 200000000 }], contingencyRate: 0.15,
     debtShare: 0.6, interestRate: 0.06, loanYears: 15, taxRate: 0.22, depreciationYears: 25, maintenanceCapexRate: 0.01, maintenanceCapexPct: 0.01,
@@ -48,8 +48,9 @@ export function withDefaultProjectSegments(a: Assumptions): Assumptions {
   }] });
 }
 
-/** Creation defaults only: explicit cost growth keeps manual F&B independent of revenue. */
+/** Creation defaults only: explicit cost growth keeps manual F&B independent of revenue. Five entries so Year 2–5 and 6+ are all editable. */
 export function withDefaultOpexGrowth(a: Assumptions): Assumptions {
   if (a.opexGrowth?.fb?.length) return a;
-  return { ...a, opexGrowth: { ...a.opexGrowth, fb: [a.costInflation, a.costInflation, a.costInflation] } };
+  const rate = a.costInflation;
+  return { ...a, opexGrowth: { ...a.opexGrowth, fb: [rate, rate, rate, rate, rate] } };
 }

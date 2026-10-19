@@ -45,20 +45,25 @@ export function Field({ label, hint, children }: { label: string; hint?: string;
   );
 }
 
+/** Growth lists always show Year 2–5 plus a final "Year 6+" field; shorter saved lists are padded with their last value. */
 export function GrowthList({ values, onChange, disabled }: { values: number[]; onChange: (v: number[]) => void; disabled?: boolean | undefined }) {
+  const MIN_ENTRIES = 5;
+  const last = values.at(-1) ?? 0;
+  const list = values.length >= MIN_ENTRIES ? values : [...values, ...Array(MIN_ENTRIES - values.length).fill(last)];
+  const canRemove = values.length > MIN_ENTRIES;
   return (
     <div className="space-y-1">
       <div className="flex flex-wrap items-end gap-2">
-        {values.map((v, i) => (
+        {list.map((v, i) => (
           <div key={i} className="w-24">
-            <span className="text-[11px] text-muted-foreground">{i === values.length - 1 ? `Year ${i + 2}+` : `Year ${i + 2}`}</span>
-            <NumField percent value={v} disabled={disabled} onChange={(n) => onChange(values.map((x, j) => (j === i ? n : x)))} />
+            <span className="text-[11px] text-muted-foreground">{i === list.length - 1 ? `Year ${i + 2}+` : `Year ${i + 2}`}</span>
+            <NumField percent value={v} disabled={disabled} onChange={(n) => onChange(list.map((x, j) => (j === i ? n : x)))} />
           </div>
         ))}
         {!disabled && (
           <div className="flex gap-1 pb-1 text-xs">
-            <button type="button" className="text-accent hover:underline" onClick={() => onChange([...values, values.at(-1) ?? 0])}>+ year</button>
-            {values.length > 1 && <button type="button" className="text-muted-foreground hover:underline" onClick={() => onChange(values.slice(0, -1))}>− year</button>}
+            <button type="button" className="text-accent hover:underline" onClick={() => onChange([...list, last])}>+ year</button>
+            {canRemove && <button type="button" className="text-muted-foreground hover:underline" onClick={() => onChange(values.slice(0, -1))}>− year</button>}
           </div>
         )}
       </div>

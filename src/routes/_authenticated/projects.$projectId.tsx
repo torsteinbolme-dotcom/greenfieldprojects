@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field } from "@/components/editor/inputs";
 import { Card, CapexSection, ExitSection, FinancingSection, ForecastSection, Kpi, Limitations, RevenueOpexSection, SegmentsSection } from "@/components/editor/sections";
-import { MOIC_YEAR, buildEntries, moicAtYear, portfolioAverages } from "@/lib/portfolio";
+import { MOIC_YEAR, buildEntries, irrAtYear, moicAtYear, portfolioAverages } from "@/lib/portfolio";
 import { createScenario, logAudit, saveAssumptionVersion, useLatestAssumptions, useMembership, useProjects, useScenarios, type Membership, type ProjectRow } from "@/lib/data";
 import { safeCalculate } from "@/lib/model";
 import { withLinkedTicketPrices } from "@/lib/ticket-pricing";

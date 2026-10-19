@@ -6,21 +6,23 @@ import { Field, NumField } from "@/components/editor/inputs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { int, pct } from "@/lib/format";
-import { allocationValid, capacityInputsValid, capacityOf, capacityTable, EQUAL_ALLOCATION, MONTHS, type Capacity } from "@/lib/capacity";
-import { profileValid, useSeasonalityProfiles } from "@/lib/seasonality";
+import { allocationValid, capacityInputsValid, capacityOf, capacityTable, EQUAL_ALLOCATION, MONTHS, type Capacity, type SeasonalitySource } from "@/lib/capacity";
+import { capacityWithProfile, useSeasonalityProfiles } from "@/lib/seasonality";
 
 type Props = { a: Assumptions; r: ModelResult | null; ro: boolean; set: (patch: Partial<Assumptions>) => void };
 
 export function CapacitySection({ a, r, ro, set }: Props) {
   const saved = capacityOf(a);
   const [alloc, setAlloc] = useState(saved.monthlyAllocation);
+  const [attribution, setAttribution] = useState<SeasonalitySource | null | undefined>(saved.seasonalitySource);
   const savedKey = JSON.stringify(saved.monthlyAllocation);
-  useEffect(() => { setAlloc(JSON.parse(savedKey)); }, [savedKey]);
+  const savedSourceKey = JSON.stringify(saved.seasonalitySource ?? null);
+  useEffect(() => { setAlloc(JSON.parse(savedKey)); setAttribution(JSON.parse(savedSourceKey)); }, [savedKey, savedSourceKey]);
   const [yearIdx, setYearIdx] = useState(2);
   const commit = (c: Capacity) => set({ capacity: c } as Partial<Assumptions>);
   const total = alloc.reduce((s, x) => s + x, 0);
   const valid = allocationValid(alloc);
-  const dirty = JSON.stringify(alloc) !== savedKey;
+  const dirty = JSON.stringify(alloc) !== savedKey || JSON.stringify(attribution ?? null) !== savedSourceKey;
   const enabled = capacityInputsValid(saved);
 
   const rows = r?.rows ?? [];
@@ -28,7 +30,7 @@ export function CapacitySection({ a, r, ro, set }: Props) {
   const table = row ? capacityTable(row, { ...saved, monthlyAllocation: alloc }) : null;
 
   const { data: profiles } = useSeasonalityProfiles();
-  const usable = (profiles ?? []).filter((pr) => profileValid(pr.totalPct, 12));
+  const usable = (profiles ?? []).filter((pr) => pr.valid);
   const [source, setSource] = useState("manual");
   const selected = source === "manual" ? null : usable.find((pr) => pr.label === source) ?? null;
 
@@ -62,7 +64,7 @@ export function CapacitySection({ a, r, ro, set }: Props) {
                   </SelectContent>
                 </Select>
               </Field>
-              {selected && <Button size="sm" variant="outline" onClick={() => setAlloc([...selected.allocation])}>Apply Distribution</Button>}
+              {selected && <Button size="sm" variant="outline" onClick={() => { const draft = capacityWithProfile(saved, selected); setAlloc(draft.monthlyAllocation); setAttribution(draft.seasonalitySource); }}>Apply Distribution</Button>}
             </div>
             {selected && (
               <div className="mt-3">
@@ -73,7 +75,7 @@ export function CapacitySection({ a, r, ro, set }: Props) {
                   {selected.allocation.map((share, i) => (
                     <div key={MONTHS[i]} className="flex w-8 flex-col items-center gap-1" title={`${MONTHS[i]}: ${pct(share)}`}>
                       <div className="w-full rounded-sm bg-primary/70" style={{ height: `${Math.max(share * 400, share > 0 ? 2 : 0)}px` }} />
-                      <span className="text-[10px] text-muted-foreground">{MONTHS[i]!.slice(0, 3)}</span>
+                      <span className="text-[10px] text-muted-foreground">{MONTHS[i]?.slice(0, 3)}</span>
                     </div>
                   ))}
                 </div>
@@ -118,9 +120,9 @@ export function CapacitySection({ a, r, ro, set }: Props) {
         </div>
         {!valid && <p className="mt-2 text-xs text-destructive">Monthly allocation must total exactly 100% before it is saved (currently {pct(total)}).</p>}
         {!ro && <div className="mt-3 flex flex-wrap gap-2">
-          <Button size="sm" disabled={!valid || !dirty} onClick={() => { if (allocationValid(alloc)) commit({ ...saved, monthlyAllocation: [...alloc] }); }}>Save Distribution</Button>
-          <Button size="sm" variant="outline" disabled={!dirty} onClick={() => setAlloc([...saved.monthlyAllocation])}>Cancel Changes</Button>
-          <Button size="sm" variant="ghost" onClick={() => setAlloc([...EQUAL_ALLOCATION])}>Reset to equal distribution</Button>
+          <Button size="sm" disabled={!valid || !dirty} onClick={() => { if (allocationValid(alloc)) commit({ ...saved, monthlyAllocation: [...alloc], ...(attribution ? { seasonalitySource: { ...attribution } } : saved.seasonalitySource ? { seasonalitySource: null } : {}) }); }}>Save Distribution</Button>
+          <Button size="sm" variant="outline" disabled={!dirty} onClick={() => { setAlloc([...saved.monthlyAllocation]); setAttribution(saved.seasonalitySource); }}>Cancel Changes</Button>
+          <Button size="sm" variant="ghost" onClick={() => { setAlloc([...EQUAL_ALLOCATION]); setAttribution(null); }}>Reset to equal distribution</Button>
         </div>}
       </Card>
     </div>

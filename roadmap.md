@@ -1,4 +1,5 @@
 # Tasks
+- [ ] Harden seasonality validation, normalized-year averaging, frozen source attribution and atomic replacement; preserve existing data; run complete tests and verify production build.
 - [x] Apply separate F&B OPEX growth to current scenarios and new projects, preserving rates/history and benchmark passenger flags; all current scenarios already had explicit rates. New insert defaults cover signup/copies; new-project save/reload and current forecasts verified, 161 tests pass.
 - [x] Separate manual F&B OPEX development from revenue growth: year-1 OPEX and explicit F&B growth only; benchmark and absent-list legacy behaviour preserved; 158 tests pass and signed-in forecast verified at 9,0 / 10,8 / 12,4 NOK m.
 - [x] Rename Ancillary growth to Ancillary revenue growth; verified in the signed-in project.

@@ -19,7 +19,7 @@ import {
   cableMetrics, combine, ebitdaOf, parseWideSheet, restaurantMetrics, useBenchmarks,
   type BenchmarkAsset, type BenchmarkRecord, type DataStatus, type ImportRow,
 } from "@/lib/benchmarks";
-import { equalWeightedAverage, groupProfiles, parseSeasonalitySheet, profileValid, useSeasonalityProfiles, type SeasonalityImportRow, type SeasonalityRow } from "@/lib/seasonality";
+import { parseSeasonalitySheet, profileKey, seasonalityImportProfiles, saveSeasonalityProfiles, useSeasonalityProfiles, type SeasonalityProfile } from "@/lib/seasonality";
 
 export const Route = createFileRoute("/_authenticated/benchmarks")({
   head: () => ({ meta: [
@@ -231,58 +231,34 @@ function BenchmarksPage() {
 function SeasonalityImportDialog({ orgId, onClose }: { orgId: string; onClose: () => void }) {
   const qc = useQueryClient();
   const { data: existing } = useSeasonalityProfiles();
-  const [rows, setRows] = useState<SeasonalityImportRow[] | null>(null);
-  const [fileName, setFileName] = useState("");
+  const [preview, setPreview] = useState<SeasonalityProfile[]>([]);
   const [replace, setReplace] = useState(false);
   const [busy, setBusy] = useState(false);
 
   async function onFile(file: File) {
+    setPreview([]);
+    setReplace(false);
     try {
       const XLSX = await import("xlsx");
       const wb = XLSX.read(await file.arrayBuffer());
-      const parsed = parseSeasonalitySheet(XLSX.utils.sheet_to_json<Record<string, unknown>>(wb.Sheets[wb.SheetNames[0] ?? ""]!, { defval: null }));
-      setFileName(file.name);
-      setReplace(false);
-      setRows(parsed);
+      const sheet = wb.Sheets[wb.SheetNames[0] ?? ""];
+      if (!sheet) throw new Error("No seasonality worksheet found");
+      const parsed = parseSeasonalitySheet(XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: null }));
+      setPreview(seasonalityImportProfiles(parsed, orgId));
     } catch (e) { toast.error((e as Error).message); }
   }
 
-  // Preview: group the parsed rows, then add equal-weighted averages for benchmarks with 2+ complete years.
-  const preview = useMemo(() => {
-    if (!rows) return [];
-    const grouped = groupProfiles(rows.map((r, i) => ({
-      id: String(i), organization_id: orgId, benchmark_name: r.benchmark, profile_name: r.profile,
-      month: r.month, allocation_pct: r.allocationPct ?? 0, historical_passengers: r.passengers, method: r.method,
-    })) as SeasonalityRow[]);
-    const benchmarks = [...new Set(grouped.map((g) => g.benchmark))];
-    const averages = benchmarks.map((b) => equalWeightedAverage(b, grouped)).filter(Boolean) as NonNullable<ReturnType<typeof equalWeightedAverage>>[];
-    return [...grouped, ...averages];
-  }, [rows, orgId]);
-
   const duplicates = useMemo(() => {
-    const existingKeys = new Set((existing ?? []).map((p) => `${p.benchmark}${p.profile}`));
-    return preview.filter((p) => existingKeys.has(`${p.benchmark}${p.profile}`));
+    const existingKeys = new Set((existing ?? []).map((p) => profileKey(p.benchmark, p.profile)));
+    return preview.filter((p) => existingKeys.has(profileKey(p.benchmark, p.profile)));
   }, [preview, existing]);
-  const invalid = preview.filter((p) => !profileValid(p.totalPct, 12));
+  const invalid = preview.filter((p) => !p.valid);
 
   async function run() {
-    if (!rows || !preview.length) return;
+    if (!preview.length || invalid.length || (duplicates.length && !replace)) return;
     setBusy(true);
     try {
-      if (duplicates.length && replace) {
-        for (const d of duplicates) {
-          const { error } = await supabase.from("seasonality_profiles").delete().eq("organization_id", orgId).eq("benchmark_name", d.benchmark).eq("profile_name", d.profile);
-          if (error) throw error;
-        }
-      }
-      const insert = preview
-        .filter((p) => !duplicates.some((d) => d.benchmark === p.benchmark && d.profile === p.profile) || replace)
-        .flatMap((p) => p.allocation.map((share, i) => ({
-          organization_id: orgId, benchmark_name: p.benchmark, profile_name: p.profile, month: i + 1,
-          allocation_pct: share * 100, historical_passengers: p.passengers[i] ?? null, method: p.method,
-        })));
-      const { error } = await supabase.from("seasonality_profiles").insert(insert);
-      if (error) throw error;
+      await saveSeasonalityProfiles(orgId, preview, replace);
       toast.success(`Imported ${preview.length} seasonality profile${preview.length === 1 ? "" : "s"}`);
       await qc.invalidateQueries({ queryKey: ["seasonality-profiles"] });
       onClose();
@@ -300,8 +276,8 @@ function SeasonalityImportDialog({ orgId, onClose }: { orgId: string; onClose: (
             <table className="fin-table fin-table-tight w-full"><thead><tr><th>Profile</th><th className="text-right">Months</th><th className="text-right">Total</th><th className="text-right">Passengers</th><th>Status</th></tr></thead>
               <tbody>{preview.map((p) => {
                 const dup = duplicates.some((d) => d.benchmark === p.benchmark && d.profile === p.profile);
-                const ok = profileValid(p.totalPct, 12);
-                const monthCount = new Set((rows ?? []).filter((r) => r.benchmark === p.benchmark && r.profile === p.profile).map((r) => r.month)).size || 12;
+                const ok = p.valid;
+                const monthCount = p.months.length;
                 return <tr key={p.label}>
                   <td>{p.label}</td>
                   <td className="text-right">{monthCount}</td>

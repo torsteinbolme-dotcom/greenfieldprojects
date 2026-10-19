@@ -531,6 +531,10 @@ export type Database = {
     Functions: {
       accept_invite: { Args: { _token: string }; Returns: string }
       can_edit_org: { Args: { _org: string; _user: string }; Returns: boolean }
+      import_seasonality_profiles: {
+        Args: { p_organization_id: string; p_replace?: boolean; p_rows: Json }
+        Returns: undefined
+      }
       is_org_admin: { Args: { _org: string; _user: string }; Returns: boolean }
       is_org_member: { Args: { _org: string; _user: string }; Returns: boolean }
     }

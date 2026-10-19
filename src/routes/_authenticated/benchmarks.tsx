@@ -81,6 +81,7 @@ function BenchmarksPage() {
   const year = yearSel ?? years[0] ?? new Date().getFullYear();
   const [editing, setEditing] = useState<{ record?: BenchmarkRecord | undefined; asset?: BenchmarkAsset | undefined } | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [seasonalityOpen, setSeasonalityOpen] = useState(false);
   const [cableKpi, setCableKpi] = useState("ebitdaPerPax");
 
   if (isLoading || !data) return <p className="text-muted-foreground">Loading benchmarks…</p>;

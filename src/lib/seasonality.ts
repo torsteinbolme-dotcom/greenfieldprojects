@@ -96,7 +96,7 @@ export function parseSeasonalitySheet(raw: Record<string, unknown>[]): Seasonali
     const passengers = paxRaw === null || paxRaw === undefined || paxRaw === "" ? null : Number(paxRaw);
     if (allocationPct !== null && !Number.isFinite(allocationPct)) throw new Error(`Row ${i + 2}: invalid allocation_pct`);
     if (passengers !== null && !Number.isFinite(passengers)) throw new Error(`Row ${i + 2}: invalid historical_passengers`);
-    return { benchmark, profile, month, allocationPct, passengers, method: r.method ? String(r.method) : null };
+    return { benchmark, profile, month, allocationPct, passengers, method: r["method"] ? String(r["method"]) : null };
   });
   // Compute percentages from raw passengers where the percentage is missing.
   const totals = new Map<string, number>();

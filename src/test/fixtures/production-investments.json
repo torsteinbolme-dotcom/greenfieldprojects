@@ -1,0 +1,733 @@
+{
+  "A": {
+    "name": "A",
+    "openingYear": 2030,
+    "years": 15,
+    "initialPassengers": 54347.82608695653,
+    "segments": [
+      {
+        "name": "Roundtrip adult",
+        "share": 0.39,
+        "grossPrice": 699,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 2
+      },
+      {
+        "name": "Roundtrip child",
+        "share": 0.07,
+        "grossPrice": 349.5,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 2
+      },
+      {
+        "name": "One-way adult",
+        "share": 0.15,
+        "grossPrice": 489.3,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 1
+      },
+      {
+        "name": "One-way child",
+        "share": 0.03,
+        "grossPrice": 244.65,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 1
+      },
+      {
+        "name": "Annual pass adult",
+        "share": 0.01,
+        "grossPrice": 3495,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 8
+      },
+      {
+        "name": "Cruise",
+        "share": 0.25,
+        "grossPrice": 699,
+        "vatRate": 0.12,
+        "commission": 0.2,
+        "boardingsPerGuest": 2
+      },
+      {
+        "name": "Tour operators",
+        "share": 0.1,
+        "grossPrice": 699,
+        "vatRate": 0.12,
+        "commission": 0.15,
+        "boardingsPerGuest": 2
+      }
+    ],
+    "passengerGrowth": [
+      0.2,
+      0.15,
+      0.04
+    ],
+    "priceGrowth": [
+      0.05,
+      0.05,
+      0.03
+    ],
+    "fbRevenueYear1": 6369082.125603865,
+    "merchRevenueYear1": 1207729.468599034,
+    "ancillaryGrowth": [
+      0.2,
+      0.15,
+      0.04
+    ],
+    "cableFixedOpex": 6817533.09178744,
+    "cableVariableCostPerPassenger": 10,
+    "fbOpexYear1": 5921497.584541063,
+    "merchOpexYear1": 724637.6811594203,
+    "costInflation": 0.025,
+    "capexItems": [
+      {
+        "name": "Top station (m\u00b2)",
+        "quantity": 3500,
+        "unitCost": 15822.784810126583
+      },
+      {
+        "name": "Lower station (m\u00b2)",
+        "quantity": 1000,
+        "unitCost": 7233.273056057867
+      },
+      {
+        "name": "Skywalk",
+        "quantity": 1,
+        "unitCost": 3616636.528028933
+      },
+      {
+        "name": "Architect",
+        "quantity": 1,
+        "unitCost": 904159.1320072332
+      },
+      {
+        "name": "Cable car",
+        "quantity": 1,
+        "unitCost": 22603978.30018083
+      },
+      {
+        "name": "Zoning process",
+        "quantity": 1,
+        "unitCost": 904159.1320072332
+      },
+      {
+        "name": "Engineering design",
+        "quantity": 1,
+        "unitCost": 5424954.7920434
+      },
+      {
+        "name": "Outdoor areas",
+        "quantity": 1,
+        "unitCost": 1808318.2640144664
+      },
+      {
+        "name": "Tunnel",
+        "quantity": 1,
+        "unitCost": 27124773.960217
+      }
+    ],
+    "contingencyRate": 0.2,
+    "debtShare": 0.6,
+    "interestRate": 0.06,
+    "loanYears": 15,
+    "taxRate": 0.22,
+    "depreciationYears": 25,
+    "maintenanceCapexRate": 0.01,
+    "exitYear": 8,
+    "exitMultiple": 15,
+    "exitTransactionCostRate": 0.01,
+    "distributeCashAnnually": false,
+    "maintenanceCapexPct": 0.01,
+    "fbFollowsPassengers": true
+  },
+  "B": {
+    "name": "B",
+    "openingYear": 2030,
+    "years": 15,
+    "initialPassengers": 181159.4202898551,
+    "segments": [
+      {
+        "name": "Roundtrip adult",
+        "share": 0.39,
+        "grossPrice": 699,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 2
+      },
+      {
+        "name": "Roundtrip child",
+        "share": 0.07,
+        "grossPrice": 349.5,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 2
+      },
+      {
+        "name": "One-way adult",
+        "share": 0.15,
+        "grossPrice": 489.3,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 1
+      },
+      {
+        "name": "One-way child",
+        "share": 0.03,
+        "grossPrice": 244.65,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 1
+      },
+      {
+        "name": "Annual pass adult",
+        "share": 0.01,
+        "grossPrice": 3495,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 8
+      },
+      {
+        "name": "Cruise",
+        "share": 0.25,
+        "grossPrice": 699,
+        "vatRate": 0.12,
+        "commission": 0.2,
+        "boardingsPerGuest": 2
+      },
+      {
+        "name": "Tour operators",
+        "share": 0.1,
+        "grossPrice": 699,
+        "vatRate": 0.12,
+        "commission": 0.15,
+        "boardingsPerGuest": 2
+      }
+    ],
+    "passengerGrowth": [
+      0.2,
+      0.15,
+      0.04
+    ],
+    "priceGrowth": [
+      0.05,
+      0.05,
+      0.03
+    ],
+    "fbRevenueYear1": 21230273.752012886,
+    "merchRevenueYear1": 4025764.8953301134,
+    "ancillaryGrowth": [
+      0.2,
+      0.15,
+      0.04
+    ],
+    "cableFixedOpex": 22725110.305958137,
+    "cableVariableCostPerPassenger": 10,
+    "fbOpexYear1": 19738325.281803545,
+    "merchOpexYear1": 2415458.937198068,
+    "costInflation": 0.025,
+    "capexItems": [
+      {
+        "name": "Top station (m\u00b2)",
+        "quantity": 3500,
+        "unitCost": 52742.61603375527
+      },
+      {
+        "name": "Lower station (m\u00b2)",
+        "quantity": 1000,
+        "unitCost": 24110.910186859554
+      },
+      {
+        "name": "Skywalk",
+        "quantity": 1,
+        "unitCost": 12055455.093429776
+      },
+      {
+        "name": "Architect",
+        "quantity": 1,
+        "unitCost": 3013863.773357444
+      },
+      {
+        "name": "Cable car",
+        "quantity": 1,
+        "unitCost": 75346594.33393611
+      },
+      {
+        "name": "Zoning process",
+        "quantity": 1,
+        "unitCost": 3013863.773357444
+      },
+      {
+        "name": "Engineering design",
+        "quantity": 1,
+        "unitCost": 18083182.640144665
+      },
+      {
+        "name": "Outdoor areas",
+        "quantity": 1,
+        "unitCost": 6027727.546714888
+      },
+      {
+        "name": "Tunnel",
+        "quantity": 1,
+        "unitCost": 90415913.20072332
+      }
+    ],
+    "contingencyRate": 0.2,
+    "debtShare": 0.6,
+    "interestRate": 0.06,
+    "loanYears": 15,
+    "taxRate": 0.22,
+    "depreciationYears": 25,
+    "maintenanceCapexRate": 0.01,
+    "exitYear": 8,
+    "exitMultiple": 15,
+    "exitTransactionCostRate": 0.01,
+    "distributeCashAnnually": false,
+    "maintenanceCapexPct": 0.01,
+    "fbFollowsPassengers": true
+  },
+  "C": {
+    "name": "C",
+    "openingYear": 2030,
+    "years": 15,
+    "initialPassengers": 362318.8405797102,
+    "segments": [
+      {
+        "name": "Roundtrip adult",
+        "share": 0.39,
+        "grossPrice": 699,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 2
+      },
+      {
+        "name": "Roundtrip child",
+        "share": 0.07,
+        "grossPrice": 349.5,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 2
+      },
+      {
+        "name": "One-way adult",
+        "share": 0.15,
+        "grossPrice": 489.3,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 1
+      },
+      {
+        "name": "One-way child",
+        "share": 0.03,
+        "grossPrice": 244.65,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 1
+      },
+      {
+        "name": "Annual pass adult",
+        "share": 0.01,
+        "grossPrice": 3495,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 8
+      },
+      {
+        "name": "Cruise",
+        "share": 0.25,
+        "grossPrice": 699,
+        "vatRate": 0.12,
+        "commission": 0.2,
+        "boardingsPerGuest": 2
+      },
+      {
+        "name": "Tour operators",
+        "share": 0.1,
+        "grossPrice": 699,
+        "vatRate": 0.12,
+        "commission": 0.15,
+        "boardingsPerGuest": 2
+      }
+    ],
+    "passengerGrowth": [
+      0.2,
+      0.15,
+      0.04
+    ],
+    "priceGrowth": [
+      0.05,
+      0.05,
+      0.03
+    ],
+    "fbRevenueYear1": 42460547.50402577,
+    "merchRevenueYear1": 8051529.790660227,
+    "ancillaryGrowth": [
+      0.2,
+      0.15,
+      0.04
+    ],
+    "cableFixedOpex": 45450220.611916274,
+    "cableVariableCostPerPassenger": 10,
+    "fbOpexYear1": 39476650.56360709,
+    "merchOpexYear1": 4830917.874396136,
+    "costInflation": 0.025,
+    "capexItems": [
+      {
+        "name": "Top station (m\u00b2)",
+        "quantity": 3500,
+        "unitCost": 163502.10970464133
+      },
+      {
+        "name": "Lower station (m\u00b2)",
+        "quantity": 1000,
+        "unitCost": 74743.82157926462
+      },
+      {
+        "name": "Skywalk",
+        "quantity": 1,
+        "unitCost": 37371910.789632306
+      },
+      {
+        "name": "Architect",
+        "quantity": 1,
+        "unitCost": 9342977.697408076
+      },
+      {
+        "name": "Cable car",
+        "quantity": 1,
+        "unitCost": 233574442.4352019
+      },
+      {
+        "name": "Zoning process",
+        "quantity": 1,
+        "unitCost": 9342977.697408076
+      },
+      {
+        "name": "Engineering design",
+        "quantity": 1,
+        "unitCost": 56057866.18444846
+      },
+      {
+        "name": "Outdoor areas",
+        "quantity": 1,
+        "unitCost": 18685955.394816153
+      },
+      {
+        "name": "Tunnel",
+        "quantity": 1,
+        "unitCost": 280289330.9222423
+      }
+    ],
+    "contingencyRate": 0.2,
+    "debtShare": 0.6,
+    "interestRate": 0.06,
+    "loanYears": 15,
+    "taxRate": 0.22,
+    "depreciationYears": 25,
+    "maintenanceCapexRate": 0.01,
+    "exitYear": 8,
+    "exitMultiple": 15,
+    "exitTransactionCostRate": 0.01,
+    "distributeCashAnnually": false,
+    "maintenanceCapexPct": 0.01,
+    "fbFollowsPassengers": true
+  },
+  "depreciation_exhaustion": {
+    "name": "A",
+    "openingYear": 2030,
+    "years": 6,
+    "initialPassengers": 54347.82608695653,
+    "segments": [
+      {
+        "name": "Roundtrip adult",
+        "share": 0.39,
+        "grossPrice": 699,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 2
+      },
+      {
+        "name": "Roundtrip child",
+        "share": 0.07,
+        "grossPrice": 349.5,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 2
+      },
+      {
+        "name": "One-way adult",
+        "share": 0.15,
+        "grossPrice": 489.3,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 1
+      },
+      {
+        "name": "One-way child",
+        "share": 0.03,
+        "grossPrice": 244.65,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 1
+      },
+      {
+        "name": "Annual pass adult",
+        "share": 0.01,
+        "grossPrice": 3495,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 8
+      },
+      {
+        "name": "Cruise",
+        "share": 0.25,
+        "grossPrice": 699,
+        "vatRate": 0.12,
+        "commission": 0.2,
+        "boardingsPerGuest": 2
+      },
+      {
+        "name": "Tour operators",
+        "share": 0.1,
+        "grossPrice": 699,
+        "vatRate": 0.12,
+        "commission": 0.15,
+        "boardingsPerGuest": 2
+      }
+    ],
+    "passengerGrowth": [
+      0.2,
+      0.15,
+      0.04
+    ],
+    "priceGrowth": [
+      0.05,
+      0.05,
+      0.03
+    ],
+    "fbRevenueYear1": 6369082.125603865,
+    "merchRevenueYear1": 1207729.468599034,
+    "ancillaryGrowth": [
+      0.2,
+      0.15,
+      0.04
+    ],
+    "cableFixedOpex": 6817533.09178744,
+    "cableVariableCostPerPassenger": 10,
+    "fbOpexYear1": 5921497.584541063,
+    "merchOpexYear1": 724637.6811594203,
+    "costInflation": 0.025,
+    "capexItems": [
+      {
+        "name": "Top station (m\u00b2)",
+        "quantity": 3500,
+        "unitCost": 15822.784810126583
+      },
+      {
+        "name": "Lower station (m\u00b2)",
+        "quantity": 1000,
+        "unitCost": 7233.273056057867
+      },
+      {
+        "name": "Skywalk",
+        "quantity": 1,
+        "unitCost": 3616636.528028933
+      },
+      {
+        "name": "Architect",
+        "quantity": 1,
+        "unitCost": 904159.1320072332
+      },
+      {
+        "name": "Cable car",
+        "quantity": 1,
+        "unitCost": 22603978.30018083
+      },
+      {
+        "name": "Zoning process",
+        "quantity": 1,
+        "unitCost": 904159.1320072332
+      },
+      {
+        "name": "Engineering design",
+        "quantity": 1,
+        "unitCost": 5424954.7920434
+      },
+      {
+        "name": "Outdoor areas",
+        "quantity": 1,
+        "unitCost": 1808318.2640144664
+      },
+      {
+        "name": "Tunnel",
+        "quantity": 1,
+        "unitCost": 27124773.960217
+      }
+    ],
+    "contingencyRate": 0.2,
+    "debtShare": 0.6,
+    "interestRate": 0.06,
+    "loanYears": 15,
+    "taxRate": 0.22,
+    "depreciationYears": 2,
+    "maintenanceCapexRate": 0.01,
+    "exitYear": 6,
+    "exitMultiple": 15,
+    "exitTransactionCostRate": 0.01,
+    "distributeCashAnnually": false,
+    "maintenanceCapexPct": 0.01,
+    "fbFollowsPassengers": true
+  },
+  "zero_fb_revenue_fixed_cost": {
+    "name": "A",
+    "openingYear": 2030,
+    "years": 15,
+    "initialPassengers": 54347.82608695653,
+    "segments": [
+      {
+        "name": "Roundtrip adult",
+        "share": 0.39,
+        "grossPrice": 699,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 2
+      },
+      {
+        "name": "Roundtrip child",
+        "share": 0.07,
+        "grossPrice": 349.5,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 2
+      },
+      {
+        "name": "One-way adult",
+        "share": 0.15,
+        "grossPrice": 489.3,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 1
+      },
+      {
+        "name": "One-way child",
+        "share": 0.03,
+        "grossPrice": 244.65,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 1
+      },
+      {
+        "name": "Annual pass adult",
+        "share": 0.01,
+        "grossPrice": 3495,
+        "vatRate": 0.12,
+        "commission": 0,
+        "boardingsPerGuest": 8
+      },
+      {
+        "name": "Cruise",
+        "share": 0.25,
+        "grossPrice": 699,
+        "vatRate": 0.12,
+        "commission": 0.2,
+        "boardingsPerGuest": 2
+      },
+      {
+        "name": "Tour operators",
+        "share": 0.1,
+        "grossPrice": 699,
+        "vatRate": 0.12,
+        "commission": 0.15,
+        "boardingsPerGuest": 2
+      }
+    ],
+    "passengerGrowth": [
+      0.2,
+      0.15,
+      0.04
+    ],
+    "priceGrowth": [
+      0.05,
+      0.05,
+      0.03
+    ],
+    "fbRevenueYear1": 0,
+    "merchRevenueYear1": 1207729.468599034,
+    "ancillaryGrowth": [
+      0.2,
+      0.15,
+      0.04
+    ],
+    "cableFixedOpex": 6817533.09178744,
+    "cableVariableCostPerPassenger": 10,
+    "fbOpexYear1": 5921497.584541063,
+    "merchOpexYear1": 724637.6811594203,
+    "costInflation": 0.025,
+    "capexItems": [
+      {
+        "name": "Top station (m\u00b2)",
+        "quantity": 3500,
+        "unitCost": 15822.784810126583
+      },
+      {
+        "name": "Lower station (m\u00b2)",
+        "quantity": 1000,
+        "unitCost": 7233.273056057867
+      },
+      {
+        "name": "Skywalk",
+        "quantity": 1,
+        "unitCost": 3616636.528028933
+      },
+      {
+        "name": "Architect",
+        "quantity": 1,
+        "unitCost": 904159.1320072332
+      },
+      {
+        "name": "Cable car",
+        "quantity": 1,
+        "unitCost": 22603978.30018083
+      },
+      {
+        "name": "Zoning process",
+        "quantity": 1,
+        "unitCost": 904159.1320072332
+      },
+      {
+        "name": "Engineering design",
+        "quantity": 1,
+        "unitCost": 5424954.7920434
+      },
+      {
+        "name": "Outdoor areas",
+        "quantity": 1,
+        "unitCost": 1808318.2640144664
+      },
+      {
+        "name": "Tunnel",
+        "quantity": 1,
+        "unitCost": 27124773.960217
+      }
+    ],
+    "contingencyRate": 0.2,
+    "debtShare": 0.6,
+    "interestRate": 0.06,
+    "loanYears": 15,
+    "taxRate": 0.22,
+    "depreciationYears": 25,
+    "maintenanceCapexRate": 0.01,
+    "exitYear": 8,
+    "exitMultiple": 15,
+    "exitTransactionCostRate": 0.01,
+    "distributeCashAnnually": false,
+    "maintenanceCapexPct": 0.01,
+    "fbFollowsPassengers": false,
+    "opexGrowth": null
+  }
+}

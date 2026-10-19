@@ -98,10 +98,19 @@ function EditorPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <Link to="/projects" className="text-xs text-muted-foreground hover:underline">← Projects</Link>
-          <h1 className="mt-1 text-3xl font-semibold">{project.name}</h1>
-          <p className="text-sm text-muted-foreground">{project.location ?? "No location"} · {project.status}</p>
+        <div className="flex flex-wrap items-end gap-4">
+          <div>
+            <Link to="/projects" className="text-xs text-muted-foreground hover:underline">← Projects</Link>
+            <h1 className="mt-1 text-3xl font-semibold">{project.name}</h1>
+            <p className="text-sm text-muted-foreground">{project.location ?? "No location"} · {project.status}</p>
+          </div>
+          {r && y3 && (
+            <div className="grid grid-cols-3 gap-2">
+              <Kpi compact label={`MOIC Y${draft.exitYear}`} value={mult(r.equityMultiple)} sub="Equity multiple at exit" />
+              <Kpi compact label="EBITDA Y3" value={nokM(y3.ebitda)} sub={`Operating year 3 · ${y3.calendarYear}`} />
+              <Kpi compact label="EBITDA / pax Y3" value={nok(y3.passengers > 0 ? y3.ebitda / y3.passengers : 0)} sub="Per passenger, year 3" />
+            </div>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {r && <PresentationExport key={scenario.id} coverPath={project.cover_image_url} input={{ project, scenario, assumptions: draft, result: r, assets: bench.data?.assets ?? [], records: bench.data?.records ?? [], version: latest?.version }} />}
@@ -125,13 +134,6 @@ function EditorPage() {
           {!ro && state && controller && <SaveControls state={state} undo={controller.undo} retry={() => { void controller.flush(); }} />}
         </div>
       </div>
-      {r && y3 && (
-        <div className="grid grid-cols-3 gap-3 sm:max-w-xl">
-          <Kpi label={`MOIC Y${draft.exitYear}`} value={mult(r.equityMultiple)} sub="Equity multiple at exit" />
-          <Kpi label="EBITDA Y3" value={nokM(y3.ebitda)} sub={`Operating year 3 · ${y3.calendarYear}`} />
-          <Kpi label="EBITDA / pax Y3" value={nok(y3.passengers > 0 ? y3.ebitda / y3.passengers : 0)} sub="Per passenger, year 3" />
-        </div>
-      )}
       {scenario.kind !== "base" && <p className="text-xs text-muted-foreground">Editing scenario “{scenario.name}”. Base is never modified by changes here.</p>}
       {error && <div className="rounded-md bg-warning p-3 text-sm text-warning-foreground">Cannot calculate: {error}</div>}
 

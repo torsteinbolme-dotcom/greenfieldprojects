@@ -28,12 +28,12 @@ export function Card({ title, children, className }: { title?: string; children:
   );
 }
 
-export function Kpi({ label, value, sub }: { label: string; value: string; sub?: string }) {
+export function Kpi({ label, value, sub, compact }: { label: string; value: string; sub?: string; compact?: boolean }) {
   return (
-    <div className="rounded-md border bg-card p-4">
-      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="num mt-1 text-2xl text-primary">{value}</p>
-      {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
+    <div className={cn("rounded-md border bg-card", compact ? "px-3 py-2" : "p-4")}>
+      <p className={cn("uppercase tracking-wide text-muted-foreground", compact ? "text-[10px]" : "text-xs")}>{label}</p>
+      <p className={cn("num text-primary", compact ? "mt-0.5 text-lg leading-tight" : "mt-1 text-2xl")}>{value}</p>
+      {sub && <p className={cn("text-muted-foreground", compact ? "text-[10px] leading-tight" : "text-xs")}>{sub}</p>}
     </div>
   );
 }

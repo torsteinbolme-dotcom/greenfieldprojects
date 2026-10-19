@@ -196,9 +196,7 @@ function EditorPage() {
           )}
           {r && <EbitdaBridge key={scenario.id} a={draft} r={r} />}
           {r && <BreakEvenPanel key={`break-even:${scenario.id}`} a={draft} />}
-          <div className="grid gap-4 lg:grid-cols-2">
-            <ProjectDetails ro={ro} project={project} m={m} projectId={projectId} />
-          </div>
+          <ProjectDetails ro={ro} project={project} m={m} projectId={projectId} />
           <Limitations />
         </TabsContent>
         <TabsContent value="segments"><SegmentsSection a={draft} set={set} ro={ro} /></TabsContent>

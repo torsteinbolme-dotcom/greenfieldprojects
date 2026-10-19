@@ -157,6 +157,7 @@ function BenchmarksPage() {
             </Select></div>
           {canEdit && <>
             <Button variant="outline" onClick={() => setImportOpen(true)}><Upload className="mr-1 h-4 w-4" />Import Excel</Button>
+            <Button variant="outline" onClick={() => setSeasonalityOpen(true)}><Upload className="mr-1 h-4 w-4" />Import seasonality</Button>
             <Button onClick={() => setEditing({})}><Plus className="mr-1 h-4 w-4" />Add record</Button>
           </>}
         </div>

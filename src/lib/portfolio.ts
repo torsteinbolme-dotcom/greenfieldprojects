@@ -69,14 +69,34 @@ export function sortByMetric<T>(items: T[], value: (item: T) => number | string,
   });
 }
 
-/** Presentation-only portfolio averages of engine outputs (MOIC at exit, Year 3 EBITDA and EBITDA per passenger). */
-export function portfolioAverages(entries: Pick<PortfolioEntry, "result">[]) {
+/** The header MOIC always reads Year 8, whatever exit year a scenario saves. */
+export const MOIC_YEAR = 8;
+
+/**
+ * Equity multiple if the project were sold at the end of Year 8: the engine's own exit maths
+ * (exit EBITDA × exit multiple, less closing debt and transaction costs, plus retained cash)
+ * over all equity funded to that year. Presentation-only — the stored exit year and engine
+ * outputs are untouched.
+ */
+export function moicAtYear(a: Assumptions, r: ModelResult, year = MOIC_YEAR): number | null {
+  const row = r.rows[year - 1];
+  if (!row) return null;
+  const ev = row.ebitda * a.exitMultiple;
+  const equityValue = ev - row.closingDebt + row.retainedCash - ev * a.exitTransactionCostRate;
+  const held = r.rows.slice(0, year);
+  const totalEquity = r.equity + held.reduce((s, x) => s + x.equityInjection, 0);
+  if (!(totalEquity > 0)) return null;
+  return (held.reduce((s, x) => s + x.distribution, 0) + equityValue) / totalEquity;
+}
+
+/** Presentation-only portfolio averages of engine outputs (MOIC at Year 8, Year 3 EBITDA and EBITDA per passenger). */
+export function portfolioAverages(entries: Pick<PortfolioEntry, "a" | "result">[]) {
   const avg = (xs: number[]) => (xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : null);
-  const ok = entries.flatMap((e) => (e.result ? [e.result] : []));
-  const y3 = ok.flatMap((r) => (r.rows[2] ? [r.rows[2]] : []));
+  const ok = entries.flatMap((e) => (e.result ? [{ a: e.a, r: e.result }] : []));
+  const y3 = ok.flatMap((e) => (e.r.rows[2] ? [e.r.rows[2]] : []));
   return {
     count: ok.length,
-    moic: avg(ok.map((r) => r.equityMultiple).filter((x): x is number => Number.isFinite(x))),
+    moic: avg(ok.flatMap((e) => { const m = moicAtYear(e.a, e.r); return m == null || !Number.isFinite(m) ? [] : [m]; })),
     ebitdaY3: avg(y3.map((r) => r.ebitda)),
     ebitdaPaxY3: avg(y3.filter((r) => r.passengers > 0).map((r) => r.ebitda / r.passengers)),
   };

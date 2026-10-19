@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field } from "@/components/editor/inputs";
 import { Card, CapexSection, ExitSection, FinancingSection, ForecastSection, Kpi, Limitations, RevenueOpexSection, SegmentsSection } from "@/components/editor/sections";
-import { buildEntries, portfolioAverages } from "@/lib/portfolio";
+import { MOIC_YEAR, buildEntries, moicAtYear, portfolioAverages } from "@/lib/portfolio";
 import { createScenario, logAudit, saveAssumptionVersion, useLatestAssumptions, useMembership, useProjects, useScenarios, type Membership, type ProjectRow } from "@/lib/data";
 import { safeCalculate } from "@/lib/model";
 import { withLinkedTicketPrices } from "@/lib/ticket-pricing";
@@ -98,6 +98,7 @@ function EditorPage() {
   if (!scenario || !draft) return <p className="text-muted-foreground">Loading scenario…</p>;
 
   const y3 = r?.rows[2];
+  const moic8 = r ? moicAtYear(draft, r) : null;
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -109,7 +110,7 @@ function EditorPage() {
           </div>
           {r && y3 && (
             <div className="grid grid-cols-3 gap-2">
-              <Kpi compact label={`MOIC Y${draft.exitYear}`} value={mult(r.equityMultiple)} sub={avgSub(r.equityMultiple ?? NaN, avg?.moic, mult)} />
+              <Kpi compact label={`MOIC Y${MOIC_YEAR}`} value={mult(moic8)} sub={avgSub(moic8 ?? NaN, avg?.moic, mult)} />
               <Kpi compact label="EBITDA Y3" value={nokM(y3.ebitda)} sub={avgSub(y3.ebitda, avg?.ebitdaY3, nokM)} />
               <Kpi compact label="EBITDA / pax Y3" value={nok(y3.passengers > 0 ? y3.ebitda / y3.passengers : 0)} sub={avgSub(y3.passengers > 0 ? y3.ebitda / y3.passengers : 0, avg?.ebitdaPaxY3, nok)} />
             </div>
@@ -305,10 +306,18 @@ type Ctx = { ro: boolean; project: ProjectRow; m: Membership; projectId: string 
   }
 
 
-/** "Avg 3,84x · +0,75x" — portfolio average of all projects' Base scenarios, with this project's difference. */
-function avgSub(value: number, average: number | null | undefined, fmt: (v: number) => string): string {
+/** "Avg 3,84x · +0,75x" — portfolio average of all projects' Base scenarios; the gap is green above average, red below. */
+function avgSub(value: number, average: number | null | undefined, fmt: (v: number) => string): ReactNode {
   if (average == null || !Number.isFinite(average)) return "Portfolio avg –";
   if (!Number.isFinite(value)) return `Avg ${fmt(average)}`;
   const d = value - average;
-  return `Avg ${fmt(average)} · ${d >= 0 ? "+" : "−"}${fmt(Math.abs(d))}`;
+  return (
+    <>
+      Avg {fmt(average)} ·{" "}
+      <span className={`num font-medium ${d >= 0 ? "text-success" : "text-destructive"}`}>
+        {d >= 0 ? "+" : "−"}
+        {fmt(Math.abs(d))}
+      </span>
+    </>
+  );
 }

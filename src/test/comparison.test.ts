@@ -91,7 +91,8 @@ describe("moicAtYear", () => {
   });
   it("counts equity injected before Year 8 in the denominator", () => {
     const e = mk({ ebitda: 0, passengers: 0 }, { ebitda: 12, closingDebt: 0, retainedCash: 0 });
-    (e.result as { rows: { equityInjection: number }[] }).rows[3].equityInjection = 20;
+    const rows = (e.result as { rows: { equityInjection: number }[] }).rows;
+    if (rows[3]) rows[3].equityInjection = 20;
     expect(moicAtYear(exit as never, e.result as never)).toBeCloseTo(1, 10); // (12 × 10) / (100 + 20)
   });
   it("returns null when the forecast stops before Year 8", () => {
@@ -105,7 +106,7 @@ describe("portfolioAverages", () => {
     const a = portfolioAverages([
       mk({ ebitda: 100, passengers: 200 }, { ebitda: 10, closingDebt: 0, retainedCash: 0 }),
       mk({ ebitda: 300, passengers: 300 }, { ebitda: 20, closingDebt: 50, retainedCash: 10 }),
-      { a: exit, result: null },
+      { a: exit as never, result: null },
     ]);
     expect(a.count).toBe(2);
     expect(a.moic).toBeCloseTo(1.3, 10); // (1.0 + 1.6) / 2 — not the 99 exit-year MOIC

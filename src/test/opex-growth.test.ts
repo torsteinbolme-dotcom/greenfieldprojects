@@ -41,12 +41,12 @@ describe("OPEX growth and merchandise cost share", () => {
     if (!row) throw new Error("Missing year 2");
     expect(forecastOpex(a, row).fb).toBeCloseTo(10800000, 6);
   });
-  it("keeps benchmark passenger adjustment with an explicit OPEX growth list", () => {
+  it("uses only the explicit OPEX growth list even with benchmark passenger adjustment", () => {
     const a = { ...projectMountain, fbOpexYear1: 9000000, passengerGrowth: [0.2],
       opexGrowth: { fb: [0.1] }, fbBenchmark: { adjust: true, opex: { assetId: "restaurant", year: 2025 } } };
     const row = calculate(a).rows[1];
     if (!row) throw new Error("Missing year 2");
-    expect(forecastOpex(a, row).fb).toBeCloseTo(11880000, 6);
+    expect(forecastOpex(a, row).fb).toBeCloseTo(9900000, 6);
   });
 });
 

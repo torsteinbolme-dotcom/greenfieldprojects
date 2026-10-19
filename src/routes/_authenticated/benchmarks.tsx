@@ -19,6 +19,7 @@ import {
   cableMetrics, combine, ebitdaOf, parseWideSheet, restaurantMetrics, useBenchmarks,
   type BenchmarkAsset, type BenchmarkRecord, type DataStatus, type ImportRow,
 } from "@/lib/benchmarks";
+import { equalWeightedAverage, groupProfiles, parseSeasonalitySheet, profileValid, useSeasonalityProfiles, type SeasonalityImportRow, type SeasonalityRow } from "@/lib/seasonality";
 
 export const Route = createFileRoute("/_authenticated/benchmarks")({
   head: () => ({ meta: [

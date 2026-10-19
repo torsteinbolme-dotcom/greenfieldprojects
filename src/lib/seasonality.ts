@@ -84,14 +84,14 @@ export function parseSeasonalitySheet(raw: Record<string, unknown>[]): Seasonali
   const norm = (r: Record<string, unknown>) => Object.fromEntries(Object.entries(r).map(([k, v]) => [k.trim().toLowerCase(), v]));
   const rows = raw.map(norm);
   const out: SeasonalityImportRow[] = rows.map((r, i) => {
-    const benchmark = String(r.benchmark ?? "").trim();
-    const profile = String(r.profile ?? "").trim();
-    const monthRaw = r.month;
+    const benchmark = String(r["benchmark"] ?? "").trim();
+    const profile = String(r["profile"] ?? "").trim();
+    const monthRaw = r["month"];
     const month = typeof monthRaw === "number" ? monthRaw : monthNumber(String(monthRaw ?? ""));
     if (!benchmark || !profile) throw new Error(`Row ${i + 2}: benchmark and profile are required`);
     if (!month || month < 1 || month > 12) throw new Error(`Row ${i + 2}: unknown month "${String(monthRaw ?? "")}"`);
-    const pctRaw = r.allocation_pct;
-    const paxRaw = r.historical_passengers;
+    const pctRaw = r["allocation_pct"];
+    const paxRaw = r["historical_passengers"];
     const allocationPct = pctRaw === null || pctRaw === undefined || pctRaw === "" ? null : Number(pctRaw);
     const passengers = paxRaw === null || paxRaw === undefined || paxRaw === "" ? null : Number(paxRaw);
     if (allocationPct !== null && !Number.isFinite(allocationPct)) throw new Error(`Row ${i + 2}: invalid allocation_pct`);

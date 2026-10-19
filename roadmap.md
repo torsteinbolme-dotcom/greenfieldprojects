@@ -83,4 +83,4 @@
 - [x] Sign-in now lands on Projects instead of Portfolio (password sign-in, Google return, email confirmation); verified in the signed-in preview.
 - [x] Growth lists: every growth list (passenger, ticket price, ancillary revenue, cable car OPEX, F&B OPEX) now shows Year 2–5 plus Year 6+; saved shorter lists are padded with their last value and engine results stay identical; verified in the signed-in preview.
 - [x] Seasonality profiles: imported Romsdalsgondolen 2024, 2025 and 2024–2025 Average; Capacity tab distribution-source selector with preview + Apply; Benchmarks "Import seasonality" (CSV/Excel, derives percentages from raw passengers, auto multi-year average, duplicate replace confirmation); tests added.
-- [x] Project header: MOIC (exit year), EBITDA Y3 and EBITDA/pax Y3 KPI chips; verified on Krossobanen in the signed-in preview.
+- [x] Project header: MOIC (exit year), EBITDA Y3 and EBITDA/pax Y3 chips sit to the right of the project title in compact form; verified in the signed-in preview.

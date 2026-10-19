@@ -57,6 +57,13 @@
       "when": 1792358321063,
       "tag": "0007_default_independent_fb_opex_growth",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792406839041,
+      "tag": "0008_create_seasonality_profiles",
+      "breakpoints": true
     }
   ]
 }

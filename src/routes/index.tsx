@@ -47,7 +47,7 @@ function Index() {
         </div>
         <footer className="mt-16 border-t border-border pt-6">
           <p className="max-w-3xl text-xs leading-relaxed text-muted-foreground">
-            This site contains confidential and proprietary information and is the exclusive property of Norwegian Travel Company. The document and its contents may be shared with third parties or outsiders only with explicit authorisation and should otherwise be treated as confidential information intended for internal distribution within The Norwegian Travel Company.
+            This site contains confidential and proprietary information and is the exclusive property of Norwegian Travel Company. The site and its contents may be shared with third parties or outsiders only with explicit authorisation and should otherwise be treated as confidential information intended for internal distribution within The Norwegian Travel Company.
           </p>
         </footer>
       </div>

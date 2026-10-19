@@ -106,14 +106,17 @@ export function irrAtYear(a: Assumptions, r: ModelResult, year = MOIC_YEAR): num
   return irr(cashflows);
 }
 
-/** Presentation-only portfolio averages of engine outputs (MOIC at Year 8, Year 3 EBITDA and EBITDA per passenger). */
+/** Presentation-only portfolio averages of engine outputs (Year 8 MOIC and IRR, Year 3 EBITDA and EBITDA per passenger). */
 export function portfolioAverages(entries: Pick<PortfolioEntry, "a" | "result">[]) {
   const avg = (xs: number[]) => (xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : null);
   const ok = entries.flatMap((e) => (e.result ? [{ a: e.a, r: e.result }] : []));
   const y3 = ok.flatMap((e) => (e.r.rows[2] ? [e.r.rows[2]] : []));
+  const atYear = (fn: (a: Assumptions, r: ModelResult) => number | null) =>
+    avg(ok.flatMap((e) => { const v = fn(e.a, e.r); return v == null || !Number.isFinite(v) ? [] : [v]; }));
   return {
     count: ok.length,
-    moic: avg(ok.flatMap((e) => { const m = moicAtYear(e.a, e.r); return m == null || !Number.isFinite(m) ? [] : [m]; })),
+    moic: atYear(moicAtYear),
+    irr: atYear(irrAtYear),
     ebitdaY3: avg(y3.map((r) => r.ebitda)),
     ebitdaPaxY3: avg(y3.filter((r) => r.passengers > 0).map((r) => r.ebitda / r.passengers)),
   };

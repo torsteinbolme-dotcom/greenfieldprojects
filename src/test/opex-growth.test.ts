@@ -41,11 +41,21 @@ describe("OPEX growth and merchandise cost share", () => {
     if (!row) throw new Error("Missing year 2");
     expect(forecastOpex(a, row).fb).toBeCloseTo(10800000, 6);
   });
-  it("keeps benchmark passenger adjustment with an explicit OPEX growth list", () => {
+  it("uses only the explicit OPEX growth list even with benchmark passenger adjustment", () => {
     const a = { ...projectMountain, fbOpexYear1: 9000000, passengerGrowth: [0.2],
       opexGrowth: { fb: [0.1] }, fbBenchmark: { adjust: true, opex: { assetId: "restaurant", year: 2025 } } };
     const row = calculate(a).rows[1];
     if (!row) throw new Error("Missing year 2");
-    expect(forecastOpex(a, row).fb).toBeCloseTo(11880000, 6);
+    expect(forecastOpex(a, row).fb).toBeCloseTo(9900000, 6);
+  });
+});
+
+describe("F&B OPEX growth list is the only driver", () => {
+  it("ignores passenger scaling when a growth list is set, even with a linked restaurant benchmark", () => {
+    const a = { ...projectMountain, fbOpexYear1: 1000000, passengerGrowth: [0.2, 0.15],
+      fbBenchmark: { adjust: true, opex: { adjust: true } }, opexGrowth: { fb: [0.03] } } as typeof projectMountain;
+    const rows = calculate(a).rows;
+    expect(forecastOpex(a, rows[1]!).fb).toBeCloseTo(1030000, 2);
+    expect(forecastOpex(a, rows[2]!).fb).toBeCloseTo(1060900, 2);
   });
 });

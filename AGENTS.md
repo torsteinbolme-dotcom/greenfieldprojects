@@ -29,7 +29,7 @@
 - The overview EBITDA bridge derives from engine rows and forecastOpex in `src/lib/ebitda-bridge.ts`. Why: every split reconciles with authoritative totals.
 - Break-even is a read-only engine sensitivity in `src/lib/break-even.ts`. Why: costs and tax-loss history stay consistent with the engine.
 - Summary/PPTX read engine outputs; `presentation-*` isolates data, layout and OOXML repair. Why: deterministic outputs and valid editable charts.
-- `costIndex`/`merchOpexAt` read OPEX growth and merch shares; manual F&B grows year-1 costs only. Templates/insert triggers default missing F&B growth from cost inflation; preserve history and benchmark flags. Why: no revenue/cost double growth.
+- `costIndex`/`merchOpexAt` read OPEX growth and merch shares; a set F&B OPEX growth list solely drives F&B OPEX after Year 1 (no passenger scaling). Missing F&B growth defaults to cost inflation; preserve history and benchmark flags. Why: no revenue/cost double growth.
 - Project photos: private `project-covers` bucket, path `<org>/<project>.<ext>`; `projects.cover_image_url` stores that path and the UI signs URLs (`src/lib/covers*.ts`). Why: public buckets are blocked.
 - Capacity stays outside the engine in scenario JSON; distributions are local drafts until valid explicit Save; key the editor by scenario. Why: protect forecasts and isolate drafts.
 - Seasonality uses validated 12-month profiles and an org-scoped transactional import RPC; annual/normalized profiles count once in averages. Applying copies percentages plus frozen attribution into the capacity draft only. Why: atomic replacement, provenance and financial isolation.

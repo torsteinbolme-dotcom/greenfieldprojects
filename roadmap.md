@@ -1,4 +1,6 @@
 # Tasks
+- [x] Production-readiness audit and report: A/B/C independently reconcile; 211 tests pass, two explicitly expected financial failures; automatic production build OK; authenticated preview CRUD/capacity/comparisons/exports and disposable tenant/history probes pass. Original five datasets have unchanged fingerprints. Database relationship/Base guards deployed; frontend save-error/retry fixes remain local. Live website testing blocked by workspace access; no production sign-off.
+- [ ] Release sign-off blocked: signed-off formula approval for depreciation/legacy zero-sales costs and financial-definition decisions; production browser access; native PowerPoint/Keynote access; publication approval. Detailed unexecuted tests and persistence risks are recorded in the audit report.
 - [x] Harden seasonality validation, normalized-year averaging, frozen source attribution and atomic replacement; 203 tests pass and production build OK. Authenticated import/failure-preservation and applied-source save/reload verified using disposable QA data, then removed; all six original profile fingerprints unchanged; existing project assumptions untouched.
 - [x] Apply separate F&B OPEX growth to current scenarios and new projects, preserving rates/history and benchmark passenger flags; all current scenarios already had explicit rates. New insert defaults cover signup/copies; new-project save/reload and current forecasts verified, 161 tests pass.
 - [x] Separate manual F&B OPEX development from revenue growth: year-1 OPEX and explicit F&B growth only; benchmark and absent-list legacy behaviour preserved; 158 tests pass and signed-in forecast verified at 9,0 / 10,8 / 12,4 NOK m.
@@ -46,7 +48,7 @@
 - [x] Phase 1: dashboard with Cable cars / Restaurants / Combined tabs, sortable tables, charts, history chart.
 - [x] Phase 2: Benchmarking tab in each project (comparable selection, weights summing to 100%, calendar vs stabilised years).
 - [x] Phase 3: Apply Benchmark Assumptions (preview + confirm, undoable) and deviation flags with configurable threshold. Engine OPEX split declined by user (2026-10-18).
-- [ ] New accounts don't get the 2025 benchmark seed yet.
+- [ ] New-account 2025 financial benchmark seed: blocked on approved seed scope/source for other organizations; do not copy an existing organization's private data.
 - [x] Comparison split into Project vs. Project and Year 3 vs. Benchmarks with expandable sidebar menu; verified signed in.
 - [x] Display differences with an explicit sign and colour them: + green, - red, zero and missing neutral; verified in the signed-in preview.
 - [x] Removed "Use Benchmark as Project Basis" (user request 2026-10-18)

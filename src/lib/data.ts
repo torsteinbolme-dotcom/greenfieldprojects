@@ -77,24 +77,31 @@ export function useLatestAssumptions() {
 
 export async function logAudit(orgId: string, entity_type: string, entity_id: string | null, action: string, details?: object) {
   const u = { user: (await supabase.auth.getSession()).data.session?.user };
-  await supabase.from("audit_events").insert({
+  const { error } = await supabase.from("audit_events").insert({
     organization_id: orgId, actor_id: (u.user?.id ?? null), entity_type, entity_id, action, details: (details ?? null) as never,
   });
+  if (error) throw error;
 }
 
 export async function saveAssumptionVersion(orgId: string, scenarioId: string, a: Assumptions, note?: string) {
-  const { data: last } = await supabase
-    .from("scenario_assumptions").select("version").eq("scenario_id", scenarioId)
-    .order("version", { ascending: false }).limit(1).maybeSingle();
-  const version = (last?.version ?? 0) + 1;
   const u = { user: (await supabase.auth.getSession()).data.session?.user };
-  const { error } = await supabase.from("scenario_assumptions").insert({
-    organization_id: orgId, scenario_id: scenarioId, version, assumptions: withLinkedTicketPrices(a) as never,
-    calculation_version: CALCULATION_VERSION, note: note ?? null, created_by: (u.user?.id ?? null),
-  });
-  if (error) throw error;
-  await logAudit(orgId, "scenario", scenarioId, "assumptions_saved", { version });
-  return version;
+  // Other tabs/users may append between the read and insert. Retry only a unique-version collision.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const { data: last, error: readError } = await supabase
+      .from("scenario_assumptions").select("version").eq("scenario_id", scenarioId)
+      .order("version", { ascending: false }).limit(1).maybeSingle();
+    if (readError) throw readError;
+    const version = (last?.version ?? 0) + 1;
+    const { error } = await supabase.from("scenario_assumptions").insert({
+      organization_id: orgId, scenario_id: scenarioId, version, assumptions: withLinkedTicketPrices(a) as never,
+      calculation_version: CALCULATION_VERSION, note: note ?? null, created_by: (u.user?.id ?? null),
+    });
+    if (error?.code === "23505" && attempt < 2) continue;
+    if (error) throw error;
+    await logAudit(orgId, "scenario", scenarioId, "assumptions_saved", { version });
+    return version;
+  }
+  throw new Error("Could not allocate a new scenario version");
 }
 
 export async function createScenario(orgId: string, projectId: string, name: string, kind: string, a: Assumptions) {

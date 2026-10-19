@@ -17,7 +17,7 @@ describe('independent representative investment cases', () => {
     const money = (actual: number, ref: number) => expect(Math.abs(actual - ref)).toBeLessThan(1);
     money(r.capex, e.capex); money(r.debt, e.debt); money(r.equity, e.equity);
     expect(y.passengers).toBeCloseTo(e.pax, 6);
-    for (const [actual, ref] of [[y.ticketRevenue,e.ticket],[y.fbRevenue,e.fb],[y.revenue,e.revenue],[y.opex,e.opex],[y.ebitda,e.ebitda],[y.interest,e.interest],[y.principal,e.principal],[y.maintenanceCapex,e.maintenance],[y.tax,e.tax],[y.cashAfterDebt,e.cash],[r.exitEquityValue,e.exit]]) money(actual,ref);
+    for (const [actual, ref] of [[y.ticketRevenue,e.ticket],[y.fbRevenue,e.fb],[y.revenue,e.revenue],[y.opex,e.opex],[y.ebitda,e.ebitda],[y.interest,e.interest],[y.principal,e.principal],[y.maintenanceCapex,e.maintenance],[y.tax,e.tax],[y.cashAfterDebt,e.cash],[r.exitEquityValue,e.exit]]) money(actual ?? NaN,ref ?? NaN);
     expect(r.additionalEquity).toBe(0);
     expect(r.equityIrr).toBeCloseTo(e.irr,8); expect(r.equityMultiple).toBeCloseTo(e.moic,7);
     expect(r.cashflows[0]).toBeCloseTo(-e.equity,5); expect(r.cashflows.slice(1,8)).toEqual([0,0,0,0,0,0,0]);
@@ -32,6 +32,6 @@ describe('known financial audit failures awaiting formula approval', () => {
     expect(calculate(cases.depreciation_exhaustion as Assumptions).rows[2]?.depreciation).toBe(0);
   });
   it.fails('legacy zero-sales restaurant retains independently specified fixed operating costs', () => {
-    expect(calculate(cases.zero_fb_revenue_fixed_cost as Assumptions).rows[0]?.opex).toBeCloseTo(14007146.618357489,5);
+    expect(calculate(cases.zero_fb_revenue_fixed_cost as unknown as Assumptions).rows[0]?.opex).toBeCloseTo(14007146.618357489,5);
   });
 });

@@ -295,6 +295,7 @@ const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) =>
   ["DSCR", (y) => mult(y.dscr)],
 ];
 const bold = new Set(["Total revenue", "Total OPEX", "EBITDA", "Cash flow after debt service"]);
+const key = new Set(["EBITDA"]);
 
 export function ForecastSection({ r, a }: { r: ModelResult; a: Assumptions | undefined }) {
   const [expanded, setExpanded] = useState<Record<ForecastGroup, boolean>>({ revenue: true, opex: true });

@@ -47,6 +47,7 @@ const fmt = (f: Fmt, v: number | null) => {
 
 const METRICS: Metric[] = [
   { key: "moic", label: "MOIC", group: "returns", fmt: "mult", get: (r) => r.result.equityMultiple },
+  { key: "irr", label: "IRR", group: "returns", fmt: "pct", get: (r) => r.result.equityIrr },
   { key: "capex", label: "Total CAPEX (NOK m)", group: "investment", fmt: "nokM", get: (r) => r.result.capex },
   { key: "equity", label: "Equity investment (NOK m)", group: "investment", fmt: "nokM", get: (r) => r.result.equity },
   { key: "debt", label: "Debt financing (NOK m)", group: "investment", fmt: "nokM", get: (r) => r.result.debt },
@@ -60,7 +61,6 @@ const METRICS: Metric[] = [
   { key: "margin", label: "EBITDA margin", group: "operations", fmt: "pct", get: (r) => r.y3?.margin ?? null },
   { key: "revPax", label: "Revenue / passenger (NOK)", group: "operations", fmt: "nok", get: (r) => r.y3?.revenuePerPax ?? null },
   { key: "ebitdaPax", label: "EBITDA / passenger (NOK)", group: "operations", fmt: "nok", get: (r) => r.y3?.ebitdaPerPax ?? null },
-  { key: "irr", label: "Equity IRR", group: "returns", fmt: "pct", get: (r) => r.result.equityIrr },
   { key: "payback", label: "Payback period", group: "returns", fmt: "years", get: (r) => r.ret.payback },
   { key: "exitYear", label: "Exit year", group: "returns", fmt: "year", get: (r) => r.a.exitYear },
   { key: "exitEbitda", label: "Exit EBITDA (NOK m)", group: "returns", fmt: "nokM", get: (r) => r.result.rows[r.a.exitYear - 1]?.ebitda ?? null },

@@ -60,7 +60,7 @@ describe("comparison development chart metrics", () => {
     expect(devValue("revPax", null, 0)).toBeNull();
   });
 });
-import { MOIC_YEAR, metricsAt, moicAtYear, portfolioAverages } from "@/lib/portfolio";
+import { MOIC_YEAR, irrAtYear, metricsAt, moicAtYear, portfolioAverages } from "@/lib/portfolio";
 
 type AvgEntry = Parameters<typeof portfolioAverages>[0][number];
 const exit = { exitMultiple: 10, exitTransactionCostRate: 0 };
@@ -103,6 +103,28 @@ describe("moicAtYear", () => {
     const e = mk({ ebitda: 100, passengers: 200 }, { ebitda: 20, closingDebt: 50, retainedCash: 10 });
     // metricsAt reads the same derivation the header chips use, so the column labelled Y8 is Y8.
     expect(metricsAt(e as never, "operating", 3).moic).toBeCloseTo(1.6, 10);
+  });
+});
+
+describe("irrAtYear", () => {
+  const y8 = () => mk({ ebitda: 100, passengers: 200 }, { ebitda: 20, closingDebt: 50, retainedCash: 10 });
+  const y8rate = Math.pow(1.6, 1 / 8) - 1; // 100 equity in, (20 × 10 − 50 + 10) = 160 out at Year 8.
+
+  it("prices a Year 8 sale on the engine's own cash flows", () => {
+    expect(irrAtYear(exit as never, y8().result as never)).toBeCloseTo(y8rate, 8);
+  });
+  it("gives the portfolio table the Year 8 rate, not the scenario's own exit-year IRR", () => {
+    expect(metricsAt(y8() as never, "operating", 3).irr).toBeCloseTo(y8rate, 8);
+  });
+  it("counts equity injected before Year 8 in the rate", () => {
+    const e = y8();
+    const rows = (e.result as { rows: { equityInjection: number }[] }).rows;
+    if (rows[3]) rows[3].equityInjection = 20;
+    expect(irrAtYear(exit as never, e.result as never)).toBeLessThan(y8rate);
+  });
+  it("returns null when the forecast stops before Year 8", () => {
+    const short = { a: exit, result: { equity: 100, rows: [{ year: 1, ebitda: 5, closingDebt: 0, retainedCash: 0, equityInjection: 0, distribution: 0 }] } } as unknown as AvgEntry;
+    expect(irrAtYear(short.a as never, short.result as never)).toBeNull();
   });
 });
 

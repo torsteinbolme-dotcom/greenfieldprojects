@@ -1,4 +1,4 @@
-import type { Assumptions } from "@/financialEngine";
+import { irr, type Assumptions } from "@/financialEngine";
 import type { ProjectRow, ScenarioRow } from "./data";
 import { rowAt, safeCalculate, type ModelResult, type YearMode } from "./model";
 
@@ -36,8 +36,8 @@ export function metricsAt(e: PortfolioEntry, mode: YearMode, year: number) {
     revenue: row?.revenue ?? null,
     ebitda: row?.ebitda ?? null,
     margin: row && row.revenue ? row.ebitda / row.revenue : null,
-    irr: e.result?.equityIrr ?? null,
-    // Always the Year 8 multiple, whatever exit year the scenario saves (see moicAtYear).
+    // Both return columns read Year 8, whatever exit year the scenario saves (see irrAtYear/moicAtYear).
+    irr: e.result ? irrAtYear(e.a, e.result) : null,
     moic: e.result ? moicAtYear(e.a, e.result) : null,
     exitEquity: e.result?.exitEquityValue ?? null,
   };
@@ -88,6 +88,22 @@ export function moicAtYear(a: Assumptions, r: ModelResult, year = MOIC_YEAR): nu
   const totalEquity = r.equity + held.reduce((s, x) => s + x.equityInjection, 0);
   if (!(totalEquity > 0)) return null;
   return (held.reduce((s, x) => s + x.distribution, 0) + equityValue) / totalEquity;
+}
+
+/**
+ * Equity IRR if the project were sold at the end of Year 8: the engine's own cash-flow maths
+ * (initial equity out, distributions in less later injections, Year 8 exit proceeds) truncated
+ * to that year, using the same exit value moicAtYear divides. Presentation-only — the stored exit
+ * year and engine outputs are untouched.
+ */
+export function irrAtYear(a: Assumptions, r: ModelResult, year = MOIC_YEAR): number | null {
+  const row = r.rows[year - 1];
+  if (!row) return null;
+  const ev = row.ebitda * a.exitMultiple;
+  const equityValue = ev - row.closingDebt + row.retainedCash - ev * a.exitTransactionCostRate;
+  const cashflows = [-r.equity, ...r.rows.slice(0, year).map((x) => x.distribution - x.equityInjection)];
+  cashflows[year] = (cashflows[year] ?? 0) + equityValue;
+  return irr(cashflows);
 }
 
 /** Presentation-only portfolio averages of engine outputs (MOIC at Year 8, Year 3 EBITDA and EBITDA per passenger). */

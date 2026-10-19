@@ -37,7 +37,8 @@ export function metricsAt(e: PortfolioEntry, mode: YearMode, year: number) {
     ebitda: row?.ebitda ?? null,
     margin: row && row.revenue ? row.ebitda / row.revenue : null,
     irr: e.result?.equityIrr ?? null,
-    moic: e.result?.equityMultiple ?? null,
+    // Always the Year 8 multiple, whatever exit year the scenario saves (see moicAtYear).
+    moic: e.result ? moicAtYear(e.a, e.result) : null,
     exitEquity: e.result?.exitEquityValue ?? null,
   };
 }

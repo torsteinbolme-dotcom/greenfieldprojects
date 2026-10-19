@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { NumField } from "@/components/editor/inputs";
 import { Kpi } from "@/components/editor/sections";
 import { useLatestAssumptions, useProjects, useScenarios } from "@/lib/data";
-import { buildEntries, metricsAt, sortByMetric } from "@/lib/portfolio";
+import { MOIC_YEAR, buildEntries, metricsAt, sortByMetric } from "@/lib/portfolio";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import type { YearMode } from "@/lib/model";
 import { int, mult, nokM, pct } from "@/lib/format";
@@ -77,7 +77,7 @@ function PortfolioPage() {
         <table className="fin-table">
           <thead>
             <tr>
-              <th /><Th k="project" right={false}>Project</Th><Th k="scenario" right={false}>Scenario</Th><Th k="moic">MOIC</Th><Th k="capex">CAPEX (NOK m)</Th><Th k="passengers">Passengers {label}</Th>
+              <th /><Th k="project" right={false}>Project</Th><Th k="scenario" right={false}>Scenario</Th><Th k="moic">MOIC Y{MOIC_YEAR}</Th><Th k="capex">CAPEX (NOK m)</Th><Th k="passengers">Passengers {label}</Th>
               <Th k="revenue">Revenue {label}</Th><Th k="ebitda">EBITDA {label}</Th><Th k="margin">Margin</Th>
               <Th k="irr">Equity IRR</Th><Th k="exitEquity">Exit equity (NOK m)</Th>
             </tr>
@@ -102,7 +102,7 @@ function PortfolioPage() {
       </div>
       <div className="flex items-center gap-3">
         <Button disabled={selected.length < 2} onClick={() => navigate({ to: "/comparison/projects", search: { ids: selected.join(",") } })}>Compare selected ({selected.length})</Button>
-        <span className="text-xs text-muted-foreground">MOIC, IRR and exit equity use each project's own exit year and multiple.</span>
+        <span className="text-xs text-muted-foreground">MOIC is the Year {MOIC_YEAR} exit multiple for every project; IRR and exit equity use each project's own exit year and multiple.</span>
       </div>
     </div>
   );

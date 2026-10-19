@@ -60,14 +60,57 @@ describe("comparison development chart metrics", () => {
     expect(devValue("revPax", null, 0)).toBeNull();
   });
 });
-import { portfolioAverages } from "@/lib/portfolio";
+import { MOIC_YEAR, moicAtYear, portfolioAverages } from "@/lib/portfolio";
+
+type AvgEntry = Parameters<typeof portfolioAverages>[0][number];
+const exit = { exitMultiple: 10, exitTransactionCostRate: 0 };
+
+/** Minimal project entry: Year 3 and Year 8 rows by hand, 100 initial equity, no injections. */
+const mk = (y3: { ebitda: number; passengers: number }, y8: { ebitda: number; closingDebt: number; retainedCash: number }) => ({
+  a: exit,
+  result: {
+    equity: 100,
+    // Deliberately far from the Year 8 figure: the average must read Year 8, not this exit-year MOIC.
+    equityMultiple: 99,
+    rows: Array.from({ length: MOIC_YEAR }, (_, i) => ({
+      year: i + 1,
+      ebitda: i === 7 ? y8.ebitda : i === 2 ? y3.ebitda : 0,
+      passengers: i === 2 ? y3.passengers : 0,
+      closingDebt: i === 7 ? y8.closingDebt : 0,
+      retainedCash: i === 7 ? y8.retainedCash : 0,
+      equityInjection: 0,
+      distribution: 0,
+    })),
+  },
+} as unknown as AvgEntry);
+
+describe("moicAtYear", () => {
+  it("prices a Year 8 sale on Year 8 EBITDA, debt, cash and transaction costs", () => {
+    const e = mk({ ebitda: 100, passengers: 200 }, { ebitda: 20, closingDebt: 50, retainedCash: 10 });
+    expect(moicAtYear(exit as never, e.result as never)).toBeCloseTo(1.6, 10); // (20 × 10 − 50 + 10) / 100
+  });
+  it("counts equity injected before Year 8 in the denominator", () => {
+    const e = mk({ ebitda: 0, passengers: 0 }, { ebitda: 12, closingDebt: 0, retainedCash: 0 });
+    const rows = (e.result as { rows: { equityInjection: number }[] }).rows;
+    if (rows[3]) rows[3].equityInjection = 20;
+    expect(moicAtYear(exit as never, e.result as never)).toBeCloseTo(1, 10); // (12 × 10) / (100 + 20)
+  });
+  it("returns null when the forecast stops before Year 8", () => {
+    const short = { a: exit, result: { equity: 100, rows: [{ year: 1, ebitda: 5, closingDebt: 0, retainedCash: 0, equityInjection: 0, distribution: 0 }] } } as unknown as AvgEntry;
+    expect(moicAtYear(short.a as never, short.result as never)).toBeNull();
+  });
+});
+
 describe("portfolioAverages", () => {
-  it("averages MOIC, Y3 EBITDA and Y3 EBITDA per passenger across projects", () => {
-    const mk = (moic: number, ebitda: number, pax: number) => ({ result: { equityMultiple: moic, rows: [{}, {}, { ebitda, passengers: pax }] } as never });
-    const a = portfolioAverages([mk(2, 100, 200), mk(4, 300, 300), { result: null }]);
+  it("averages the Year 8 equity multiple, Year 3 EBITDA and Year 3 EBITDA per passenger", () => {
+    const a = portfolioAverages([
+      mk({ ebitda: 100, passengers: 200 }, { ebitda: 10, closingDebt: 0, retainedCash: 0 }),
+      mk({ ebitda: 300, passengers: 300 }, { ebitda: 20, closingDebt: 50, retainedCash: 10 }),
+      { a: exit as never, result: null },
+    ]);
     expect(a.count).toBe(2);
-    expect(a.moic).toBe(3);
+    expect(a.moic).toBeCloseTo(1.3, 10); // (1.0 + 1.6) / 2 — not the 99 exit-year MOIC
     expect(a.ebitdaY3).toBe(200);
-    expect(a.ebitdaPaxY3).toBe(0.75);
+    expect(a.ebitdaPaxY3).toBeCloseTo(0.75, 10); // (0.5 + 1.0) / 2
   });
 });

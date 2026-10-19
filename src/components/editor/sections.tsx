@@ -28,7 +28,7 @@ export function Card({ title, children, className }: { title?: string; children:
   );
 }
 
-export function Kpi({ label, value, sub, compact }: { label: string; value: string; sub?: string; compact?: boolean }) {
+export function Kpi({ label, value, sub, compact }: { label: string; value: string; sub?: React.ReactNode; compact?: boolean }) {
   return (
     <div className={cn("rounded-md border bg-card", compact ? "px-3 py-2" : "p-4")}>
       <p className={cn("uppercase tracking-wide text-muted-foreground", compact ? "text-[10px]" : "text-xs")}>{label}</p>

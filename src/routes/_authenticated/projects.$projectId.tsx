@@ -28,6 +28,40 @@ import { InvestmentSummary } from "@/components/editor/investment-summary";
 import { BreakEvenPanel } from "@/components/editor/break-even";
 import { SaveControls } from "@/components/editor/save-controls";
 import { CapacitySection } from "@/components/editor/capacity";
+import { uploadCover, useCoverUrls } from "@/lib/covers-client";
+
+function ProjectPhoto({ ro, project, m }: { ro: boolean; project: ProjectRow; m: Membership }) {
+  const qc = useQueryClient();
+  const [busy, setBusy] = useState(false);
+  const { data: signed = {} } = useCoverUrls([project.cover_image_url]);
+  const src = project.cover_image_url ? signed[project.cover_image_url] : undefined;
+  return (
+    <Field label="Project photo">
+      <div className="flex items-center gap-4">
+        <div className="h-20 w-32 overflow-hidden rounded-md border bg-muted">
+          {src ? <img src={src} alt={`${project.name} photo`} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-xs text-muted-foreground">No photo</div>}
+        </div>
+        {!ro && (
+          <label className="inline-flex cursor-pointer items-center rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted">
+            {busy ? "Saving photo…" : project.cover_image_url ? "Change photo" : "Add photo"}
+            <input type="file" accept="image/*" className="sr-only" disabled={busy} onChange={async (e) => {
+              const f = e.target.files?.[0];
+              e.target.value = "";
+              if (!f) return;
+              setBusy(true);
+              try {
+                await uploadCover(m.organization_id, project.id, f);
+                toast.success("Photo updated");
+                await qc.invalidateQueries({ queryKey: ["projects"] });
+                void qc.invalidateQueries({ queryKey: ["covers"] });
+              } catch (err) { toast.error(err instanceof Error ? err.message : "Could not save the photo"); } finally { setBusy(false); }
+            }} />
+          </label>
+        )}
+      </div>
+    </Field>
+  );
+}
 import { PresentationExport } from "@/components/editor/presentation-export";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
@@ -244,6 +278,7 @@ type Ctx = { ro: boolean; project: ProjectRow; m: Membership; projectId: string 
     return (
       <Card title="Project details">
         <div className="space-y-3">
+          <ProjectPhoto ro={ro} project={p} m={m} />
           <Field label="Project name"><Input name="name" required value={state.value.name} disabled={ro} onChange={(e) => change("name", e.target.value)} /></Field>
           <Field label="Location"><Input name="location" value={state.value.location} disabled={ro} onChange={(e) => change("location", e.target.value)} /></Field>
           <Field label="Description"><Textarea name="description" value={state.value.description} disabled={ro} onChange={(e) => change("description", e.target.value)} /></Field>

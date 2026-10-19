@@ -27,30 +27,6 @@ function ProjectsPage() {
   const [showArchived, setShowArchived] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [confirmDel, setConfirmDel] = useState<ProjectRow | null>(null);
-  const [uploading, setUploading] = useState<string | null>(null);
-  const canEdit = m?.role !== "viewer";
-  const refresh = () => qc.invalidateQueries();
-
-  const run = async (fn: () => Promise<unknown>, msg: string) => {
-    try { await fn(); toast.success(msg); refresh(); } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
-  };
-
-  const list = projects.filter((p) => (showArchived ? true : p.status === "active"));
-  const { data: signed = {} } = useCoverUrls(list.map((p) => p.cover_image_url));
-
-  const setPhoto = async (p: ProjectRow, file: File) => {
-    if (!m) return;
-    setUploading(p.id);
-    try {
-      await uploadCover(m.organization_id, p.id, file);
-      toast.success("Photo updated");
-      refresh();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not save the photo");
-    } finally {
-      setUploading(null);
-    }
-  };
 
   return (
     <div>
@@ -90,28 +66,6 @@ function ProjectsPage() {
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                 <span className="rounded-full bg-card/90 px-3 py-1.5 text-xs font-medium text-card-foreground opacity-0 shadow-sm transition duration-200 group-hover:opacity-100">Open project</span>
               </div>
-              {canEdit && (
-                <div className="absolute right-3 top-3 z-10">
-                  <Button size="icon" variant="ghost" className="h-8 w-8 bg-card/85 text-card-foreground hover:bg-card"
-                    aria-label={`${p.cover_image_url ? "Change" : "Add"} photo for ${p.name}`}
-                    title={uploading === p.id ? "Saving photo…" : p.cover_image_url ? "Change photo" : "Add photo"}
-                    disabled={uploading === p.id}
-                    onClick={() => document.getElementById(`project-photo-${p.id}`)?.click()}>
-                    {uploading === p.id ? <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" /> : <MoreHorizontal className="h-5 w-5" />}
-                  </Button>
-                  <input id={`project-photo-${p.id}`}
-                    type="file"
-                    accept="image/*"
-                    className="sr-only"
-                    disabled={uploading === p.id}
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) void setPhoto(p, f);
-                      e.target.value = "";
-                    }}
-                  />
-                </div>
-              )}
               <div className="pointer-events-none absolute inset-x-0 bottom-0 p-4">
                 <Link to="/projects/$projectId" params={{ projectId: p.id }} className="pointer-events-auto text-lg font-semibold text-primary-foreground hover:underline">
                   {p.name}

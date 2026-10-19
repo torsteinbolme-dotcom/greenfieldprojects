@@ -13,7 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field } from "@/components/editor/inputs";
 import { Card, CapexSection, ExitSection, FinancingSection, ForecastSection, Kpi, Limitations, RevenueOpexSection, SegmentsSection } from "@/components/editor/sections";
-import { createScenario, logAudit, saveAssumptionVersion, useMembership, useProjects, useScenarios, type Membership, type ProjectRow } from "@/lib/data";
+import { buildEntries, portfolioAverages } from "@/lib/portfolio";
+import { createScenario, logAudit, saveAssumptionVersion, useLatestAssumptions, useMembership, useProjects, useScenarios, type Membership, type ProjectRow } from "@/lib/data";
 import { safeCalculate } from "@/lib/model";
 import { withLinkedTicketPrices } from "@/lib/ticket-pricing";
 import { int, mult, nok, nokM, pct } from "@/lib/format";
@@ -90,6 +91,8 @@ function EditorPage() {
     if (JSON.stringify(next) !== JSON.stringify(draft)) controller?.edit(next, "fbBenchmark:passengers");
   }, [draft, bench.data, ro, controller]);
   const [newScenOpen, setNewScenOpen] = useState(false);
+  const { data: latestAll } = useLatestAssumptions();
+  const avg = useMemo(() => (projects && allScen && latestAll ? portfolioAverages(buildEntries(projects, allScen, latestAll)) : null), [projects, allScen, latestAll]);
 
   if (!project || !m) return <p className="text-muted-foreground">Loading project…</p>;
   if (!scenario || !draft) return <p className="text-muted-foreground">Loading scenario…</p>;
@@ -106,9 +109,9 @@ function EditorPage() {
           </div>
           {r && y3 && (
             <div className="grid grid-cols-3 gap-2">
-              <Kpi compact label={`MOIC Y${draft.exitYear}`} value={mult(r.equityMultiple)} sub="Equity multiple at exit" />
-              <Kpi compact label="EBITDA Y3" value={nokM(y3.ebitda)} sub={`Operating year 3 · ${y3.calendarYear}`} />
-              <Kpi compact label="EBITDA / pax Y3" value={nok(y3.passengers > 0 ? y3.ebitda / y3.passengers : 0)} sub="Per passenger, year 3" />
+              <Kpi compact label={`MOIC Y${draft.exitYear}`} value={mult(r.equityMultiple)} sub={avgSub(r.equityMultiple, avg?.moic, mult)} />
+              <Kpi compact label="EBITDA Y3" value={nokM(y3.ebitda)} sub={avgSub(y3.ebitda, avg?.ebitdaY3, nokM)} />
+              <Kpi compact label="EBITDA / pax Y3" value={nok(y3.passengers > 0 ? y3.ebitda / y3.passengers : 0)} sub={avgSub(y3.passengers > 0 ? y3.ebitda / y3.passengers : 0, avg?.ebitdaPaxY3, nok)} />
             </div>
           )}
         </div>
@@ -301,3 +304,10 @@ type Ctx = { ro: boolean; project: ProjectRow; m: Membership; projectId: string 
     );
   }
 
+
+/** "Avg 3,84x · +0,75x" — portfolio average of all projects' Base scenarios, with this project's difference. */
+function avgSub(value: number, average: number | null | undefined, fmt: (v: number) => string): string {
+  if (average == null || !Number.isFinite(average)) return "Portfolio avg –";
+  const d = value - average;
+  return `Avg ${fmt(average)} · ${d >= 0 ? "+" : "−"}${fmt(Math.abs(d))}`;
+}

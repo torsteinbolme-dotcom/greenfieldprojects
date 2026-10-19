@@ -265,7 +265,7 @@ export function FinancingSection({ a, set, ro, r }: P & { r: ModelResult | null 
 }
 
 const safeExit = (a: Assumptions) => safeCalculate(a).result?.exitEquityValue ?? null;
-type ForecastGroup = "revenue" | "opex";
+type ForecastGroup = "revenue" | "opex" | "financing";
 const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) => string, ForecastGroup?][] = [
   ["Passengers", (y) => int(y.passengers)],
   ["Avg. realized ticket ex VAT, after commission (NOK)", (y) => nok(y.ticketNetPrice, 1)],
@@ -280,13 +280,14 @@ const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) =>
   ["Merchandise OPEX", (y, a) => nokM(-forecastOpex(a, y).merchandise), "opex"],
   ["EBITDA", (y) => nokM(y.ebitda)],
   ["EBITDA margin", (y) => pct(y.revenue ? y.ebitda / y.revenue : null)],
-  ["Depreciation", (y) => nokM(-y.depreciation)],
-  ["Interest", (y) => nokM(-y.interest)],
-  ["Principal", (y) => nokM(-y.principal)],
-  ["Tax", (y) => nokM(-y.tax)],
-  ["Operating cash flow (EBITDA − tax)", (y) => nokM(y.ebitda - y.tax)],
-  ["Maintenance CAPEX", (y) => nokM(-y.maintenanceCapex)],
-  ["Debt service (interest + principal)", (y) => nokM(-(y.interest + y.principal))],
+  ["Below EBITDA", () => ""],
+  ["Depreciation", (y) => nokM(-y.depreciation), "financing"],
+  ["Interest", (y) => nokM(-y.interest), "financing"],
+  ["Principal", (y) => nokM(-y.principal), "financing"],
+  ["Tax", (y) => nokM(-y.tax), "financing"],
+  ["Operating cash flow (EBITDA − tax)", (y) => nokM(y.ebitda - y.tax), "financing"],
+  ["Maintenance CAPEX", (y) => nokM(-y.maintenanceCapex), "financing"],
+  ["Debt service (interest + principal)", (y) => nokM(-(y.interest + y.principal)), "financing"],
   ["Cash flow after debt service", (y) => nokM(y.cashAfterDebt)],
   ["Additional equity contributions", (y) => nokM(y.equityInjection)],
   ["Exit proceeds to equity", (y, a) => (y.year === a.exitYear ? nokM(safeExit(a)) : "–")],
@@ -294,11 +295,12 @@ const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) =>
   ["Closing debt", (y) => nokM(y.closingDebt)],
   ["DSCR", (y) => mult(y.dscr)],
 ];
-const bold = new Set(["Total revenue", "Total OPEX", "EBITDA", "Cash flow after debt service"]);
+const bold = new Set(["Total revenue", "Total OPEX", "EBITDA", "Cash flow after debt service", "Below EBITDA"]);
 const key = new Set(["EBITDA"]);
+const groupHint: Record<ForecastGroup, string> = { revenue: "revenue items", opex: "operating expenses", financing: "items below EBITDA" };
 
 export function ForecastSection({ r, a }: { r: ModelResult; a: Assumptions | undefined }) {
-  const [expanded, setExpanded] = useState<Record<ForecastGroup, boolean>>({ revenue: true, opex: true });
+  const [expanded, setExpanded] = useState<Record<ForecastGroup, boolean>>({ revenue: true, opex: true, financing: false });
   // A live module update can briefly render the previous caller without the new
   // assumptions prop. Wait for real inputs rather than inventing expense values.
   if (!a) return <p role="status" className="text-muted-foreground">Loading forecast inputs…</p>;
@@ -311,14 +313,14 @@ export function ForecastSection({ r, a }: { r: ModelResult; a: Assumptions | und
           </thead>
           <tbody>
             {forecastRows.filter(([, , group]) => !group || expanded[group]).map(([label, f, group]) => {
-              const toggleGroup = label === "Total revenue" ? "revenue" : label === "Total OPEX" ? "opex" : null;
+              const toggleGroup = label === "Total revenue" ? "revenue" : label === "Total OPEX" ? "opex" : label === "Below EBITDA" ? "financing" : null;
               return (
               <tr key={label} className={`${bold.has(label) ? "font-semibold" : ""} ${key.has(label) ? "fin-key" : ""}`}>
                 <td className={`sticky left-0 z-10 ${key.has(label) ? "bg-keyrow hover:bg-keyrow-hover" : "bg-card"}`}>
                   {toggleGroup ? (
                     <Button variant="ghost" size="sm" className="h-7 justify-start px-1 font-semibold" aria-expanded={expanded[toggleGroup]}
                       aria-label={`${expanded[toggleGroup] ? "Collapse" : "Expand"} ${label.toLowerCase()}`}
-                      title={`${expanded[toggleGroup] ? "Hide" : "Show"} ${toggleGroup === "revenue" ? "revenue items" : "operating expenses"}`}
+                      title={`${expanded[toggleGroup] ? "Hide" : "Show"} ${groupHint[toggleGroup]}`}
                       onClick={() => setExpanded((current) => ({ ...current, [toggleGroup]: !current[toggleGroup] }))}>
                       {expanded[toggleGroup] ? <ChevronDown /> : <ChevronRight />}{label}
                     </Button>

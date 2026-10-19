@@ -23,7 +23,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "recover">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -58,6 +58,10 @@ function AuthPage() {
       if (mode === "signin") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+      } else if (mode === "recover") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
+        if (error) throw error;
+        toast.success("Check your email for a reset link.");
       } else {
         const inviteToken = sessionStorage.getItem("invite_token");
         const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + "/projects", ...(inviteToken ? { data: { invite_token: inviteToken } } : {}) } });
@@ -88,15 +92,33 @@ function AuthPage() {
       </div>
       <div className="flex items-center justify-center p-8">
         <form onSubmit={submit} className="w-full max-w-sm space-y-5">
-          <h2 className="text-2xl font-semibold">{mode === "signin" ? "Sign in" : "Create account"}</h2>
-          <Button type="button" variant="outline" className="w-full" onClick={google}>Continue with Google</Button>
-          <div className="text-center text-xs text-muted-foreground">or with email</div>
+          <h2 className="text-2xl font-semibold">{mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Reset password"}</h2>
+          {mode !== "recover" && (
+            <>
+              <Button type="button" variant="outline" className="w-full" onClick={google}>Continue with Google</Button>
+              <div className="text-center text-xs text-muted-foreground">or with email</div>
+            </>
+          )}
           <div className="space-y-2"><Label htmlFor="email">Email</Label><Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-          <div className="space-y-2"><Label htmlFor="pw">Password</Label><Input id="pw" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} /></div>
-          <Button type="submit" className="w-full" disabled={busy}>{mode === "signin" ? "Sign in" : "Create account"}</Button>
+          {mode === "recover" ? (
+            <p className="text-xs text-muted-foreground">We email you a link to choose a new password.</p>
+          ) : (
+            <div className="space-y-2"><Label htmlFor="pw">Password</Label><Input id="pw" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} /></div>
+          )}
+          <Button type="submit" className="w-full" disabled={busy}>{mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Send reset link"}</Button>
+          {mode === "signin" && (
+            <button type="button" className="w-full text-sm text-accent hover:underline" onClick={() => setMode("recover")}>
+              Forgot password?
+            </button>
+          )}
           {mode === "signup" && (
             <button type="button" className="w-full text-sm text-accent hover:underline" onClick={() => setMode("signin")}>
               Already have an account? Sign in
+            </button>
+          )}
+          {mode === "recover" && (
+            <button type="button" className="w-full text-sm text-accent hover:underline" onClick={() => setMode("signin")}>
+              Back to sign in
             </button>
           )}
         </form>

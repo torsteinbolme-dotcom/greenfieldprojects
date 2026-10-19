@@ -71,6 +71,13 @@
       "when": 1792409543619,
       "tag": "0009_atomic_seasonality_import",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792410369609,
+      "tag": "0010_audit_tenant_relationship_guards",
+      "breakpoints": true
     }
   ]
 }

@@ -88,5 +88,5 @@
 - [x] Seasonality profiles: imported Romsdalsgondolen 2024, 2025 and 2024–2025 Average; Capacity tab distribution-source selector with preview + Apply; Benchmarks "Import seasonality" (CSV/Excel, derives percentages from raw passengers, auto multi-year average, duplicate replace confirmation); tests added.
 - [x] Project header: MOIC (exit year), EBITDA Y3 and EBITDA/pax Y3 chips sit to the right of the project title in compact form; verified in the signed-in preview.
 - [x] Project header chips: gap to the portfolio average shown in green (+) or red (−); MOIC chip always reads Year 8 (`moicAtYear`), independent of the exit year; verified in the signed-in preview.
-- [ ] Portfolio table: IRR moved to sit immediately right of MOIC Y8 and labelled IRR Y8 using a genuine Year 8 derivation (`irrAtYear`).
-- [ ] Comparison table: add IRR Y8 next to MOIC Y8.
+- [x] Portfolio table: IRR moved to sit immediately right of MOIC Y8 and labelled IRR Y8 using a genuine Year 8 derivation (`irrAtYear`); values match each project's own figure, verified in the signed-in preview.
+- [x] Comparison table: IRR Y8 now sits immediately right of MOIC Y8 (and in "Rank by"); verified in the signed-in preview.

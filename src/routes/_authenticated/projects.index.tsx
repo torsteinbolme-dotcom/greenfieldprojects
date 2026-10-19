@@ -27,6 +27,15 @@ function ProjectsPage() {
   const [showArchived, setShowArchived] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [confirmDel, setConfirmDel] = useState<ProjectRow | null>(null);
+  const canEdit = m?.role !== "viewer";
+  const refresh = () => qc.invalidateQueries();
+
+  const run = async (fn: () => Promise<unknown>, msg: string) => {
+    try { await fn(); toast.success(msg); refresh(); } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+  };
+
+  const list = projects.filter((p) => (showArchived ? true : p.status === "active"));
+  const { data: signed = {} } = useCoverUrls(list.map((p) => p.cover_image_url));
 
   return (
     <div>

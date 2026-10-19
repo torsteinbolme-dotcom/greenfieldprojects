@@ -94,9 +94,11 @@ function AuthPage() {
           <div className="space-y-2"><Label htmlFor="email">Email</Label><Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
           <div className="space-y-2"><Label htmlFor="pw">Password</Label><Input id="pw" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} /></div>
           <Button type="submit" className="w-full" disabled={busy}>{mode === "signin" ? "Sign in" : "Create account"}</Button>
-          <button type="button" className="w-full text-sm text-accent hover:underline" onClick={() => setMode(mode === "signin" ? "signup" : "signin")}>
-            {mode === "signin" ? "New here? Create an account" : "Already have an account? Sign in"}
-          </button>
+          {mode === "signup" && (
+            <button type="button" className="w-full text-sm text-accent hover:underline" onClick={() => setMode("signin")}>
+              Already have an account? Sign in
+            </button>
+          )}
         </form>
       </div>
     </div>

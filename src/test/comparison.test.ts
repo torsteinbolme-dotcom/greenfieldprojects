@@ -60,3 +60,14 @@ describe("comparison development chart metrics", () => {
     expect(devValue("revPax", null, 0)).toBeNull();
   });
 });
+import { portfolioAverages } from "@/lib/portfolio";
+describe("portfolioAverages", () => {
+  it("averages MOIC, Y3 EBITDA and Y3 EBITDA per passenger across projects", () => {
+    const mk = (moic: number, ebitda: number, pax: number) => ({ result: { equityMultiple: moic, rows: [{}, {}, { ebitda, passengers: pax }] } as never });
+    const a = portfolioAverages([mk(2, 100, 200), mk(4, 300, 300), { result: null }]);
+    expect(a.count).toBe(2);
+    expect(a.moic).toBe(3);
+    expect(a.ebitdaY3).toBe(200);
+    expect(a.ebitdaPaxY3).toBe(0.75);
+  });
+});

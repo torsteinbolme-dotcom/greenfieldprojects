@@ -68,3 +68,16 @@ export function sortByMetric<T>(items: T[], value: (item: T) => number | string,
     return (a - b) * factor;
   });
 }
+
+/** Presentation-only portfolio averages of engine outputs (MOIC at exit, Year 3 EBITDA and EBITDA per passenger). */
+export function portfolioAverages(entries: Pick<PortfolioEntry, "result">[]) {
+  const avg = (xs: number[]) => (xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : null);
+  const ok = entries.flatMap((e) => (e.result ? [e.result] : []));
+  const y3 = ok.flatMap((r) => (r.rows[2] ? [r.rows[2]] : []));
+  return {
+    count: ok.length,
+    moic: avg(ok.map((r) => r.equityMultiple).filter((x): x is number => Number.isFinite(x))),
+    ebitdaY3: avg(y3.map((r) => r.ebitda)),
+    ebitdaPaxY3: avg(y3.filter((r) => r.passengers > 0).map((r) => r.ebitda / r.passengers)),
+  };
+}

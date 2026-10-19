@@ -99,3 +99,4 @@
 - [x] Forecast: additional equity contributions, exit proceeds to equity, retained cash, closing debt and DSCR collapsed behind an "Equity, cash & debt" section that starts closed; 7 forecast tests pass and the open/close cycle plus independent collapse from "Below EBITDA" were checked in the preview.
 - [x] Hidden the "Edit with Lovable" badge on the published site (Pro plan); badge visibility confirmed hidden, propagates within ~30 seconds.
 - Project delete is soft (hidden, restorable)
+- Photo change moved to Project details; explain Source workbooks

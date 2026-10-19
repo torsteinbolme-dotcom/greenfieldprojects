@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Loader2, MoreHorizontal } from "lucide-react";
+
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createProject, deleteProject, duplicateProject, logAudit, useMembership, useProjects, type ProjectRow } from "@/lib/data";
 import { coverSrc } from "@/lib/covers";
-import { uploadCover, useCoverUrls } from "@/lib/covers-client";
+import { useCoverUrls } from "@/lib/covers-client";
 import { projectMountain } from "@/exampleProject";
 import { blankAssumptions, withDefaultProjectSegments } from "@/lib/model";
 

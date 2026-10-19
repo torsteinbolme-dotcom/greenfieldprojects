@@ -301,9 +301,10 @@ function SeasonalityImportDialog({ orgId, onClose }: { orgId: string; onClose: (
               <tbody>{preview.map((p) => {
                 const dup = duplicates.some((d) => d.benchmark === p.benchmark && d.profile === p.profile);
                 const ok = profileValid(p.totalPct, 12);
+                const monthCount = new Set((rows ?? []).filter((r) => r.benchmark === p.benchmark && r.profile === p.profile).map((r) => r.month)).size || 12;
                 return <tr key={p.label}>
                   <td>{p.label}</td>
-                  <td className="text-right">12</td>
+                  <td className="text-right">{monthCount}</td>
                   <td className={`text-right ${ok ? "" : "text-destructive"}`}>{formatNumber(p.totalPct, 2, 2)}%</td>
                   <td className="text-right">{p.passengers.some((x) => x !== null) ? formatNumber(p.passengers.reduce((s, x) => s + (x ?? 0), 0), 0, 0) : "—"}</td>
                   <td className="text-xs">{!ok ? <span className="text-destructive">Must total 100%</span> : dup ? <span className="text-warning-foreground">Replaces existing</span> : "New"}</td>

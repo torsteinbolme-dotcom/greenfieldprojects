@@ -60,7 +60,7 @@ describe("comparison development chart metrics", () => {
     expect(devValue("revPax", null, 0)).toBeNull();
   });
 });
-import { MOIC_YEAR, moicAtYear, portfolioAverages } from "@/lib/portfolio";
+import { MOIC_YEAR, metricsAt, moicAtYear, portfolioAverages } from "@/lib/portfolio";
 
 type AvgEntry = Parameters<typeof portfolioAverages>[0][number];
 const exit = { exitMultiple: 10, exitTransactionCostRate: 0 };

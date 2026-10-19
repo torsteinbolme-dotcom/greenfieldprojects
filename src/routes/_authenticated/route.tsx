@@ -3,6 +3,7 @@ import { useState } from "react";
 import { BarChart3, Briefcase, ChevronDown, FolderKanban, LogOut, Ruler, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMembership } from "@/lib/data";
+import logoLight from "@/assets/brand/logo-light.svg";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -54,8 +55,8 @@ function Shell() {
     <div className="flex min-h-screen">
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground md:flex">
         <div className="px-5 py-6">
-          <p className="font-display text-lg text-sidebar-accent-foreground">Cable Car</p>
-          <p className="eyebrow text-sidebar-primary">Portfolio</p>
+          <Link to="/projects" aria-label="Norwegian Travel — Projects"><img src={logoLight} alt="Norwegian Travel" className="h-auto w-full max-w-[11rem]" /></Link>
+          <p className="eyebrow mt-3 text-sidebar-primary">Cable Car Portfolio</p>
         </div>
         <nav className="flex-1 space-y-1 px-3">
           {nav.map((n, i) => (<div key={n.to}>

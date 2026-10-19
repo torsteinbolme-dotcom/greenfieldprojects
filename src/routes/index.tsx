@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import logoDark from "@/assets/brand/logo-dark.svg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -28,7 +29,8 @@ function Index() {
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto flex min-h-screen max-w-5xl flex-col justify-center px-6 py-16">
-        <p className="eyebrow">Cable Car Portfolio</p>
+        <img src={logoDark} alt="Norwegian Travel" className="h-auto w-64 md:w-80" />
+        <p className="eyebrow mt-10">Cable Car Portfolio</p>
         <h1 className="mt-4 max-w-3xl text-5xl font-semibold leading-tight text-primary md:text-6xl">
           Infrastructure returns, modelled line by line.
         </h1>
@@ -39,6 +41,9 @@ function Index() {
           <Button asChild size="lg"><Link to="/portfolio">Open portfolio</Link></Button>
           <Button asChild size="lg" variant="outline"><Link to="/auth">Sign in</Link></Button>
         </div>
+        <p className="mt-6 max-w-xl border-l-2 border-accent pl-4 text-sm italic text-muted-foreground">
+          “You shall not pass!” — the gatekeeper at the bottom station, to anyone without a login. (Ticket holders ride straight up.)
+        </p>
         <dl className="mt-20 grid grid-cols-2 gap-8 border-t pt-8 md:grid-cols-4">
           {[["30-year", "forecast horizon"], ["NOK m", "reporting unit"], ["Versioned", "scenario history"], ["Org-scoped", "data access"]].map(([a, b]) => (
             <div key={a}><dt className="font-display text-2xl text-primary">{a}</dt><dd className="text-sm text-muted-foreground">{b}</dd></div>

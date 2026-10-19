@@ -1,76 +1,151 @@
-import { describe, expect, it } from "vitest";
-import { equalWeightedAverage, groupProfiles, monthNumber, parseSeasonalitySheet, profileValid, type SeasonalityRow } from "@/lib/seasonality";
+import { describe, expect, it, vi, afterEach } from "vitest";
+import { calculate } from "@/financialEngine";
+import { projectMountain } from "@/exampleProject";
+import { capacityOf, allocationValid } from "@/lib/capacity";
+import { capacityWithProfile, equalWeightedAverage, groupProfiles, monthNumber, parseSeasonalitySheet, profileValid, seasonalityImportProfiles, saveSeasonalityProfiles, type SeasonalityRow } from "@/lib/seasonality";
 
-const row = (benchmark: string, profile: string, month: number, pct: number, pax: number | null = null): SeasonalityRow => ({
-  id: `${benchmark}-${profile}-${month}`, organization_id: "org", benchmark_name: benchmark, profile_name: profile,
-  month, allocation_pct: pct, historical_passengers: pax, method: null,
+const { rpc } = vi.hoisted(() => ({ rpc: vi.fn() }));
+vi.mock("@/integrations/supabase/client", () => ({ supabase: { rpc } }));
+afterEach(() => vi.clearAllMocks());
+const months = Array.from({ length: 12 }, (_, i) => i + 1);
+const rawYear = (profile = "2024", passengers = Array.from({ length: 12 }, () => 1000)) => passengers.map((n, i) => ({ benchmark: "Cable car", profile, month: i + 1, historical_passengers: n, allocation_pct: n / passengers.reduce((s, x) => s + x, 0) * 100 }));
+const profiles = (raw = rawYear()) => seasonalityImportProfiles(parseSeasonalitySheet(raw), "org");
+const firstProfile = (raw = rawYear()) => {
+  const p = profiles(raw)[0];
+  if (!p) throw new Error("Missing fixture profile");
+  return p;
+};
+const stored = (raw = rawYear()): SeasonalityRow[] => raw.map((r, i) => ({ id: String(i), organization_id: "org", benchmark_name: r.benchmark, profile_name: r.profile, month: r.month, allocation_pct: r.allocation_pct, historical_passengers: r.historical_passengers, method: null }));
+
+describe("seasonality validation", () => {
+  it("requires exactly 12 unique integer months 1–12", () => {
+    expect(() => profiles(rawYear().slice(0, 11))).toThrow(/12 unique months/);
+    const duplicate = rawYear(); duplicate[11] = { ...duplicate[0] as ReturnType<typeof rawYear>[number] };
+    expect(() => profiles(duplicate)).toThrow(/duplicate or missing/);
+    expect(() => profiles([...rawYear(), rawYear()[0] as ReturnType<typeof rawYear>[number]])).toThrow(/12 unique/);
+    for (const m of [0, 13, 1.5, NaN]) {
+      const raw = rawYear(); raw[0] = { ...raw[0] as ReturnType<typeof rawYear>[number], month: m };
+      expect(() => profiles(raw)).toThrow(/unknown month/);
+    }
+  });
+  it("accepts rounding within 0.06 percentage points but rejects materially incorrect totals", () => {
+    expect(profileValid(99.96, months)).toBe(true);
+    expect(profileValid(100.06, months)).toBe(true);
+    expect(profileValid(100.061, months)).toBe(false);
+    expect(profileValid(99.5, months)).toBe(false);
+    expect(profileValid(100, [...months.slice(0, 11), 1])).toBe(false);
+    expect(profileValid(NaN, months)).toBe(false);
+  });
+  it.each([-1, 1.5, NaN, Infinity, 2147483648, "invalid", true])("rejects invalid passenger count %s", n => {
+    const raw: Record<string, unknown>[] = rawYear(); raw[0] = { ...raw[0], historical_passengers: n };
+    expect(() => parseSeasonalitySheet(raw)).toThrow(/invalid historical_passengers/);
+  });
+  it("rejects partial or zero annual passenger counts", () => {
+    const raw: Record<string, unknown>[] = rawYear(); raw[0] = { ...raw[0], historical_passengers: null };
+    expect(() => parseSeasonalitySheet(raw)).toThrow(/all 12 months/);
+    expect(() => parseSeasonalitySheet(rawYear().map(r => ({ ...r, historical_passengers: 0 })))).toThrow(/positive annual total/);
+  });
+  it("reconciles supplied rounded percentages within 0.005 percentage points per month", () => {
+    const rounded = rawYear().map(r => ({ ...r, allocation_pct: 8.33 }));
+    expect(profiles(rounded)).toHaveLength(1);
+    const wrong = rawYear(); wrong[0] = { ...wrong[0] as ReturnType<typeof rawYear>[number], allocation_pct: 9 }; wrong[1] = { ...wrong[1] as ReturnType<typeof rawYear>[number], allocation_pct: 100 / 12 - (9 - 100 / 12) };
+    expect(() => profiles(wrong)).toThrow(/do not reconcile/);
+  });
+  it("derives missing shares from ALL twelve passenger counts, even with mixed supplied percentages", () => {
+    const raw: Record<string, unknown>[] = rawYear("2024", [1000, 3000, ...Array.from({ length: 10 }, () => 0)]);
+    raw[0] = { ...raw[0], allocation_pct: null };
+    const parsed = parseSeasonalitySheet(raw);
+    expect(parsed[0]?.allocationPct).toBe(25);
+    expect(parsed[1]?.allocationPct).toBe(75);
+  });
+  it.each([-1, 101, Infinity, "invalid", true])("rejects invalid percentage %s", pct => {
+    const raw: Record<string, unknown>[] = rawYear(); raw[0] = { ...raw[0], allocation_pct: pct };
+    expect(() => parseSeasonalitySheet(raw)).toThrow(/invalid allocation_pct/);
+  });
+  it("keeps invalid stored profiles but prevents their application or averaging", () => {
+    const rs = stored(); rs[11] = { ...rs[0] as SeasonalityRow };
+    const p = groupProfiles(rs)[0];
+    expect(p?.valid).toBe(false);
+    if (!p) throw new Error("Missing invalid fixture");
+    expect(() => capacityWithProfile(capacityOf(projectMountain), p)).toThrow(/Invalid/);
+    expect(equalWeightedAverage("Cable car", [p, firstProfile(rawYear("2025"))])).toBeNull();
+  });
+  it("does not conflate benchmark/profile name pairs", () => {
+    const a = stored().map(r => ({ ...r, benchmark_name: "AB", profile_name: "C" }));
+    const b = stored().map(r => ({ ...r, benchmark_name: "A", profile_name: "BC" }));
+    expect(groupProfiles([...a, ...b])).toHaveLength(2);
+  });
 });
 
-const yearProfile = (benchmark: string, profile: string, pcts: number[]) => pcts.map((p, i) => row(benchmark, profile, i + 1, p, 1000));
-
-describe("parseSeasonalitySheet", () => {
-  it("parses percentage rows and keeps historical passengers", () => {
-    const rows = parseSeasonalitySheet([
-      { benchmark: "Romsdalsgondolen", profile: "2024", month: "July", allocation_pct: 25.13, historical_passengers: 26541, method: "Historical monthly passengers" },
-    ]);
-    expect(rows).toEqual([{ benchmark: "Romsdalsgondolen", profile: "2024", month: 7, allocationPct: 25.13, passengers: 26541, method: "Historical monthly passengers" }]);
+describe("equal weighted averages", () => {
+  it("includes Growth-Adjusted years, equal weights not passenger weights, and no historical counts", () => {
+    const p = profiles([...rawYear("2024 Actual", [1000, ...Array.from({ length: 11 }, () => 0)]), ...rawYear("2025 Growth-Adjusted", [0, 9000, ...Array.from({ length: 10 }, () => 0)])]);
+    const avg = p.find(x => x.profile.includes("Average"));
+    expect(avg?.allocation.slice(0, 2)).toEqual([0.5, 0.5]);
+    expect(avg?.passengers).toEqual(Array.from({ length: 12 }, () => null));
+    expect(avg?.method).toContain("normalized");
   });
-
-  it("derives percentages from raw monthly passengers when allocation is missing", () => {
-    const rows = parseSeasonalitySheet([
-      { benchmark: "Fjellheisen", profile: "2025", month: "January", allocation_pct: null, historical_passengers: 1000 },
-      { benchmark: "Fjellheisen", profile: "2025", month: "February", allocation_pct: null, historical_passengers: 3000 },
-    ]);
-    expect(rows[0]!.allocationPct).toBeCloseTo(25);
-    expect(rows[1]!.allocationPct).toBeCloseTo(75);
-    expect(rows[0]!.method).toBe("Derived from historical monthly passengers");
+  it.each(["2024-2025 Average", "2024–2025 Average", "2024_2025_average"])("keeps uploaded %s without duplicating or averaging it again", profile => {
+    const average = rawYear(profile).map(r => ({ ...r, historical_passengers: null }));
+    const raw: Record<string, unknown>[] = [...rawYear(), ...rawYear("2025_normalized_growth_adjusted"), ...average];
+    const ps = seasonalityImportProfiles(parseSeasonalitySheet(raw), "org");
+    expect(ps).toHaveLength(3);
+    expect(ps.filter(p => /average/i.test(p.profile))).toHaveLength(1);
+    expect(equalWeightedAverage("Cable car", ps)?.allocation[0]).toBeCloseTo(1 / 12);
   });
-
-  it("rejects unknown months and rows with neither percentages nor passengers", () => {
-    expect(() => parseSeasonalitySheet([{ benchmark: "X", profile: "2024", month: "Smarch", allocation_pct: 1 }])).toThrow(/unknown month/i);
-    expect(() => parseSeasonalitySheet([{ benchmark: "X", profile: "2024", month: "May", allocation_pct: null, historical_passengers: null }])).toThrow(/no allocation_pct/);
+  it("rejects ambiguous duplicate annual variants instead of double counting a year", () => {
+    expect(() => profiles([...rawYear("2024"), ...rawYear("2025 Actual"), ...rawYear("2025 Growth-Adjusted")])).toThrow(/same year/);
+  });
+  it("requires at least two annual profiles", () => {
+    expect(equalWeightedAverage("Cable car", [firstProfile()])).toBeNull();
   });
 });
 
-describe("groupProfiles and profileValid", () => {
-  it("groups 12 months into a profile with fractional allocation summing to 1", () => {
-    const pcts = [0, 1.2, 3.56, 4.41, 10.45, 17.17, 25.13, 21.92, 9.57, 4.19, 1.05, 1.35];
-    const [p] = groupProfiles(yearProfile("Romsdalsgondolen", "2024", pcts));
-    expect(p!.label).toBe("Romsdalsgondolen — 2024");
-    expect(p!.allocation).toHaveLength(12);
-    expect(p!.allocation.reduce((s, x) => s + x, 0)).toBeCloseTo(1, 6);
-    expect(p!.allocation[6]).toBeCloseTo(0.2513);
-    expect(profileValid(p!.totalPct, 12)).toBe(true);
+describe("applied snapshot and financial isolation", () => {
+  it("copies source, year/profile and normalization status without live references", () => {
+    const p = firstProfile(rawYear("2025 Growth-Adjusted"));
+    const saved = capacityOf(projectMountain);
+    const applied = capacityWithProfile(saved, p);
+    expect(applied.seasonalitySource).toEqual({ benchmark: "Cable car", profile: "2025 Growth-Adjusted", year: 2025, normalizationStatus: "normalized", method: null });
+    const old = applied.monthlyAllocation[0];
+    p.allocation[0] = 1; p.profile = "Changed";
+    expect(applied.monthlyAllocation[0]).toBe(old);
+    expect(applied.seasonalitySource?.profile).toBe("2025 Growth-Adjusted");
+    expect(applied.hourlyCapacity).toBe(saved.hourlyCapacity);
   });
-
-  it("flags profiles that do not total 100%", () => {
-    expect(profileValid(99.5, 12)).toBe(false);
-    expect(profileValid(100.005, 12)).toBe(true); // rounding tolerance
-    expect(profileValid(100, 11)).toBe(false);
+  it("normalizes accepted rounded percentages so explicit distribution Save remains valid", () => {
+    const p = firstProfile(rawYear().map(r => ({ ...r, allocation_pct: 8.33 })));
+    expect(allocationValid(capacityWithProfile(capacityOf(projectMountain), p).monthlyAllocation)).toBe(true);
   });
-});
-
-describe("equalWeightedAverage", () => {
-  const y2024 = groupProfiles(yearProfile("Romsdalsgondolen", "2024", [0, 2, 4, 4, 10, 18, 25, 22, 10, 4, 1, 0].map((x, i, a) => x + (i === 11 ? 100 - a.reduce((s, v) => s + v, 0) : 0))))[0]!;
-  const y2025 = groupProfiles(yearProfile("Romsdalsgondolen", "2025", [0, 1, 3, 5, 9, 16, 29, 19, 9, 5, 2, 2]))[0]!;
-
-  it("averages annual percentage profiles with equal weight and stores no passenger counts", () => {
-    const avg = equalWeightedAverage("Romsdalsgondolen", [y2024, y2025])!;
-    expect(avg.profile).toBe("2024–2025 Average");
-    expect(avg.allocation[6]).toBeCloseTo((y2024.allocation[6]! + y2025.allocation[6]!) / 2);
-    expect(avg.totalPct).toBeCloseTo(100, 6);
-    expect(avg.passengers.every((x) => x === null)).toBe(true);
-  });
-
-  it("returns null with fewer than two complete year profiles", () => {
-    expect(equalWeightedAverage("Romsdalsgondolen", [y2024])).toBeNull();
+  it("applying seasonality does not change revenue, EBITDA, IRR or MOIC", () => {
+    const before = calculate(projectMountain);
+    const p = firstProfile(rawYear("2025 Growth-Adjusted", [1000, 3000, ...Array.from({ length: 10 }, () => 0)]));
+    const after = calculate({ ...projectMountain, capacity: capacityWithProfile(capacityOf(projectMountain), p) } as typeof projectMountain);
+    expect(after.rows.map(r => r.revenue)).toEqual(before.rows.map(r => r.revenue));
+    expect(after.rows.map(r => r.ebitda)).toEqual(before.rows.map(r => r.ebitda));
+    expect(after.equityIrr).toBe(before.equityIrr);
+    expect(after.equityMultiple).toBe(before.equityMultiple);
+    expect(after).toEqual(before);
   });
 });
 
-describe("monthNumber", () => {
-  it("maps English month names case-insensitively", () => {
-    expect(monthNumber("january")).toBe(1);
-    expect(monthNumber("December")).toBe(12);
-    expect(monthNumber("Nope")).toBeNull();
+describe("atomic import boundary", () => {
+  it("uses one transactional call with explicit replace confirmation", async () => {
+    rpc.mockResolvedValue({ error: null });
+    await saveSeasonalityProfiles("org", [firstProfile()], true);
+    expect(rpc).toHaveBeenCalledTimes(1);
+    expect(rpc).toHaveBeenCalledWith("import_seasonality_profiles", expect.objectContaining({ p_organization_id: "org", p_replace: true, p_rows: expect.arrayContaining([expect.objectContaining({ month: 12 })]) }));
   });
+  it("surfaces failed replacement and does not retry with a destructive delete", async () => {
+    rpc.mockResolvedValue({ error: new Error("Import failed") });
+    await expect(saveSeasonalityProfiles("org", [firstProfile()], true)).rejects.toThrow("Import failed");
+    expect(rpc).toHaveBeenCalledTimes(1);
+  });
+});
+
+it("maps numeric CSV months and English names", () => {
+  expect(monthNumber("1")).toBe(1);
+  expect(monthNumber("January")).toBe(1);
+  expect(monthNumber("december")).toBe(12);
+  expect(monthNumber("Nope")).toBeNull();
 });

@@ -1,7 +1,8 @@
 import type { Assumptions, YearResult } from "@/financialEngine";
 
 /** Optional, validation-only capacity inputs stored in scenario JSON. Never read by the engine. */
-export type Capacity = { hourlyCapacity: number; hoursPerDay: number; monthlyAllocation: number[] };
+export type SeasonalitySource = { benchmark: string; profile: string; year: number | null; normalizationStatus: "normalized" | "not-normalized"; method: string | null };
+export type Capacity = { hourlyCapacity: number; hoursPerDay: number; monthlyAllocation: number[]; seasonalitySource?: SeasonalitySource | null };
 export type WithCapacity = Assumptions & { capacity?: Capacity };
 
 export const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];

@@ -76,7 +76,7 @@ function ResetPasswordPage() {
       const { data: upd, error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
       // Invited users join the inviting organization (no-op if already a member or no invite).
-      const inviteToken = upd.user?.user_metadata?.invite_token;
+      const inviteToken = upd.user?.user_metadata?.["invite_token"];
       if (typeof inviteToken === "string") await supabase.rpc("accept_invite", { _token: inviteToken });
       sessionStorage.removeItem(RECOVERY_FLAG);
       toast.success("Your new password is active.");

@@ -315,6 +315,8 @@ export type Database = {
           cover_image_url: string | null
           created_at: string
           created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           description: string | null
           id: string
           location: string | null
@@ -329,6 +331,8 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           id?: string
           location?: string | null
@@ -343,6 +347,8 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           id?: string
           location?: string | null
@@ -537,6 +543,7 @@ export type Database = {
       }
       is_org_admin: { Args: { _org: string; _user: string }; Returns: boolean }
       is_org_member: { Args: { _org: string; _user: string }; Returns: boolean }
+      soft_delete_project: { Args: { _project: string }; Returns: undefined }
     }
     Enums: {
       org_role: "admin" | "editor" | "viewer"

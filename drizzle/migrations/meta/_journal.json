@@ -78,6 +78,13 @@
       "when": 1792410369609,
       "tag": "0010_audit_tenant_relationship_guards",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792417990011,
+      "tag": "0011_migration",
+      "breakpoints": true
     }
   ]
 }

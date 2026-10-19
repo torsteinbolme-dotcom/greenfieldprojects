@@ -130,6 +130,15 @@
   .fin-table tr:hover td {
     @apply bg-muted;
   }
+  /* Emphasised headline rows (EBITDA): a soft gold band with accent rules top and bottom. */
+  .fin-table tr.fin-key td {
+    background-color: color-mix(in srgb, var(--accent) 16%, var(--card));
+    border-top: 1px solid color-mix(in srgb, var(--accent) 60%, var(--border));
+    border-bottom: 1px solid color-mix(in srgb, var(--accent) 60%, var(--border));
+  }
+  .fin-table tr.fin-key:hover td {
+    background-color: color-mix(in srgb, var(--accent) 26%, var(--card));
+  }
   .eyebrow {
     @apply text-xs font-medium uppercase;
     color: var(--eyebrow);

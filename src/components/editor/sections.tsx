@@ -312,7 +312,7 @@ export function ForecastSection({ r, a }: { r: ModelResult; a: Assumptions | und
             {forecastRows.filter(([, , group]) => !group || expanded[group]).map(([label, f, group]) => {
               const toggleGroup = label === "Total revenue" ? "revenue" : label === "Total OPEX" ? "opex" : null;
               return (
-              <tr key={label} className={bold.has(label) ? "font-semibold" : ""}>
+              <tr key={label} className={`${bold.has(label) ? "font-semibold" : ""} ${key.has(label) ? "fin-key" : ""}`}>
                 <td className="sticky left-0 z-10 bg-card">
                   {toggleGroup ? (
                     <Button variant="ghost" size="sm" className="h-7 justify-start px-1 font-semibold" aria-expanded={expanded[toggleGroup]}

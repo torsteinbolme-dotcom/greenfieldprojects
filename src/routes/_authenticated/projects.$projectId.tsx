@@ -125,6 +125,13 @@ function EditorPage() {
           {!ro && state && controller && <SaveControls state={state} undo={controller.undo} retry={() => { void controller.flush(); }} />}
         </div>
       </div>
+      {r && y3 && (
+        <div className="grid grid-cols-3 gap-3 sm:max-w-xl">
+          <Kpi label={`MOIC Y${draft.exitYear}`} value={mult(r.equityMultiple)} sub="Equity multiple at exit" />
+          <Kpi label="EBITDA Y3" value={nokM(y3.ebitda)} sub={`Operating year 3 · ${y3.calendarYear}`} />
+          <Kpi label="EBITDA / pax Y3" value={nok(y3.passengers > 0 ? y3.ebitda / y3.passengers : 0)} sub="Per passenger, year 3" />
+        </div>
+      )}
       {scenario.kind !== "base" && <p className="text-xs text-muted-foreground">Editing scenario “{scenario.name}”. Base is never modified by changes here.</p>}
       {error && <div className="rounded-md bg-warning p-3 text-sm text-warning-foreground">Cannot calculate: {error}</div>}
 

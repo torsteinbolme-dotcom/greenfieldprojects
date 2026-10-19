@@ -454,6 +454,50 @@ export type Database = {
           },
         ]
       }
+      seasonality_profiles: {
+        Row: {
+          allocation_pct: number
+          benchmark_name: string
+          created_at: string
+          historical_passengers: number | null
+          id: string
+          method: string | null
+          month: number
+          organization_id: string
+          profile_name: string
+        }
+        Insert: {
+          allocation_pct: number
+          benchmark_name: string
+          created_at?: string
+          historical_passengers?: number | null
+          id?: string
+          method?: string | null
+          month: number
+          organization_id: string
+          profile_name: string
+        }
+        Update: {
+          allocation_pct?: number
+          benchmark_name?: string
+          created_at?: string
+          historical_passengers?: number | null
+          id?: string
+          method?: string | null
+          month?: number
+          organization_id?: string
+          profile_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seasonality_profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       latest_scenario_assumptions: {

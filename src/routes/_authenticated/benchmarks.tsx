@@ -279,7 +279,7 @@ function SeasonalityImportDialog({ orgId, onClose }: { orgId: string; onClose: (
         .filter((p) => !duplicates.some((d) => d.benchmark === p.benchmark && d.profile === p.profile) || replace)
         .flatMap((p) => p.allocation.map((share, i) => ({
           organization_id: orgId, benchmark_name: p.benchmark, profile_name: p.profile, month: i + 1,
-          allocation_pct: share * 100, historical_passengers: p.passengers[i], method: p.method,
+          allocation_pct: share * 100, historical_passengers: p.passengers[i] ?? null, method: p.method,
         })));
       const { error } = await supabase.from("seasonality_profiles").insert(insert);
       if (error) throw error;

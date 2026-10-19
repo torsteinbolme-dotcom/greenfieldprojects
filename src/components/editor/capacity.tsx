@@ -27,6 +27,11 @@ export function CapacitySection({ a, r, ro, set }: Props) {
   const row = rows[Math.min(yearIdx, rows.length - 1)];
   const table = row ? capacityTable(row, { ...saved, monthlyAllocation: alloc }) : null;
 
+  const { data: profiles } = useSeasonalityProfiles();
+  const usable = (profiles ?? []).filter((pr) => profileValid(pr.totalPct, 12));
+  const [source, setSource] = useState("manual");
+  const selected = source === "manual" ? null : usable.find((pr) => pr.label === source) ?? null;
+
   return (
     <div className="space-y-4">
       <Card title="Capacity & seasonality">

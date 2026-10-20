@@ -28,6 +28,7 @@ export function TicketPricingSection({ a, r, ro, set }: {
         </div>}
         <SeasonalPricingSection a={a} passengers={row?.passengers ?? a.initialPassengers} year={row?.year ?? 1} ro={ro} set={set} />
       </div>
-    </Card>
+      </Card>
+    </div>
   );
 }

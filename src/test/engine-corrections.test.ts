@@ -24,12 +24,12 @@ describe('depreciation stops at end of useful life', () => {
 
 describe('zero revenue keeps fixed legacy costs', () => {
   it('F&B Year 1 OPEX remains with zero F&B revenue', () => {
-    const a = { ...base(), fbRevenueYear1: 0, fbFollowsPassengers: false, opexGrowth: undefined, fbOpexYear1: 4_000_000, costInflation: 0.03 };
+    const a = { ...base(), fbRevenueYear1: 0, fbFollowsPassengers: false, opexGrowth: {}, fbOpexYear1: 4_000_000, costInflation: 0.03 };
     const r = calculate(a); const z = calculate({ ...a, fbOpexYear1: 0 });
     expect(r.rows[2]!.opex - z.rows[2]!.opex).toBeCloseTo(4_000_000 * 1.03 ** 2, 2);
   });
   it('merchandise OPEX remains with zero merchandise revenue (legacy ratio)', () => {
-    const a = { ...base(), merchRevenueYear1: 0, merchOpexRate: null, merchOpexYear1: 1_000_000, opexGrowth: undefined, costInflation: 0.02 };
+    const a = { ...base(), merchRevenueYear1: 0, merchOpexRate: null, merchOpexYear1: 1_000_000, opexGrowth: {}, costInflation: 0.02 };
     const r = calculate(a); const z = calculate({ ...a, merchOpexYear1: 0 });
     expect(r.rows[1]!.opex - z.rows[1]!.opex).toBeCloseTo(1_020_000, 2);
   });

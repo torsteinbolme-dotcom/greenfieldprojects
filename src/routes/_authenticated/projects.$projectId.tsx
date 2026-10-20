@@ -28,6 +28,7 @@ import { InvestmentSummary } from "@/components/editor/investment-summary";
 import { BreakEvenPanel } from "@/components/editor/break-even";
 import { SaveControls } from "@/components/editor/save-controls";
 import { CapacitySection } from "@/components/editor/capacity";
+import { TicketPricingSection } from "@/components/editor/ticket-pricing";
 import { uploadCover, useCoverUrls } from "@/lib/covers-client";
 
 function ProjectPhoto({ ro, project, m }: { ro: boolean; project: ProjectRow; m: Membership }) {
@@ -179,7 +180,7 @@ function EditorPage() {
 
       <Tabs value={search.tab ?? "overview"} onValueChange={(t) => navigate({ search: (s) => ({ ...s, tab: t }), replace: true })}>
         <TabsList className="h-auto flex-wrap">
-          {([["overview", "Overview"], ["summary", "Investment Summary"], ["segments", "Passenger segments"], ["capex", "CAPEX"], ["revenue", "Revenue & OPEX"], ["financing", "Financing"], ["forecast", "Forecast"], ["exit", "Exit analysis"], ["capacity", "Capacity"], ["benchmarking", "Benchmarking"], ["history", "Version history"]] as const).map(([k, l]) => (
+          {([["overview", "Overview"], ["summary", "Investment Summary"], ["segments", "Passenger segments"], ["tickets", "Ticket pricing & revenue"], ["capex", "CAPEX"], ["revenue", "Revenue & OPEX"], ["financing", "Financing"], ["forecast", "Forecast"], ["exit", "Exit analysis"], ["capacity", "Capacity"], ["benchmarking", "Benchmarking"], ["history", "Version history"]] as const).map(([k, l]) => (
             <TabsTrigger key={k} value={k}>{l}</TabsTrigger>
           ))}
         </TabsList>
@@ -202,6 +203,7 @@ function EditorPage() {
           <Limitations />
         </TabsContent>
         <TabsContent value="segments"><SegmentsSection a={draft} set={set} ro={ro} /></TabsContent>
+        <TabsContent value="tickets"><TicketPricingSection key={scenario.id} a={draft} r={r} ro={ro} set={set} /></TabsContent>
         <TabsContent value="capex"><CapexSection a={draft} set={set} ro={ro} r={r} /></TabsContent>
         <TabsContent value="revenue"><RevenueOpexSection a={draft} set={set} ro={ro} /></TabsContent>
         <TabsContent value="financing"><FinancingSection a={draft} set={set} ro={ro} r={r} /></TabsContent>

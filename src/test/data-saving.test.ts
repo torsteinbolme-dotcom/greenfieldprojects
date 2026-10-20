@@ -19,6 +19,14 @@ beforeEach(() => {
 });
 
 describe("append-only save failure safeguards", () => {
+  it("persists independent methods and inactive values only in the edited scenario", async () => {
+    mocks.read.mockResolvedValue({ data: { version: 2 }, error: null });
+    const methods = { fb: { revenue: { method: "perPassenger" as const, perPassenger: 125, annualAmount: 10000 }, opex: { method: "fixedVariable" as const, fixedAmount: 5000, variablePerPassenger: 90 } } };
+    await saveAssumptionVersion("org", "volume-scenario", { ...projectMountain, volumeMethods: methods });
+    await saveAssumptionVersion("org", "base-scenario", projectMountain);
+    expect(mocks.insert.mock.calls[0]?.[0]).toMatchObject({ scenario_id: "volume-scenario", version: 3, calculation_version: "mountain-v5-volume", assumptions: { volumeMethods: methods } });
+    expect(mocks.insert.mock.calls[1]?.[0].assumptions.volumeMethods).toBeUndefined();
+  });
   it("persists scenario-specific seasonal prices and monthly assignments in new versions", async () => {
     mocks.read.mockResolvedValue({ data: { version: 2 }, error: null });
     const pricing = initializeSeasonalPricing(projectMountain); pricing.months[5] = "high";

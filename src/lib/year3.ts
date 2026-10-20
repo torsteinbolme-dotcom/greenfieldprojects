@@ -16,7 +16,7 @@ export const performanceYearOf = (a: Pick<Assumptions, "performanceYear">, r: Mo
 /** Splits one forecast year into cable car, restaurant (F&B) and other (merchandise) parts; parts sum to the engine totals. */
 export function splitYear(a: Assumptions, row: YearResult) {
   const fbOpex = fbOpexAt(a, row);
-  const otherOpex = merchOpexAt(a, row.year, row.merchRevenue);
+  const otherOpex = (row.merchOpex ?? merchOpexAt(a, row.year, row.merchRevenue)) + (row.otherOpex ?? 0);
   const cableOpex = row.opex - fbOpex - otherOpex;
   const d = (x: number, y: number) => (y ? x / y : null);
   const cableEbitda = row.ticketRevenue - cableOpex;
@@ -26,7 +26,7 @@ export function splitYear(a: Assumptions, row: YearResult) {
     passengers: row.passengers,
     cableRevenue: row.ticketRevenue, cableOpex, cableEbitda,
     fbRevenue: row.fbRevenue, fbOpex, fbEbitda,
-    otherRevenue: row.merchRevenue, otherOpex, otherEbitda: row.merchRevenue - otherOpex,
+    otherRevenue: row.merchRevenue + (row.otherRevenue ?? 0), otherOpex, otherEbitda: row.merchRevenue + (row.otherRevenue ?? 0) - otherOpex,
     totalRevenue: row.revenue, totalEbitda: row.ebitda,
     revenuePerPax: d(row.revenue, row.passengers), ebitdaPerPax: d(row.ebitda, row.passengers), margin: d(row.ebitda, row.revenue),
     cableRevenuePerPax: d(row.ticketRevenue, row.passengers), cableOpexPerPax: d(cableOpex, row.passengers),

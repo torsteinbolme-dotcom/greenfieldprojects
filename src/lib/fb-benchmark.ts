@@ -99,6 +99,8 @@ export function withFbBenchmark<T extends AssumptionsWithFb>(a: T, assets: Bench
   if (!sel || (!sel.revenue && !sel.opex)) return a;
   const next = { ...a, fbBenchmark: { ...sel } };
   for (const kind of ["revenue", "opex"] as const) {
+    // Explicit methods read the snapshot in the engine; do not overwrite inactive manual values.
+    if (a.volumeMethods?.fb?.[kind]) continue;
     const source = sel[kind];
     if (!source) continue;
     const adjust = sourceAdjust(sel, source);

@@ -9,6 +9,12 @@ export type SeasonalPricing = {
   prices: { segmentName: string; low: number; high: number }[];
 };
 
+/** UI-only lock: keep saved seasonal values and all financial logic unchanged. */
+export function seasonalFareReadOnly(a: Assumptions, index: number): boolean {
+  const key = a.segments[index]?.name.toLowerCase().replace(/[^a-z]/g, "") ?? "";
+  return seasonalFareLinked(a, index) || ["annualpassadult", "adultannualpass", "cruise", "touroperators", "touroperator", "mice"].includes(key);
+}
+
 /** Only child and one-way fares follow the seasonal adult round-trip base. */
 export function seasonalFareLinked(a: Assumptions, index: number): boolean {
   const key = a.segments[index]?.name.toLowerCase().replace(/[^a-z]/g, "");
@@ -52,6 +58,11 @@ export function ticketPriceGrowthIndex(a: Assumptions, year: number): number {
 /** Same passenger mix, VAT and commissions as the flat model; never apply boardings. */
 export function seasonalNetPrice(a: Assumptions, season: TicketSeason): number {
   return a.segments.reduce((sum, s, i) => sum + s.share * (seasonalGrossPrice(a, i, season) / (1 + s.vatRate)) * (1 - s.commission), 0);
+}
+
+export function seasonalNetPriceRows(a: Assumptions, year: number) {
+  const index = ticketPriceGrowthIndex(a, year);
+  return (["low", "high"] as const).map(season => ({ season, netPrice: seasonalNetPrice(a, season) * index }));
 }
 
 export function seasonalWeightedTicket(a: Assumptions): number | null {

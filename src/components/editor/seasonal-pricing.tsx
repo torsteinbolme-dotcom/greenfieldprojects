@@ -2,7 +2,7 @@ import type { Assumptions } from "@/financialEngine";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { NumField } from "./inputs";
-import { initializeSeasonalPricing, seasonalFareLinked, seasonalGrossPrice, withLinkedSeasonalPrices, seasonalRevenueTable, type SeasonalPricing } from "@/lib/seasonal-pricing";
+import { initializeSeasonalPricing, seasonalFareReadOnly, seasonalGrossPrice, seasonalNetPriceRows, withLinkedSeasonalPrices, seasonalRevenueTable, type SeasonalPricing } from "@/lib/seasonal-pricing";
 import { MONTHS } from "@/lib/capacity";
 import { deltaClass, int, nok, pct, signedNum } from "@/lib/format";
 
@@ -22,14 +22,19 @@ export function SeasonalPricingSection({ a, passengers, year, ro, set }: {
     {pricing?.enabled && <>
       <div className="overflow-x-auto">
         <table className="w-full text-sm"><thead><tr className="border-b text-xs text-muted-foreground"><th className="py-2 text-left">Ticket category</th><th className="min-w-32 px-2 text-right">Low season · NOK gross</th><th className="min-w-32 px-2 text-right">High season · NOK gross</th></tr></thead>
-          <tbody>{a.segments.map((s, i) => <tr key={`${s.name}-${i}`} className="border-b"><td className="py-2">{s.name}</td>{(["low", "high"] as const).map(season => <td key={season} className="px-2 py-1">{seasonalFareLinked(a, i) ? <span className="num block text-right text-muted-foreground" aria-label={`${s.name} ${season}-season price`}>{nok(seasonalGrossPrice(a, i, season), 2)}</span> : <NumField aria-label={`${s.name} ${season}-season price`} value={seasonalGrossPrice(a, i, season)} disabled={ro} onChange={value => {
+          <tbody>{a.segments.map((s, i) => <tr key={`${s.name}-${i}`} className="border-b"><td className="py-2">{s.name}</td>{(["low", "high"] as const).map(season => <td key={season} className="px-2 py-1">{seasonalFareReadOnly(a, i) ? <span className="num block text-right text-muted-foreground" aria-label={`${s.name} ${season}-season price`}>{nok(seasonalGrossPrice(a, i, season), 2)}</span> : <NumField aria-label={`${s.name} ${season}-season price`} value={seasonalGrossPrice(a, i, season)} disabled={ro} onChange={value => {
             if (value < 0) return;
             update({ ...pricing, prices: a.segments.map((segment, j) => ({ ...(pricing.prices[j] ?? { segmentName: segment.name, low: segment.grossPrice, high: segment.grossPrice }), ...(j === i ? { [season]: value } : {}) })) });
           }} />}</td>)}</tr>)}</tbody>
         </table>
       </div>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-        {MONTHS.map((month, i) => <div key={month} className="flex flex-wrap items-center justify-between gap-2 border-b py-2"><span className="text-xs">{month}</span><div className="flex shrink-0 gap-1" role="group" aria-label={`${month} season`}>
+      <div className="overflow-x-auto" aria-label="Seasonal net ticket prices">
+        <table className="fin-table"><thead><tr><th>Season · Year {year}</th><th className="text-right">Net ticket price · NOK ex VAT, after commission</th></tr></thead>
+          <tbody>{seasonalNetPriceRows(a, year).map(row => <tr key={row.season}><td>{row.season === "low" ? "Low season" : "High season"}</td><td className="num text-right font-semibold">{nok(row.netPrice, 2)}</td></tr>)}</tbody>
+        </table>
+      </div>
+      <div className="grid grid-cols-1 gap-x-5 gap-y-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {MONTHS.map((month, i) => <div key={month} className="flex items-center gap-2 border-b py-2"><span className="w-20 shrink-0 text-xs">{month}</span><div className="flex shrink-0 gap-1" role="group" aria-label={`${month} season`}>
           {(["low", "high"] as const).map(season => <Button key={season} size="sm" variant={pricing.months[i] === season ? "default" : "outline"} className="h-7 px-2 text-xs" disabled={ro} aria-pressed={pricing.months[i] === season} aria-label={`${month} ${season} season`} onClick={() => update({ ...pricing, months: pricing.months.map((m, j) => j === i ? season : m) })}>{season === "high" ? "High" : "Low"}</Button>)}
         </div></div>)}
       </div>

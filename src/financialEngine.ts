@@ -1,6 +1,7 @@
 // @ts-nocheck -- authoritative engine kept verbatim; strict-null type errors are suppressed rather than altering its logic.
 /** Project Mountain v1 financial engine. All amounts NOK, rates decimals. */
 import { seasonalWeightedTicket, ticketPriceGrowthIndex, type SeasonalPricing } from './lib/seasonal-pricing';
+import { benchmarkAmount, escalation, validateVolumeMethods, volumeRevenue, volumeOpex, type VolumeMethods } from './lib/volume-methods';
 export type Segment = {name:string;share:number;grossPrice:number;vatRate:number;commission:number;boardingsPerGuest:number};
 export type CapexItem = {name:string;quantity:number;unitCost:number};
 // cableVariableCostPerPassenger adds to cable car OPEX. maintenanceCapexRate is a legacy inert input; maintenanceCapexPct (absent = 0) is the annual investing outflow as % of initial CAPEX (mountain-v3).
@@ -16,13 +17,14 @@ export type Assumptions = {
   exitYear:number;exitMultiple:number;exitTransactionCostRate:number;performanceYear?:number;
   distributeCashAnnually:boolean;
   seasonalPricing?:SeasonalPricing;
+  volumeMethods?:VolumeMethods;
   // Optional per-cost yearly growth lists (fall back to costInflation) and merchandise OPEX as share of merchandise revenue.
   opexGrowth?:{cable?:number[];fb?:number[];merch?:number[]};
   merchOpexRate?:number|null;
   fbFollowsPassengers?:boolean;
   fbBenchmark?:{adjust:boolean;revenue?:{assetId:string;year:number;adjust?:boolean}|null;opex?:{assetId:string;year:number;adjust?:boolean}|null};
 };
-export type YearResult={year:number;calendarYear:number;passengers:number;ticketNetPrice:number;ticketRevenue:number;fbRevenue:number;merchRevenue:number;revenue:number;opex:number;ebitda:number;depreciation:number;ebit:number;openingDebt:number;interest:number;principal:number;closingDebt:number;tax:number;maintenanceCapex:number;equityInjection:number;cashAfterDebt:number;distribution:number;retainedCash:number;dscr:number|null};
+export type YearResult={year:number;calendarYear:number;passengers:number;ticketNetPrice:number;ticketRevenue:number;fbRevenue:number;merchRevenue:number;otherRevenue?:number;fbOpex?:number;merchOpex?:number;otherOpex?:number;revenue:number;opex:number;ebitda:number;depreciation:number;ebit:number;openingDebt:number;interest:number;principal:number;closingDebt:number;tax:number;maintenanceCapex:number;equityInjection:number;cashAfterDebt:number;distribution:number;retainedCash:number;dscr:number|null};
 const growth=(values:number[],year:number)=>values[Math.min(year-2,values.length-1)]??0;
 const safe=(v:number)=>Number.isFinite(v)?v:0;
 /** Cumulative cost index for a year: product of (1+growth) over years 2..year; defaults to costInflation every year. */
@@ -40,6 +42,7 @@ export function irr(cashflows:number[]):number|null {
   return (lo+hi)/2;
 }
 export function calculate(a:Assumptions){
+  validateVolumeMethods(a.volumeMethods);
   if(a.years<1||a.years>40||a.exitYear<1||a.exitYear>a.years)throw Error('Invalid model horizon or exit year');
   if(Math.abs(a.segments.reduce((s,x)=>s+x.share,0)-1)>1e-6)throw Error('Passenger segment shares must sum to 100%');
   if(a.segments.some(s=>s.vatRate<0||s.commission<0||s.commission>1))throw Error('Invalid VAT or commission');
@@ -57,11 +60,19 @@ export function calculate(a:Assumptions){
     const fbOpexLinked=a.fbBenchmark?.opex ? (a.fbBenchmark.opex.adjust??a.fbBenchmark.adjust) : a.fbFollowsPassengers;
     if(fbRevenueLinked)fb=a.fbRevenueYear1*paxIndex*priceIndex;
     const ticketNetPrice=seasonalTicket===null||seasonalTicket===flatWeightedTicket?price:seasonalTicket*ticketPriceGrowthIndex(a,year);
-    const ticketRevenue=passengers*ticketNetPrice,revenue=ticketRevenue+fb+merch;
-    const opex=(a.cableFixedOpex+(a.cableVariableCostPerPassenger||0)*passengers)*costIndex(a,'cable',year)+
-      // When an F&B OPEX growth list is set, it is the only driver of F&B OPEX after Year 1 (user decision).
-      (a.opexGrowth?.fb?.length ? a.fbOpexYear1 : a.fbBenchmark?.opex ? a.fbOpexYear1*(fbOpexLinked?paxIndex:1) : (fbOpexLinked? a.fbOpexYear1*paxIndex:(a.fbRevenueYear1>0? a.fbOpexYear1*fb/a.fbRevenueYear1:0)))*costIndex(a,'fb',year)+
-      merchOpexAt(a,year,merch);
+    const methods=a.volumeMethods,revIndex=escalation(a.ancillaryGrowth,year);
+    const fbBenchmarkRevenueIndex=fbRevenueLinked?paxIndex*priceIndex:revIndex;
+    const actualFb=volumeRevenue(methods?.fb?.revenue,passengers,revIndex,fb,benchmarkAmount(a,'revenue'),fbBenchmarkRevenueIndex);
+    const actualMerch=volumeRevenue(methods?.merch?.revenue,passengers,revIndex,merch,0,1);
+    const otherRevenue=volumeRevenue(methods?.other?.revenue,passengers,revIndex,0,0,1);
+    // Explicit F&B OPEX growth remains the sole driver for existing methods.
+    const legacyFbOpex=(a.opexGrowth?.fb?.length ? a.fbOpexYear1 : a.fbBenchmark?.opex ? a.fbOpexYear1*(fbOpexLinked?paxIndex:1) : (fbOpexLinked? a.fbOpexYear1*paxIndex:(a.fbRevenueYear1>0? a.fbOpexYear1*actualFb/a.fbRevenueYear1:0)))*costIndex(a,'fb',year);
+    const fbOpex=volumeOpex(methods?.fb?.opex,passengers,actualFb,costIndex(a,'fb',year),legacyFbOpex,benchmarkAmount(a,'opex')*(a.opexGrowth?.fb?.length?1:fbOpexLinked?paxIndex:1)*costIndex(a,'fb',year));
+    const merchOpex=volumeOpex(methods?.merch?.opex,passengers,actualMerch,costIndex(a,'merch',year),merchOpexAt(a,year,actualMerch),0);
+    const otherOpex=volumeOpex(methods?.other?.opex,passengers,otherRevenue,Math.pow(1+a.costInflation,year-1),0,0);
+    const ticketRevenue=passengers*ticketNetPrice,revenue=ticketRevenue+actualFb+actualMerch+otherRevenue;
+    // Keep the original addition order for bit-identical legacy results.
+    const opex=(a.cableFixedOpex+(a.cableVariableCostPerPassenger||0)*passengers)*costIndex(a,'cable',year)+fbOpex+merchOpex+otherOpex;
     const ebitda=revenue-opex,depreciation=capex/a.depreciationYears,ebit=ebitda-depreciation;
     const interest=openingDebt*a.interestRate,principal=year<=a.loanYears?Math.min(openingDebt,debt/a.loanYears):0;
     const closingDebt=Math.max(0,openingDebt-principal);
@@ -78,7 +89,7 @@ export function calculate(a:Assumptions){
     const equityInjection=retainedCash<0?-retainedCash:0;
     retainedCash+=equityInjection;
     const debtService=interest+principal;
-    rows.push({year,calendarYear:a.openingYear+year-1,passengers,ticketNetPrice,ticketRevenue,fbRevenue:fb,merchRevenue:merch,revenue,opex,ebitda,depreciation,ebit,openingDebt,interest,principal,closingDebt,tax,maintenanceCapex,equityInjection,cashAfterDebt,distribution,retainedCash,dscr:debtService>0?(ebitda-tax)/debtService:null});
+    rows.push({year,calendarYear:a.openingYear+year-1,passengers,ticketNetPrice,ticketRevenue,fbRevenue:actualFb,merchRevenue:actualMerch,...(methods?{otherRevenue,fbOpex,merchOpex,otherOpex}:{}),revenue,opex,ebitda,depreciation,ebit,openingDebt,interest,principal,closingDebt,tax,maintenanceCapex,equityInjection,cashAfterDebt,distribution,retainedCash,dscr:debtService>0?(ebitda-tax)/debtService:null});
     openingDebt=closingDebt;
   }
   const exit=rows[a.exitYear-1],enterpriseValue=exit.ebitda*a.exitMultiple;

@@ -68,7 +68,7 @@ export function projectMetrics(a: Assumptions, row: YearResult): Metrics {
   const restEbitda = row.fbRevenue - fbOpex;
   const d = (x: number, y: number) => (y ? x / y : null);
   return {
-    cableRevenuePerPax: a.segments.reduce((s, x) => s + x.share * (x.grossPrice / (1 + x.vatRate)) * (1 - x.commission), 0), cableOpexPerPax: d(cableOpex, row.passengers), cableEbitdaPerPax: d(cableEbitda, row.passengers),
+    cableRevenuePerPax: a.seasonalPricing?.enabled ? row.ticketNetPrice : a.segments.reduce((s, x) => s + x.share * (x.grossPrice / (1 + x.vatRate)) * (1 - x.commission), 0), cableOpexPerPax: d(cableOpex, row.passengers), cableEbitdaPerPax: d(cableEbitda, row.passengers),
     cableMargin: d(cableEbitda, cableRevenue), cableOpex,
     restRevenuePerPax: d(row.fbRevenue, row.passengers), restEbitdaPerPax: d(restEbitda, row.passengers), restMargin: d(restEbitda, row.fbRevenue),
   };

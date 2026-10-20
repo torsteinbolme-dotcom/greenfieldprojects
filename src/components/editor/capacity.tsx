@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { int, pct } from "@/lib/format";
 import { allocationValid, capacityInputsValid, capacityOf, capacityTable, EQUAL_ALLOCATION, MONTHS, type Capacity, type SeasonalitySource } from "@/lib/capacity";
 import { capacityWithProfile, useSeasonalityProfiles } from "@/lib/seasonality";
+import { SeasonalPricingSection } from "./seasonal-pricing";
 
 type Props = { a: Assumptions; r: ModelResult | null; ro: boolean; set: (patch: Partial<Assumptions>) => void };
 
@@ -37,7 +38,6 @@ export function CapacitySection({ a, r, ro, set }: Props) {
   return (
     <div className="space-y-4">
       <Card title="Capacity & seasonality">
-        <p className="mb-4 text-xs text-muted-foreground">Validation only — theoretical capacity (hourly capacity × hours × days), not practical capacity. Checks the passenger forecast against cable car capacity. It never changes passengers, revenue, EBITDA, IRR, MOIC or exit values.</p>
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="Hourly cable car capacity (passengers/hour)"><NumField value={saved.hourlyCapacity} disabled={ro} step="1" onChange={(v) => commit({ ...saved, hourlyCapacity: v })} /></Field>
           <Field label="Operating hours per day (average)"><NumField value={saved.hoursPerDay} disabled={ro} onChange={(v) => commit({ ...saved, hoursPerDay: v })} /></Field>
@@ -124,6 +124,7 @@ export function CapacitySection({ a, r, ro, set }: Props) {
           <Button size="sm" variant="outline" disabled={!dirty} onClick={() => { setAlloc([...saved.monthlyAllocation]); setAttribution(saved.seasonalitySource); }}>Cancel Changes</Button>
           <Button size="sm" variant="ghost" onClick={() => { setAlloc([...EQUAL_ALLOCATION]); setAttribution(null); }}>Reset to equal distribution</Button>
         </div>}
+        <SeasonalPricingSection a={a} passengers={row?.passengers ?? a.initialPassengers} year={row?.year ?? 1} ro={ro} set={set} />
       </Card>
     </div>
   );

@@ -1,4 +1,6 @@
 # Tasks
+- [ ] Add opt-in seasonal ticket pricing, monthly transparency and benchmark-distribution integration.
+- [ ] Verify seasonal financial references, scenario persistence/isolation and complete test suite; inspect automatic production build.
 - [x] Removed the "Source workbooks" attachment section from the project page; Project details now spans the full width. Attached files and their storage are untouched in the database.
 - [x] Overview first/default; renaming moved to Overview Project details with autosave; horizontal three-dot photo control opens the file chooser; signed-in rename/reload verified on a temporary copy, then deleted; 8 existing tests pass and build OK.
 - [x] Forgot password: "Forgot password?" link on the sign-in page, emailed reset link, and a /reset-password page that sets the new password; reset send, expired/used-link rejection and page states verified in the preview; the final save was not exercised because the only account is the user's own and its password must not be changed here.

@@ -1,13 +1,18 @@
 import type { Assumptions } from '@/financialEngine';
 import { segmentNetPerGuest } from '@/lib/model';
+import { capacityOf } from './capacity';
 
 export type WaterfallStep = { name: string; from: number; to: number; color: string; value: number };
 
 /** Year-1 passengers and net revenue (ex VAT, after commission) per segment. */
 export function segmentRows(a: Assumptions) {
-  return a.segments.map(s => {
+  return a.segments.map((s, i) => {
     const passengers = s.share * a.initialPassengers;
-    return { name: s.name, passengers, netPerGuest: segmentNetPerGuest(s), netRevenue: passengers * segmentNetPerGuest(s) };
+    const netPerGuest = a.seasonalPricing?.enabled ? capacityOf(a).monthlyAllocation.reduce((sum, share, month) => {
+      const season = a.seasonalPricing?.months[month] ?? 'low';
+      return sum + share * (a.seasonalPricing?.prices[i]?.[season] ?? s.grossPrice) / (1 + s.vatRate) * (1 - s.commission);
+    }, 0) : segmentNetPerGuest(s);
+    return { name: s.name, passengers, netPerGuest, netRevenue: passengers * netPerGuest };
   });
 }
 

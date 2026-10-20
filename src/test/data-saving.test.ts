@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { projectMountain } from "@/exampleProject";
+import { initializeSeasonalPricing } from "@/lib/seasonal-pricing";
 
 const mocks = vi.hoisted(() => ({ read: vi.fn(), insert: vi.fn(), audit: vi.fn() }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {
@@ -18,6 +19,15 @@ beforeEach(() => {
 });
 
 describe("append-only save failure safeguards", () => {
+  it("persists scenario-specific seasonal prices and monthly assignments in new versions", async () => {
+    mocks.read.mockResolvedValue({ data: { version: 2 }, error: null });
+    const pricing = initializeSeasonalPricing(projectMountain); pricing.months[5] = "high";
+    pricing.prices[0] = { segmentName: "Roundtrip adult", low: 699, high: 899 };
+    await saveAssumptionVersion("org", "seasonal-scenario", { ...projectMountain, seasonalPricing: pricing });
+    await saveAssumptionVersion("org", "flat-scenario", projectMountain);
+    expect(mocks.insert.mock.calls[0]?.[0]).toMatchObject({ scenario_id: "seasonal-scenario", version: 3, assumptions: { seasonalPricing: pricing } });
+    expect(mocks.insert.mock.calls[1]?.[0].assumptions.seasonalPricing).toBeUndefined();
+  });
   it("does not insert version 1 when reading history fails", async () => {
     const error = { code: "42501", message: "History unavailable" };
     mocks.read.mockResolvedValue({ data: null, error });

@@ -6,7 +6,7 @@ import { TicketPricingSection } from "@/components/editor/ticket-pricing";
 import { initializeSeasonalPricing } from "@/lib/seasonal-pricing";
 import { calculate, type Assumptions } from "@/financialEngine";
 import { projectMountain } from "@/exampleProject";
-vi.mock("@/components/editor/sections", () => ({ Card: ({ children }: { children: React.ReactNode }) => <section>{children}</section> }));
+vi.mock("@/components/editor/sections", () => ({ Card: ({ children }: { children: React.ReactNode }) => <section>{children}</section>, PassengersPricingSection: () => null }));
 vi.mock("@/lib/seasonality", () => ({ useSeasonalityProfiles: () => ({ data: [] }) }));
 afterEach(cleanup);
 

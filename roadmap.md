@@ -1,4 +1,5 @@
 # Tasks
+- [ ] Show separate Low/High season net ticket-price rows excluding VAT and after commission for the selected operating year.
 - [ ] Tighten the gap between each month and its Low/High season buttons and verify the selected view.
 - [ ] Make Annual pass adult, Cruise, Tour operators and MICE seasonal low/high fares read-only, preserving their saved values.
 - [ ] Add opt-in independent volume-based revenue/OPEX methods with unchanged legacy results and preserved inactive values.

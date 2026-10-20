@@ -2,7 +2,7 @@ import type { Assumptions } from "@/financialEngine";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { NumField } from "./inputs";
-import { initializeSeasonalPricing, seasonalFareReadOnly, seasonalGrossPrice, withLinkedSeasonalPrices, seasonalRevenueTable, type SeasonalPricing } from "@/lib/seasonal-pricing";
+import { initializeSeasonalPricing, seasonalFareReadOnly, seasonalGrossPrice, seasonalNetPriceRows, withLinkedSeasonalPrices, seasonalRevenueTable, type SeasonalPricing } from "@/lib/seasonal-pricing";
 import { MONTHS } from "@/lib/capacity";
 import { deltaClass, int, nok, pct, signedNum } from "@/lib/format";
 
@@ -26,6 +26,11 @@ export function SeasonalPricingSection({ a, passengers, year, ro, set }: {
             if (value < 0) return;
             update({ ...pricing, prices: a.segments.map((segment, j) => ({ ...(pricing.prices[j] ?? { segmentName: segment.name, low: segment.grossPrice, high: segment.grossPrice }), ...(j === i ? { [season]: value } : {}) })) });
           }} />}</td>)}</tr>)}</tbody>
+        </table>
+      </div>
+      <div className="overflow-x-auto" aria-label="Seasonal net ticket prices">
+        <table className="fin-table"><thead><tr><th>Season · Year {year}</th><th className="text-right">Net ticket price · NOK ex VAT, after commission</th></tr></thead>
+          <tbody>{seasonalNetPriceRows(a, year).map(row => <tr key={row.season}><td>{row.season === "low" ? "Low season" : "High season"}</td><td className="num text-right font-semibold">{nok(row.netPrice, 2)}</td></tr>)}</tbody>
         </table>
       </div>
       <div className="grid grid-cols-1 gap-x-5 gap-y-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

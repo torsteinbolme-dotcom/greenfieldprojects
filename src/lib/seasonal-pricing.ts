@@ -60,6 +60,11 @@ export function seasonalNetPrice(a: Assumptions, season: TicketSeason): number {
   return a.segments.reduce((sum, s, i) => sum + s.share * (seasonalGrossPrice(a, i, season) / (1 + s.vatRate)) * (1 - s.commission), 0);
 }
 
+export function seasonalNetPriceRows(a: Assumptions, year: number) {
+  const index = ticketPriceGrowthIndex(a, year);
+  return (["low", "high"] as const).map(season => ({ season, netPrice: seasonalNetPrice(a, season) * index }));
+}
+
 export function seasonalWeightedTicket(a: Assumptions): number | null {
   if (!a.seasonalPricing?.enabled) return null;
   if (!seasonalPricingValid(a)) throw new Error("Seasonal prices must be nonnegative, match ticket categories, and have 12 valid months totalling 100%.");

@@ -50,3 +50,33 @@ export function validateVolumeMethods(methods: VolumeMethods | undefined) {
     }
   }
 }
+
+/** Converts a current Year 1 engine amount into the equivalent input for a method. Returns null when undefined (zero denominator or missing split). */
+export function initializeFromYear1(method: OpexMethod, x: { amount: number; revenue: number; passengers: number; fixedShare?: number | null }): Partial<VolumeLine> | null {
+  switch (method) {
+    case 'annual': return { annualAmount: x.amount };
+    case 'perPassenger': return x.passengers > 0 ? { perPassenger: x.amount / x.passengers } : null;
+    case 'revenuePercent': return x.revenue > 0 ? { revenuePercent: x.amount / x.revenue } : null;
+    case 'fixedVariable': {
+      if (x.fixedShare == null || x.fixedShare < 0 || x.fixedShare > 1) return null;
+      const variable = x.amount * (1 - x.fixedShare);
+      if (variable > 0 && !(x.passengers > 0)) return null;
+      return { fixedAmount: x.amount * x.fixedShare, variablePerPassenger: x.passengers > 0 ? variable / x.passengers : 0 };
+    }
+    default: return null;
+  }
+}
+/** Which existing assumption escalates each method (applied exactly once). */
+export function growthDriver(kind: VolumeKind, side: 'revenue' | 'opex', method: OpexMethod): string {
+  if (side === 'revenue') {
+    if (method === 'perPassenger') return 'Passenger growth × Ancillary revenue growth';
+    if (method === 'benchmark') return 'Benchmark adjustment (passengers × ticket price growth) or Ancillary revenue growth';
+    return 'Ancillary revenue growth';
+  }
+  const cost = kind === 'fb' ? 'F&B OPEX growth' : kind === 'merch' ? 'Merchandise OPEX growth' : 'Cost inflation';
+  if (method === 'revenuePercent') return 'Follows corresponding revenue (no extra inflation)';
+  if (method === 'perPassenger') return `Passenger growth × ${cost}`;
+  if (method === 'fixedVariable') return `Fixed: ${cost}; variable: Passenger growth × ${cost}`;
+  if (method === 'benchmark') return `${cost}`;
+  return kind === 'merch' ? 'Merchandise OPEX % of revenue / legacy cost growth' : cost;
+}

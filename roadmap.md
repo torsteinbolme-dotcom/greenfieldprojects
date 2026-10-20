@@ -5,7 +5,7 @@
 - [x] Make Annual pass adult, Cruise, Tour operators and MICE seasonal low/high fares read-only; saved values unchanged and adult fare still editable.
 - [x] Add opt-in independent volume-based revenue/OPEX methods with unchanged legacy results and retained inactive inputs; disposable save/reload, method switches and copied-scenario isolation verified.
 - [x] Add engine-backed unit economics to Investment Summary, project comparison and presentation exports; signed-in year change, comparison and PPTX download verified.
-- [ ] Run independent reference tests, complete suite and signed-in disposable-project checks; verify automatic production build.
+- [x] Independent reference tests and complete suite: 282 pass, two pre-existing expected financial failures; final focused 30 pass and automatic production build OK. Signed-in disposable saves, reloads, scenario isolation, comparison and exports verified; PPTX performance table renders without overlap. Native PowerPoint/Keynote and pre-existing release blockers below remain unverified.
 - [x] Move seasonal pricing and monthly ticket revenue into Ticket pricing & revenue; signed-in tab navigation, year selection, reload and separate Capacity verified; 24 seasonal tests pass and automatic build OK. Saved settings and calculations unchanged.
 - [x] Add average MOIC Y8 and average IRR Y8 to Portfolio overview; signed-in values reconcile with the three project rows (3,55x and 16,9%).
 - [x] Add opt-in seasonal ticket pricing, monthly transparency and saved benchmark-distribution integration; disabled results unchanged.

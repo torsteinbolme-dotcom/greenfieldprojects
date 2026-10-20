@@ -1,4 +1,5 @@
 # Tasks
+- [ ] Move annual inputs/revenue growth and restaurant benchmarks above calculation methods in Revenue & OPEX.
 - [ ] Show separate Low/High season net ticket-price rows excluding VAT and after commission for the selected operating year.
 - [ ] Tighten the gap between each month and its Low/High season buttons and verify the selected view.
 - [ ] Make Annual pass adult, Cruise, Tour operators and MICE seasonal low/high fares read-only, preserving their saved values.

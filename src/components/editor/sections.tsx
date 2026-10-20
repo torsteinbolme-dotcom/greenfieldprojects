@@ -218,7 +218,6 @@ export function RevenueOpexSection({ a, set, ro }: P) {
   const fbSel = (a as AssumptionsWithFb).fbBenchmark;
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <Card title="Calculation methods" className="lg:col-span-2"><VolumeMethodsEditor a={a} set={set} ro={ro} /></Card>
       <Card title="Existing annual inputs & revenue growth" className="lg:col-span-2">
         <div className="grid grid-cols-2 gap-4">
           {(!a.volumeMethods?.fb?.revenue?.method || a.volumeMethods.fb.revenue.method === "legacy") && <Field label="F&B revenue year 1 (NOK, ex VAT)"><NumField value={a.fbRevenueYear1} disabled={ro || !!fbSel?.revenue} onChange={(v) => set({ fbRevenueYear1: v })} /></Field>}
@@ -227,6 +226,7 @@ export function RevenueOpexSection({ a, set, ro }: P) {
         <div className="mt-4"><Field label="Ancillary revenue growth"><GrowthList values={a.ancillaryGrowth} disabled={ro} onChange={(v) => set({ ancillaryGrowth: v })} /></Field></div>
       </Card>
       <Card title="F&B from restaurant benchmarks" className="lg:col-span-2"><FbBenchmarkPanel a={a} set={set} ro={ro} /></Card>
+      <Card title="Calculation methods" className="lg:col-span-2"><VolumeMethodsEditor a={a} set={set} ro={ro} /></Card>
       <Card title="Operating costs" className="lg:col-span-2">
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
           <Field label="Cable car fixed OPEX year 1 (NOK)"><NumField value={a.cableFixedOpex} disabled={ro} onChange={(v) => set({ cableFixedOpex: v })} /></Field>

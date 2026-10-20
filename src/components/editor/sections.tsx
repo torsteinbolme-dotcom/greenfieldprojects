@@ -197,22 +197,27 @@ function CapexBridge({ a }: { a: Assumptions }) {
   );
 }
 
+export function PassengersPricingSection({ a, set, ro }: P) {
+  return (
+    <Card title="Passengers & pricing">
+      <div className="grid grid-cols-2 gap-4">
+        <Field label="Opening year"><NumField plain value={a.openingYear} disabled={ro} step="1" onChange={(v) => set({ openingYear: Math.round(v) })} /></Field>
+        <Field label="Model years"><NumField value={a.years} disabled={ro} step="1" onChange={(v) => set({ years: Math.round(v) })} /></Field>
+        <Field label="Year-1 passengers (guests)"><NumField value={a.initialPassengers} disabled={ro} onChange={(v) => set({ initialPassengers: v })} /></Field>
+      </div>
+      <div className="mt-4 space-y-4">
+        <Field label="Passenger growth"><GrowthList values={a.passengerGrowth} disabled={ro} onChange={(v) => set({ passengerGrowth: v })} /></Field>
+        <Field label="Ticket price growth"><GrowthList values={a.priceGrowth} disabled={ro} onChange={(v) => set({ priceGrowth: v })} /></Field>
+      </div>
+    </Card>
+  );
+}
+
 export function RevenueOpexSection({ a, set, ro }: P) {
   const fbSel = (a as AssumptionsWithFb).fbBenchmark;
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <Card title="Passengers & pricing">
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Opening year"><NumField plain value={a.openingYear} disabled={ro} step="1" onChange={(v) => set({ openingYear: Math.round(v) })} /></Field>
-          <Field label="Model years"><NumField value={a.years} disabled={ro} step="1" onChange={(v) => set({ years: Math.round(v) })} /></Field>
-          <Field label="Year-1 passengers (guests)"><NumField value={a.initialPassengers} disabled={ro} onChange={(v) => set({ initialPassengers: v })} /></Field>
-        </div>
-        <div className="mt-4 space-y-4">
-          <Field label="Passenger growth"><GrowthList values={a.passengerGrowth} disabled={ro} onChange={(v) => set({ passengerGrowth: v })} /></Field>
-          <Field label="Ticket price growth"><GrowthList values={a.priceGrowth} disabled={ro} onChange={(v) => set({ priceGrowth: v })} /></Field>
-        </div>
-      </Card>
-      <Card title="Ancillary revenue">
+      <Card title="Ancillary revenue" className="lg:col-span-2">
         <div className="grid grid-cols-2 gap-4">
           <Field label="F&B revenue year 1 (NOK, ex VAT)"><NumField value={a.fbRevenueYear1} disabled={ro || !!fbSel?.revenue} onChange={(v) => set({ fbRevenueYear1: v })} /></Field>
           <Field label="Merchandise revenue year 1 (NOK, ex VAT)"><NumField value={a.merchRevenueYear1} disabled={ro} onChange={(v) => set({ merchRevenueYear1: v })} /></Field>

@@ -8,6 +8,7 @@ import { int, mult, nok, nokM, pct } from '@/lib/format';
 import { Kpi } from './sections';
 import { EbitdaBridge } from './ebitda-bridge';
 import { BreakEvenPanel } from './break-even';
+import { UnitEconomics } from './unit-economics';
 
 function DevelopmentChart({ title, data, lines, passengers = false, bar = false }: { title: string; data: { year: number; [key: string]: number }[]; lines: string[]; passengers?: boolean; bar?: boolean }) {
   // Recharts does not process axis children wrapped in a JSX fragment — pass them as an array.
@@ -31,6 +32,7 @@ export function InvestmentSummary({ a, r, name, location, onPerformanceYear, onE
     <section className="space-y-3"><div className="flex flex-wrap items-center gap-3"><h3 className="text-lg font-semibold">Investment returns · exit Year {a.exitYear} ({exit?.calendarYear})</h3>{exitSelect}</div><div className="grid grid-cols-2 gap-3 lg:grid-cols-3"><Kpi label="Equity IRR" value={pct(r.equityIrr)} /><Kpi label="Equity MOIC" value={mult(r.equityMultiple)} /><Kpi label="Exit EBITDA" value={nokM(exit?.ebitda)} sub={`NOK m · multiple ${mult(a.exitMultiple)}`} /><Kpi label="Exit enterprise value" value={nokM(r.enterpriseValue)} sub="NOK m" /><Kpi label="Net debt at exit" value={nokM(exit ? exit.closingDebt - exit.retainedCash : null)} sub="NOK m · debt less retained cash" /><Kpi label="Exit equity value" value={nokM(r.exitEquityValue)} sub="NOK m after transaction costs" /><Kpi label="Maintenance CAPEX" value={nokM(r.rows.slice(0, a.exitYear).reduce((s, x) => s + x.maintenanceCapex, 0))} sub={`NOK m · total to exit Year ${a.exitYear}`} /></div>
       {r.additionalEquity > 0 && <p className="border-l-2 border-warning-foreground pl-3 text-sm text-warning-foreground">Cash shortfalls are funded by {nokM(r.additionalEquity)} NOK m of additional equity before exit. IRR and MOIC include these contributions.</p>}
     </section>
+    <UnitEconomics a={a} r={r} />
     <BreakEvenPanel a={a} />
     <div className="grid gap-6 lg:grid-cols-2"><DevelopmentChart title="Revenue and EBITDA development" data={development} lines={['Revenue', 'EBITDA']} /><DevelopmentChart title="Annual passengers" data={development} lines={['Passengers']} passengers /></div>
     <EbitdaBridge a={a} r={r} />

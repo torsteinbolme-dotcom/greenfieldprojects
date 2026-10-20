@@ -15,6 +15,7 @@ import { WaterfallChart } from "./waterfall";
 import { FbBenchmarkPanel } from "./fb-benchmark";
 import type { AssumptionsWithFb } from "@/lib/fb-benchmark";
 import { useState } from "react";
+import { VolumeMethodsEditor } from "./volume-methods";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
 type P = { a: Assumptions; set: (patch: Partial<Assumptions>) => void; ro: boolean };
@@ -217,10 +218,11 @@ export function RevenueOpexSection({ a, set, ro }: P) {
   const fbSel = (a as AssumptionsWithFb).fbBenchmark;
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <Card title="Ancillary revenue" className="lg:col-span-2">
+      <Card title="Calculation methods" className="lg:col-span-2"><VolumeMethodsEditor a={a} set={set} ro={ro} /></Card>
+      <Card title="Existing annual inputs & revenue growth" className="lg:col-span-2">
         <div className="grid grid-cols-2 gap-4">
-          <Field label="F&B revenue year 1 (NOK, ex VAT)"><NumField value={a.fbRevenueYear1} disabled={ro || !!fbSel?.revenue} onChange={(v) => set({ fbRevenueYear1: v })} /></Field>
-          <Field label="Merchandise revenue year 1 (NOK, ex VAT)"><NumField value={a.merchRevenueYear1} disabled={ro} onChange={(v) => set({ merchRevenueYear1: v })} /></Field>
+          {(!a.volumeMethods?.fb?.revenue?.method || a.volumeMethods.fb.revenue.method === "legacy") && <Field label="F&B revenue year 1 (NOK, ex VAT)"><NumField value={a.fbRevenueYear1} disabled={ro || !!fbSel?.revenue} onChange={(v) => set({ fbRevenueYear1: v })} /></Field>}
+          {(!a.volumeMethods?.merch?.revenue?.method || a.volumeMethods.merch.revenue.method === "legacy") && <Field label="Merchandise revenue year 1 (NOK, ex VAT)"><NumField value={a.merchRevenueYear1} disabled={ro} onChange={(v) => set({ merchRevenueYear1: v })} /></Field>}
         </div>
         <div className="mt-4"><Field label="Ancillary revenue growth"><GrowthList values={a.ancillaryGrowth} disabled={ro} onChange={(v) => set({ ancillaryGrowth: v })} /></Field></div>
       </Card>
@@ -230,11 +232,13 @@ export function RevenueOpexSection({ a, set, ro }: P) {
           <Field label="Cable car fixed OPEX year 1 (NOK)"><NumField value={a.cableFixedOpex} disabled={ro} onChange={(v) => set({ cableFixedOpex: v })} /></Field>
           <Field label="Cable car variable OPEX per passenger (NOK)" hint="Year-1 price level; grows with cable car OPEX"><NumField value={a.cableVariableCostPerPassenger ?? 0} disabled={ro} onChange={(v) => set({ cableVariableCostPerPassenger: v })} /></Field>
           <Field label="Annual maintenance CAPEX (% of initial CAPEX)" hint="Investing cash outflow, not OPEX; grows with cable car OPEX"><NumField percent value={a.maintenanceCapexPct ?? 0} disabled={ro} onChange={(v) => set({ maintenanceCapexPct: v })} /></Field>
-          <Field label="F&B OPEX year 1 (NOK)"><NumField value={a.fbOpexYear1} disabled={ro || !!fbSel?.opex} onChange={(v) => set({ fbOpexYear1: v, opexGrowth: { ...a.opexGrowth, fb: a.opexGrowth?.fb?.length ? a.opexGrowth.fb : [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation] } })} /></Field>
-          <Field label="Merchandise OPEX (% of merchandise revenue)" hint="Always this share of merchandise revenue, every year"><NumField percent value={a.merchOpexRate ?? (a.merchRevenueYear1 > 0 ? a.merchOpexYear1 / a.merchRevenueYear1 : 0)} disabled={ro} onChange={(v) => set({ merchOpexRate: v, merchOpexYear1: v * a.merchRevenueYear1 })} /><span className="block text-xs text-muted-foreground">= {nok((a.merchOpexRate ?? (a.merchRevenueYear1 > 0 ? a.merchOpexYear1 / a.merchRevenueYear1 : 0)) * a.merchRevenueYear1)} NOK in year 1</span></Field>
+          {(!a.volumeMethods?.fb?.opex?.method || a.volumeMethods.fb.opex.method === "legacy") && <Field label="F&B OPEX year 1 (NOK)"><NumField value={a.fbOpexYear1} disabled={ro || !!fbSel?.opex} onChange={(v) => set({ fbOpexYear1: v, opexGrowth: { ...a.opexGrowth, fb: a.opexGrowth?.fb?.length ? a.opexGrowth.fb : [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation] } })} /></Field>}
+          {(!a.volumeMethods?.merch?.opex?.method || a.volumeMethods.merch.opex.method === "legacy") && <Field label="Merchandise OPEX (% of merchandise revenue)" hint="Always this share of merchandise revenue, every year"><NumField percent value={a.merchOpexRate ?? (a.merchRevenueYear1 > 0 ? a.merchOpexYear1 / a.merchRevenueYear1 : 0)} disabled={ro} onChange={(v) => set({ merchOpexRate: v, merchOpexYear1: v * a.merchRevenueYear1 })} /><span className="block text-xs text-muted-foreground">= {nok((a.merchOpexRate ?? (a.merchRevenueYear1 > 0 ? a.merchOpexYear1 / a.merchRevenueYear1 : 0)) * a.merchRevenueYear1)} NOK in year 1</span></Field>}
         </div>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <Field label="Cable car OPEX growth"><GrowthList values={a.opexGrowth?.cable ?? [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, cable: v } })} /></Field>
+          {a.volumeMethods?.merch?.opex?.method && !["legacy", "revenuePercent"].includes(a.volumeMethods.merch.opex.method) && <Field label="Merchandise OPEX growth"><GrowthList values={a.opexGrowth?.merch ?? [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={v => set({ opexGrowth: { ...a.opexGrowth, merch: v } })} /></Field>}
+          <Field label="Cost inflation (Other OPEX)"><NumField percent value={a.costInflation} disabled={ro} onChange={v => set({ costInflation: v })} /></Field>
           <Field label="F&B OPEX growth"><GrowthList values={a.opexGrowth?.fb ?? [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, fb: v } })} /></Field>
         </div>
       </Card>
@@ -279,11 +283,13 @@ const forecastRows: [string, (r: ModelResult["rows"][number], a: Assumptions) =>
   ["Cable car revenue", (y) => nokM(y.ticketRevenue), "revenue"],
   ["F&B revenue", (y) => nokM(y.fbRevenue), "revenue"],
   ["Merchandise revenue", (y) => nokM(y.merchRevenue), "revenue"],
+  ["Other revenue", (y) => nokM(y.otherRevenue ?? 0), "revenue"],
   ["Total OPEX", (y) => nokM(-y.opex)],
   ["Cable car fixed OPEX", (y, a) => nokM(-forecastOpex(a, y).cableFixed), "opex"],
   ["Cable car variable OPEX", (y, a) => nokM(-forecastOpex(a, y).cableVariable), "opex"],
   ["F&B OPEX", (y, a) => nokM(-forecastOpex(a, y).fb), "opex"],
   ["Merchandise OPEX", (y, a) => nokM(-forecastOpex(a, y).merchandise), "opex"],
+  ["Other OPEX", (y, a) => nokM(-forecastOpex(a, y).other), "opex"],
   ["EBITDA", (y) => nokM(y.ebitda)],
   ["EBITDA margin", (y) => pct(y.revenue ? y.ebitda / y.revenue : null)],
   ["Below EBITDA", () => ""],
@@ -319,7 +325,7 @@ export function ForecastSection({ r, a }: { r: ModelResult; a: Assumptions | und
             <tr><th className="sticky left-0 z-10 bg-secondary">Year</th>{r.rows.map((y) => <th key={y.year} className="text-right">{y.calendarYear}<br /><span className="font-normal normal-case">Y{y.year}</span></th>)}</tr>
           </thead>
           <tbody>
-            {forecastRows.filter(([, , group]) => !group || expanded[group]).map(([label, f, group]) => {
+            {forecastRows.filter(([label, , group]) => ((!label.startsWith("Other ") || !!a.volumeMethods?.other) && (!group || expanded[group]))).map(([label, f, group]) => {
               const toggleGroup = label === "Total revenue" ? "revenue" : label === "Total OPEX" ? "opex" : label === "Below EBITDA" ? "financing" : label === "Equity, cash & debt" ? "capital" : null;
               return (
               <tr key={label} className={`${bold.has(label) ? "font-semibold" : ""} ${key.has(label) ? "fin-key" : ""}`}>

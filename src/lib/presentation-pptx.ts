@@ -76,7 +76,8 @@ export function buildPresentation(d: PresentationData, options: PresentationOpti
   function performance() {
     const s = slide('Year 3 performance', 'Year 3 is engine row index 2: the third operating year, excluding construction.');
     if (!y3) { text(s, 'Year 3 is outside the forecast horizon.'); return; }
-    table(s, [['Calendar year', String(y3.calendarYear)], ['Passengers', int(y3.passengers)], ['Revenue / OPEX', `${money(y3.revenue)} / ${money(y3.opex)}`], ['EBITDA / margin', `${money(y3.ebitda)} / ${pct(y3.revenue ? y3.ebitda / y3.revenue : null)}`], ['Revenue / passenger', per(y3.revenue, y3.passengers)], ['EBITDA / passenger', per(y3.ebitda, y3.passengers)], ['Average net ticket', `${nok(y3.ticketNetPrice)} NOK`]], ['Metric', 'Third operating year']);
+    if (d.unitEconomics) table(s, d.unitEconomics.items.map(item => [item.label, item.perPassenger === null ? 'N/A' : nok(item.perPassenger, 2), nok(item.annual, 2)]), ['Unit economics · ex VAT', 'NOK / passenger', 'Annual total · NOK'], 1.7);
+    s.addText(`${int(y3.passengers)} cable car passengers · ${y3.calendarYear} · EBITDA margin ${pct(y3.revenue ? y3.ebitda / y3.revenue : null)}`, { x: .6, y: 6.65, w: 12.1, h: .25, fontSize: 12, color: C.ink, margin: 0 });
   }
   function benchmarks() {
     const s = slide(`Benchmarks · ${d.benchmarkYear}`, 'Only project-selected comparables and NOK records are used. Historical unnormalised figures; scope and year differences require judgement.');

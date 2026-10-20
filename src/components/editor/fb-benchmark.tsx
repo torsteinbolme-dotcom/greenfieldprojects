@@ -8,10 +8,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useBenchmarks } from '@/lib/benchmarks';
 import { fbLine, latestYear, sourceAdjust, snapshotSource, withFbBenchmark, type AssumptionsWithFb, type FbBenchmark, type FbSource } from '@/lib/fb-benchmark';
+import { safeCalculate } from '@/lib/model';
+import { forecastOpex } from '@/lib/forecast-opex';
 import { formatNumber, nok, pct } from '@/lib/format';
 export function FbBenchmarkPanel({ a, set, ro }: { a: Assumptions; set: (p: Partial<Assumptions>) => void; ro: boolean }) {
   const { data, refetch } = useBenchmarks();
   const [refresh, setRefresh] = useState<{ kind: 'revenue' | 'opex'; source: FbSource } | null>(null);
+  const row = safeCalculate(a).result?.rows[0];
+  const fbRevenue = row?.fbRevenue ?? a.fbRevenueYear1;
+  const fbOpex = row ? forecastOpex(a, row).fb : a.fbOpexYear1;
   const aw = a as AssumptionsWithFb;
   const sel: FbBenchmark = aw.fbBenchmark ?? { adjust: true };
   if (!data) return <p className="text-sm text-muted-foreground">Loading benchmarks…</p>;
@@ -40,6 +45,7 @@ export function FbBenchmarkPanel({ a, set, ro }: { a: Assumptions; set: (p: Part
           <dt className="text-muted-foreground">Financial year</dt><dd className="text-right">{source?.year}</dd>
           <dt className="text-muted-foreground">Historical amount</dt><dd className="num text-right">{line.original == null ? 'N/A' : `${nok(line.original)} NOK`}</dd>
           <dt className="text-muted-foreground">Cable car passengers</dt><dd className="num text-right">{line.benchPassengers == null ? 'N/A' : formatNumber(line.benchPassengers, 0, 0)}</dd>
+          <dt className="text-muted-foreground">Benchmark NOK / cable car passenger</dt><dd className="num text-right">{line.original !== null && line.benchPassengers && line.benchPassengers > 0 ? nok(line.original / line.benchPassengers, 2) : "N/A"}</dd>
           <dt className="text-muted-foreground">Year 1 amount</dt><dd className="num text-right">{line.adjusted == null ? '—' : `${nok(line.adjusted)} NOK`}</dd>
           {(line.warning || !source?.snapshot) && <dd className="col-span-2 flex gap-1 text-destructive"><AlertTriangle className="h-4 w-4 shrink-0" />{line.warning ?? 'Snapshot unavailable. The last applied amount is retained.'}</dd>}
         </dl>}
@@ -51,8 +57,8 @@ export function FbBenchmarkPanel({ a, set, ro }: { a: Assumptions; set: (p: Part
       </div>;
     })}</div>
     <p className="text-xs text-muted-foreground">Project passengers year 1: {formatNumber(a.initialPassengers, 0, 0)}</p>
-    <div className="grid grid-cols-3 gap-3 border-t pt-3 text-sm">{[['F&B revenue year 1', a.fbRevenueYear1], ['F&B OPEX year 1', a.fbOpexYear1], ['F&B EBITDA year 1', a.fbRevenueYear1 - a.fbOpexYear1]].map(([label, amount]) => <div key={label}><p className="text-xs text-muted-foreground">{label}</p><p className="num font-medium">{nok(Number(amount))}</p></div>)}</div>
-    <p className="text-xs text-muted-foreground">EBITDA margin: {pct(a.fbRevenueYear1 ? (a.fbRevenueYear1 - a.fbOpexYear1) / a.fbRevenueYear1 : null)}</p>
+    <div className="grid grid-cols-3 gap-3 border-t pt-3 text-sm">{[['F&B revenue year 1', fbRevenue], ['F&B OPEX year 1', fbOpex], ['F&B EBITDA year 1', fbRevenue - fbOpex]].map(([label, amount]) => <div key={label}><p className="text-xs text-muted-foreground">{label}</p><p className="num font-medium">{nok(Number(amount))}</p></div>)}</div>
+    <p className="text-xs text-muted-foreground">EBITDA margin: {pct(fbRevenue ? (fbRevenue - fbOpex) / fbRevenue : null)}</p>
     <Dialog open={!!refresh} onOpenChange={open => { if (!open) setRefresh(null); }}><DialogContent><DialogHeader><DialogTitle>Refresh Benchmark — preview</DialogTitle></DialogHeader>
       {refresh && (() => {
         const old = sel[refresh.kind];

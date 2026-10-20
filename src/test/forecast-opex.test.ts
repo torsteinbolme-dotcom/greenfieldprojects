@@ -14,7 +14,7 @@ describe("forecast operating expenses", () => {
     const first = result.rows[0];
     const second = result.rows[1];
     if (!first || !second) throw new Error("Missing forecast years");
-    expect(forecastOpex(a, first)).toEqual({ cableFixed: 100000, cableVariable: 0, fb: 30000, merchandise: 10000 });
+    expect(forecastOpex(a, first)).toEqual({ cableFixed: 100000, cableVariable: 0, fb: 30000, merchandise: 10000, other: 0 });
     const costs = forecastOpex(a, second);
     expect(costs.cableFixed).toBeCloseTo(105000, 6);
     expect(costs.fb).toBeCloseTo(37800, 6);

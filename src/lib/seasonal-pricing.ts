@@ -9,6 +9,12 @@ export type SeasonalPricing = {
   prices: { segmentName: string; low: number; high: number }[];
 };
 
+/** UI-only lock: keep saved seasonal values and all financial logic unchanged. */
+export function seasonalFareReadOnly(a: Assumptions, index: number): boolean {
+  const key = a.segments[index]?.name.toLowerCase().replace(/[^a-z]/g, "") ?? "";
+  return seasonalFareLinked(a, index) || ["annualpassadult", "adultannualpass", "cruise", "touroperators", "touroperator", "mice"].includes(key);
+}
+
 /** Only child and one-way fares follow the seasonal adult round-trip base. */
 export function seasonalFareLinked(a: Assumptions, index: number): boolean {
   const key = a.segments[index]?.name.toLowerCase().replace(/[^a-z]/g, "");

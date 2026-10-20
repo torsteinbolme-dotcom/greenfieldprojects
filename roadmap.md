@@ -1,4 +1,9 @@
 # Tasks
+- [ ] Tighten the gap between each month and its Low/High season buttons and verify the selected view.
+- [ ] Make Annual pass adult, Cruise, Tour operators and MICE seasonal low/high fares read-only, preserving their saved values.
+- [ ] Add opt-in independent volume-based revenue/OPEX methods with unchanged legacy results and preserved inactive values.
+- [ ] Add engine-backed unit economics to Investment Summary, project comparison and presentation exports.
+- [ ] Run independent reference tests, complete suite and signed-in disposable-project checks; verify automatic production build.
 - [x] Move seasonal pricing and monthly ticket revenue into Ticket pricing & revenue; signed-in tab navigation, year selection, reload and separate Capacity verified; 24 seasonal tests pass and automatic build OK. Saved settings and calculations unchanged.
 - [x] Add average MOIC Y8 and average IRR Y8 to Portfolio overview; signed-in values reconcile with the three project rows (3,55x and 16,9%).
 - [x] Add opt-in seasonal ticket pricing, monthly transparency and saved benchmark-distribution integration; disabled results unchanged.

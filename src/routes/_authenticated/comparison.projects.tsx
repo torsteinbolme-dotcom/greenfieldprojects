@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { COLORS, encodeSc, ProjectPicker, useSelection, type Entry } from "@/components/comparison/selection";
 import { devValue, sortByMetric } from "@/lib/portfolio";
 import { formatNumber, mult, nok, nokM, pct } from "@/lib/format";
+import { economicsAtYear } from "@/lib/unit-economics";
 import { projectReturns, splitYear, year3Row } from "@/lib/year3";
 
 export const Route = createFileRoute("/_authenticated/comparison/projects")({
@@ -60,6 +61,7 @@ const METRICS: Metric[] = [
   { key: "ebitda", label: "EBITDA (NOK m)", group: "operations", fmt: "nokM", get: (r) => r.y3?.totalEbitda ?? null },
   { key: "margin", label: "EBITDA margin", group: "operations", fmt: "pct", get: (r) => r.y3?.margin ?? null },
   { key: "revPax", label: "Revenue / passenger (NOK)", group: "operations", fmt: "nok", get: (r) => r.y3?.revenuePerPax ?? null },
+  { key: "opexPax", label: "OPEX / passenger (NOK)", group: "operations", fmt: "nok", get: (r) => economicsAtYear(r.a, r.result.rows, 3)?.opexPerPassenger ?? null },
   { key: "ebitdaPax", label: "EBITDA / passenger (NOK)", group: "operations", fmt: "nok", get: (r) => r.y3?.ebitdaPerPax ?? null },
   { key: "payback", label: "Payback period", group: "returns", fmt: "years", get: (r) => r.ret.payback },
   { key: "exitYear", label: "Exit year", group: "returns", fmt: "year", get: (r) => r.a.exitYear },
@@ -162,6 +164,8 @@ function ProjectVsProject() {
           </div>
           <p className="mt-3 text-xs text-muted-foreground">Year 3 = third full operating year after opening. Payback uses unlevered free cash flow (EBITDA minus tax on operating profit, losses carried forward) against total CAPEX and ignores the exit value.</p>
         </Card>
+
+        <section className="space-y-3" aria-label="Year 3 unit economics comparison"><h2 className="text-lg font-semibold">Unit Economics · Year 3</h2><div className="overflow-x-auto"><table className="fin-table"><thead><tr><th>Project / scenario</th><th className="text-right">Revenue / passenger</th><th className="text-right">OPEX / passenger</th><th className="text-right">EBITDA / passenger</th></tr></thead><tbody>{sorted.map(r => { const e = economicsAtYear(r.a, r.result.rows, 3); return <tr key={r.scenario.id}><td>{label(r)}</td><td className="num text-right">{fmt("nok", e?.revenuePerPassenger ?? null)}</td><td className="num text-right text-destructive">{fmt("nok", e?.opexPerPassenger === null || e?.opexPerPassenger === undefined ? null : -e.opexPerPassenger)}</td><td className="num text-right font-semibold">{fmt("nok", e?.ebitdaPerPassenger ?? null)}</td></tr>; })}</tbody></table></div><p className="text-xs text-muted-foreground">NOK per cable car passenger · excluding VAT · costs shown negative</p></section>
 
         <div className="grid gap-4 md:grid-cols-2">
           {CHARTS.map((k) => { const m = METRICS.find((x) => x.key === k)!; return (

@@ -11,12 +11,12 @@
 
 ## Architecture rules
 - Preserve `src/financialEngine.ts` and `src/exampleProject.ts` except explicitly requested formula changes. Why: calculations are signed off.
-- Outputs are computed client-side from stored inputs (`scenario_assumptions` JSONB, append-only versions); never store hand-edited outputs. Why: deterministic, auditable results.
+- Compute outputs client-side from append-only scenario JSON; never store edited outputs. Why: auditable results.
 - Every table has `organization_id`; RLS uses `is_org_member` / `can_edit_org` / `is_org_admin` (security definer). Why: organizations must never see each other's data.
 - Scenario saves insert new versions; Base is never overwritten by other scenarios. Why: isolation and version history.
 - Scenario version reads must fail explicitly and unique-version collisions retry within a bounded limit; organization relationships and Base identity are guarded in the database. Why: concurrent saves and raw requests must not corrupt history or tenant relationships.
 - Audit investment fixtures use independent literal financial references and explicit expected-failure tests for unresolved signed-off formula defects; the disposable browser security regression must never target existing records. Why: passing test execution must not conceal unresolved economics or endanger user data.
-- New signups get their own organization plus a seeded Project Mountain (`handle_new_user` trigger). Why: every account starts with a working example.
+- Signups get their own organization and seeded Mountain via `handle_new_user`. Why: working examples.
 - Ticket ratios live in scenario JSON; use `src/lib/ticket-pricing.ts` for edits/calculations/saves; `withDefaultProjectSegments` only for new templates. Why: preserve saved fares, history and the authoritative example.
 - Use scoped serial autosave for assumptions and project details, including name (metadata only); undo saves a snapshot, never deletes history. Why: edits survive requests and stay isolated.
 - Comparison display years derive through `comparisonYears` in `src/lib/portfolio.ts`, independent of full forecast lengths. Why: shortening comparison graphs must not change authoritative calculations.
@@ -28,9 +28,11 @@
 - F&B selections and frozen per-line snapshots live in scenario assumptions; replace snapshots only via confirmed refresh; totals stay in the engine. Why: benchmark edits cannot silently change forecasts.
 - The overview EBITDA bridge derives from engine rows and forecastOpex in `src/lib/ebitda-bridge.ts`. Why: every split reconciles with authoritative totals.
 - Break-even is a read-only engine sensitivity in `src/lib/break-even.ts`. Why: costs and tax-loss history stay consistent with the engine.
-- Summary/PPTX read engine outputs; `presentation-*` isolates data, layout and OOXML repair. Why: deterministic outputs and valid editable charts.
+- Summary/PPTX and comparisons share engine-backed unit economics; `presentation-*` isolates exports. Why: consistent totals.
 - `costIndex`/`merchOpexAt` read OPEX growth and merch shares; a set F&B OPEX growth list solely drives F&B OPEX after Year 1 (no passenger scaling). Missing F&B growth defaults to cost inflation; preserve history and benchmark flags. Why: no revenue/cost double growth.
 - Project photos: private `project-covers` bucket, path `<org>/<project>.<ext>`; `projects.cover_image_url` stores that path and the UI signs URLs (`src/lib/covers*.ts`). Why: public buckets are blocked.
 - Capacity validation is nonfinancial; scenario-keyed distribution drafts require valid explicit Save. Profile imports are org-scoped and atomic; averages count each normalized year once, attribution is frozen. Why: isolation and provenance.
 - Seasonal JSON uses `seasonal-pricing.ts` for linked fares and allocation weights; retain flat F&B growth (v4-seasonal). A scenario-keyed ticket tab owns pricing/revenue and display-year selection. Why: consistent returns and isolated navigation.
-- Project delete is soft (`soft_delete_project` sets `deleted_at`; RLS hides it and its scenarios). Why: recoverable.
+- Project delete is soft; RLS hides deleted projects/scenarios. Why: recoverable.
+
+- Optional category methods live in scenario JSON; absent/legacy keeps old formulas, explicit benchmarks use frozen snapshots without rewriting inactive inputs. Why: financial neutrality and isolation.

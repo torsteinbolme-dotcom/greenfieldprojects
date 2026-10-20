@@ -2,6 +2,7 @@ import type { Assumptions } from '@/financialEngine';
 import type { ModelResult } from './model';
 import type { BenchmarkAsset, BenchmarkRecord } from './benchmarks';
 import { weightedBenchmark, weightsValid, type BenchmarkConfig } from './project-benchmarks';
+import { economicsAtYear } from './unit-economics';
 import { year3Row, performanceYearOf } from './year3';
 import { bridgeValues } from './ebitda-bridge';
 import { breakEven } from './break-even';
@@ -32,7 +33,7 @@ export function presentationData(input: PresentationInput) {
   const selected = input.assets.filter(x => (cfg.cable?.[x.id] ?? cfg.fnb?.[x.id] ?? 0) > 0);
   const c = capacityOf(a);
   const capacity = y3 && capacityInputsValid(c) && allocationValid(c.monthlyAllocation) ? capacityTable(y3, c) : null;
-  return { ...input, y3, perf, split: y3 ? bridgeValues(a, y3) : null,
+  return { ...input, y3, perf, unitEconomics: economicsAtYear(a, r.rows, 3), split: y3 ? bridgeValues(a, y3) : null,
     breakEven: y3 ? breakEven(a, 3) : null, capacity, benchmark, benchmarkYear, selected,
     maintenance: r.rows.slice(0, a.exitYear).reduce((s, x) => s + x.maintenanceCapex, 0),
     exit: r.rows[a.exitYear - 1] ?? null,

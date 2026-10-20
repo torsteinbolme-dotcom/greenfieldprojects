@@ -1,5 +1,5 @@
 # Tasks
-- [ ] Move seasonal pricing and monthly ticket revenue into a separate project tab; preserve year selection, saved settings and calculations; verify signed-in navigation.
+- [x] Move seasonal pricing and monthly ticket revenue into Ticket pricing & revenue; signed-in tab navigation, year selection, reload and separate Capacity verified; 24 seasonal tests pass and automatic build OK. Saved settings and calculations unchanged.
 - [x] Add average MOIC Y8 and average IRR Y8 to Portfolio overview; signed-in values reconcile with the three project rows (3,55x and 16,9%).
 - [x] Add opt-in seasonal ticket pricing, monthly transparency and saved benchmark-distribution integration; disabled results unchanged.
 - [x] Seasonal independent references and explicit distribution Save covered by tests; signed-in seasonal price/month save/reload and copied-scenario isolation verified on a temporary project, then hidden. 250 tests pass, two pre-existing expected financial failures; automatic build OK. Benchmark selection itself was not exercised in this browser run.

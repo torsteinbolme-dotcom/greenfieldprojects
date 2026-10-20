@@ -30,7 +30,7 @@ const safe=(v:number)=>Number.isFinite(v)?v:0;
 /** Cumulative cost index for a year: product of (1+growth) over years 2..year; defaults to costInflation every year. */
 export function costIndex(a:Pick<Assumptions,'costInflation'|'opexGrowth'>,kind:'cable'|'fb'|'merch',year:number):number{const list=a.opexGrowth?.[kind];if(!list||!list.length)return Math.pow(1+a.costInflation,year-1);let x=1;for(let y=2;y<=year;y++)x*=1+growth(list,y);return x}
 /** Merchandise OPEX for a year: fixed % of merchandise revenue when merchOpexRate is set, else legacy year-1 ratio with cost growth. */
-export function merchOpexAt(a:Assumptions,year:number,merch:number):number{if(a.merchOpexRate!=null)return merch*a.merchOpexRate;return (a.merchRevenueYear1>0?a.merchOpexYear1*merch/a.merchRevenueYear1:0)*costIndex(a,'merch',year)}
+export function merchOpexAt(a:Assumptions,year:number,merch:number):number{if(a.merchOpexRate!=null)return merch*a.merchOpexRate;return (a.merchRevenueYear1>0?a.merchOpexYear1*merch/a.merchRevenueYear1:a.merchOpexYear1)*costIndex(a,'merch',year)}
 export function xnpv(rate:number,cashflows:number[]):number{return cashflows.reduce((sum,cf,i)=>sum+cf/Math.pow(1+rate,i),0)}
 export function irr(cashflows:number[]):number|null {
   if(!cashflows.some(x=>x<0)||!cashflows.some(x=>x>0))return null;
@@ -51,7 +51,7 @@ export function calculate(a:Assumptions){
   const capex=baseCapex*(1+a.contingencyRate),debt=capex*a.debtShare,equity=capex-debt;
   const flatWeightedTicket=a.segments.reduce((s,x)=>s+x.share*(x.grossPrice/(1+x.vatRate))*(1-x.commission),0);
   const seasonalTicket=seasonalWeightedTicket(a),weightedTicket=seasonalTicket??flatWeightedTicket;
-  const rows:YearResult[]=[];let passengers=a.initialPassengers,price=flatWeightedTicket,fb=a.fbRevenueYear1,merch=a.merchRevenueYear1,openingDebt=debt,retainedCash=0,lossCarryforward=0;
+  const rows:YearResult[]=[];let passengers=a.initialPassengers,price=flatWeightedTicket,fb=a.fbRevenueYear1,merch=a.merchRevenueYear1,openingDebt=debt,retainedCash=0,lossCarryforward=0,accumulatedDepreciation=0;
   for(let year=1;year<=a.years;year++){
     if(year>1){passengers*=1+growth(a.passengerGrowth,year);price*=1+growth(a.priceGrowth,year);fb*=1+growth(a.ancillaryGrowth,year);merch*=1+growth(a.ancillaryGrowth,year)}
     // F&B linked to passengers (opt-in, set by restaurant benchmark selection): revenue follows passengers and ticket price growth, costs follow passengers and cost inflation.
@@ -66,14 +66,16 @@ export function calculate(a:Assumptions){
     const actualMerch=volumeRevenue(methods?.merch?.revenue,passengers,revIndex,merch,0,1);
     const otherRevenue=volumeRevenue(methods?.other?.revenue,passengers,revIndex,0,0,1);
     // Explicit F&B OPEX growth remains the sole driver for existing methods.
-    const legacyFbOpex=(a.opexGrowth?.fb?.length ? a.fbOpexYear1 : a.fbBenchmark?.opex ? a.fbOpexYear1*(fbOpexLinked?paxIndex:1) : (fbOpexLinked? a.fbOpexYear1*paxIndex:(a.fbRevenueYear1>0? a.fbOpexYear1*actualFb/a.fbRevenueYear1:0)))*costIndex(a,'fb',year);
+    const legacyFbOpex=(a.opexGrowth?.fb?.length ? a.fbOpexYear1 : a.fbBenchmark?.opex ? a.fbOpexYear1*(fbOpexLinked?paxIndex:1) : (fbOpexLinked? a.fbOpexYear1*paxIndex:(a.fbRevenueYear1>0? a.fbOpexYear1*actualFb/a.fbRevenueYear1:a.fbOpexYear1)))*costIndex(a,'fb',year);
     const fbOpex=volumeOpex(methods?.fb?.opex,passengers,actualFb,costIndex(a,'fb',year),legacyFbOpex,benchmarkAmount(a,'opex')*(a.opexGrowth?.fb?.length?1:fbOpexLinked?paxIndex:1)*costIndex(a,'fb',year));
     const merchOpex=volumeOpex(methods?.merch?.opex,passengers,actualMerch,costIndex(a,'merch',year),merchOpexAt(a,year,actualMerch),0);
     const otherOpex=volumeOpex(methods?.other?.opex,passengers,otherRevenue,Math.pow(1+a.costInflation,year-1),0,0);
     const ticketRevenue=passengers*ticketNetPrice,revenue=ticketRevenue+actualFb+actualMerch+otherRevenue;
     // Keep the original addition order for bit-identical legacy results.
     const opex=(a.cableFixedOpex+(a.cableVariableCostPerPassenger||0)*passengers)*costIndex(a,'cable',year)+fbOpex+merchOpex+otherOpex;
-    const ebitda=revenue-opex,depreciation=capex/a.depreciationYears,ebit=ebitda-depreciation;
+    // Straight-line depreciation stops once the asset is fully depreciated (useful life ended).
+    const ebitda=revenue-opex,remainingBook=capex-accumulatedDepreciation,depreciation=remainingBook>Math.abs(capex)*1e-9?Math.min(capex/a.depreciationYears,remainingBook):0,ebit=ebitda-depreciation;
+    accumulatedDepreciation+=depreciation;
     const interest=openingDebt*a.interestRate,principal=year<=a.loanYears?Math.min(openingDebt,debt/a.loanYears):0;
     const closingDebt=Math.max(0,openingDebt-principal);
     const taxableIncome=ebit-interest;

@@ -57,8 +57,9 @@ export function Limitations() {
 export function SegmentsSection({ a, set, ro }: P) {
   const sum = shareSum(a);
   const adultFare = a.segments.find((s) => isAdultRoundTrip(s.name));
+  const setSegments = (segments: Assumptions["segments"], indices: number[]) => set({ segments, ...(a.seasonalPricing ? { seasonalPricing: { ...a.seasonalPricing, prices: segments.map((s, i) => ({ ...(a.seasonalPricing?.prices[indices[i] ?? -1] ?? { low: s.grossPrice, high: s.grossPrice }), segmentName: s.name })) } } : {}) });
   const upd = (i: number, patch: Partial<PricedSegment>) =>
-    set({ segments: a.segments.map((s, j) => (j === i ? { ...s, ...patch } : s)) });
+    setSegments(a.segments.map((s, j) => (j === i ? { ...s, ...patch } : s)), a.segments.map((_, j) => j));
   const weighted = a.segments.reduce((s, x) => s + x.share * segmentNetPerGuest(x), 0);
   return (
     <Card title="Passenger segments">
@@ -98,7 +99,7 @@ export function SegmentsSection({ a, set, ro }: P) {
                 <td className="w-24"><NumField percent value={s.vatRate} disabled={ro} onChange={(v) => upd(i, { vatRate: v })} /></td>
                 <td className="w-24"><NumField percent value={s.commission} disabled={ro} onChange={(v) => upd(i, { commission: v })} /></td>
                 <td className="num text-right">{nok(segmentNetPerGuest(s), 2)}</td>
-                <td>{!ro && a.segments.length > 1 && <Button size="sm" variant="ghost" onClick={() => set({ segments: a.segments.filter((_, j) => j !== i) })}>Remove</Button>}</td>
+                <td>{!ro && a.segments.length > 1 && <Button size="sm" variant="ghost" onClick={() => setSegments(a.segments.filter((_, j) => j !== i), a.segments.map((_, j) => j).filter(j => j !== i))}>Remove</Button>}</td>
               </tr>
             ))}
             <tr className="font-medium">
@@ -108,7 +109,7 @@ export function SegmentsSection({ a, set, ro }: P) {
           </tbody>
         </table>
       </div>
-      {!ro && <Button size="sm" variant="outline" className="mt-3" onClick={() => set({ segments: [...a.segments, { name: "New segment", share: 0, grossPrice: 0, vatRate: 0.12, commission: 0, boardingsPerGuest: 1 }] })}>Add segment</Button>}
+      {!ro && <Button size="sm" variant="outline" className="mt-3" onClick={() => setSegments([...a.segments, { name: "New segment", share: 0, grossPrice: 0, vatRate: 0.12, commission: 0, boardingsPerGuest: 1 }], [...a.segments.map((_, j) => j), -1])}>Add segment</Button>}
       <p className="mt-3 text-xs text-muted-foreground">The base fare above is the basis for every other fare — the other segments are set as % of it. Net realized revenue is per guest, excluding VAT and after commission.</p>
       <SegmentBridge a={a} />
     </Card>

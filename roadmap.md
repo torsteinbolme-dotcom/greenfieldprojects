@@ -1,4 +1,7 @@
 # Tasks
+- [x] Add average MOIC Y8 and average IRR Y8 to Portfolio overview; signed-in values reconcile with the three project rows (3,55x and 16,9%).
+- [x] Add opt-in seasonal ticket pricing, monthly transparency and saved benchmark-distribution integration; disabled results unchanged.
+- [x] Seasonal independent references and explicit distribution Save covered by tests; signed-in seasonal price/month save/reload and copied-scenario isolation verified on a temporary project, then hidden. 250 tests pass, two pre-existing expected financial failures; automatic build OK. Benchmark selection itself was not exercised in this browser run.
 - [x] Removed the "Source workbooks" attachment section from the project page; Project details now spans the full width. Attached files and their storage are untouched in the database.
 - [x] Overview first/default; renaming moved to Overview Project details with autosave; horizontal three-dot photo control opens the file chooser; signed-in rename/reload verified on a temporary copy, then deleted; 8 existing tests pass and build OK.
 - [x] Forgot password: "Forgot password?" link on the sign-in page, emailed reset link, and a /reset-password page that sets the new password; reset send, expired/used-link rejection and page states verified in the preview; the final save was not exercised because the only account is the user's own and its password must not be changed here.

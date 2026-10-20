@@ -31,6 +31,6 @@
 - Summary/PPTX read engine outputs; `presentation-*` isolates data, layout and OOXML repair. Why: deterministic outputs and valid editable charts.
 - `costIndex`/`merchOpexAt` read OPEX growth and merch shares; a set F&B OPEX growth list solely drives F&B OPEX after Year 1 (no passenger scaling). Missing F&B growth defaults to cost inflation; preserve history and benchmark flags. Why: no revenue/cost double growth.
 - Project photos: private `project-covers` bucket, path `<org>/<project>.<ext>`; `projects.cover_image_url` stores that path and the UI signs URLs (`src/lib/covers*.ts`). Why: public buckets are blocked.
-- Capacity stays outside the engine in scenario JSON; distributions are local drafts until valid explicit Save; key the editor by scenario. Why: protect forecasts and isolate drafts.
-- Seasonality uses validated 12-month profiles and an org-scoped transactional import RPC; annual/normalized profiles count once in averages. Applying copies percentages plus frozen attribution into the capacity draft only. Why: atomic replacement, provenance and financial isolation.
+- Capacity validation is nonfinancial; scenario-keyed distribution drafts require valid explicit Save. Profile imports are org-scoped and atomic; averages count each normalized year once, attribution is frozen. Why: isolation and provenance.
+- Seasonal fares use scenario JSON and `seasonal-pricing.ts`; the engine weights net fares by saved allocation only when enabled, preserving flat F&B growth (v4-seasonal saves). Why: connected returns and unchanged disabled results.
 - Project delete is soft (`soft_delete_project` sets `deleted_at`; RLS hides it and its scenarios). Why: recoverable.

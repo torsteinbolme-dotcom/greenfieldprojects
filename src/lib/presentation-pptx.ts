@@ -1,4 +1,5 @@
 import PptxGenJS from 'pptxgenjs';
+import { CALCULATION_VERSION } from './model';
 import { int, mult, nok, nokM, pct } from './format';
 import type { PresentationData, PresentationOptions } from './presentation-data';
 
@@ -22,7 +23,7 @@ export function buildPresentation(d: PresentationData, options: PresentationOpti
     s.background = { color: C.paper };
     s.addText(title, { x: .6, y: .5, w: 12.1, h: 1, fontSize: 36, bold: true, color: C.ink, margin: 0, breakLine: false });
     s.addText(`${d.project.name.slice(0, 65)} · ${d.scenario.name.slice(0, 45)} | ${count}`, { x: .6, y: 7, w: 12.1, h: .25, fontSize: 11, color: C.ink, margin: 0 });
-    if (options.notes) s.addNotes(`${note}\nSource: active scenario ${d.scenario.name}, version ${d.version ?? 'current'}, calculation mountain-v3. All monetary forecasts exclude VAT. Figures are model estimates, not a guarantee of returns.`);
+    if (options.notes) s.addNotes(`${note}\nSource: active scenario ${d.scenario.name}, version ${d.version ?? 'current'}, calculation ${CALCULATION_VERSION}. All monetary forecasts exclude VAT. Figures are model estimates, not a guarantee of returns.`);
     return s;
   }
   function table(s: PptxGenJS.Slide, rows: string[][], headers: string[], y = 1.9) {

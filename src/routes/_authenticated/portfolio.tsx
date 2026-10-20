@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { NumField } from "@/components/editor/inputs";
 import { Kpi } from "@/components/editor/sections";
 import { useLatestAssumptions, useProjects, useScenarios } from "@/lib/data";
-import { MOIC_YEAR, buildEntries, metricsAt, sortByMetric } from "@/lib/portfolio";
+import { MOIC_YEAR, buildEntries, metricsAt, portfolioAverages, sortByMetric } from "@/lib/portfolio";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import type { YearMode } from "@/lib/model";
 import { int, mult, nokM, pct } from "@/lib/format";
@@ -44,6 +44,7 @@ function PortfolioPage() {
   );
   const sum = (f: (x: (typeof rows)[number]["m"]) => number | null) => rows.reduce((s, r) => s + (f(r.m) ?? 0), 0);
   const label = mode === "operating" ? `Y${year}` : String(year);
+  const averages = portfolioAverages(entries);
 
   return (
     <div className="space-y-6">
@@ -66,9 +67,11 @@ function PortfolioPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
         <Kpi label="Active projects" value={String(entries.length)} />
         <Kpi label="Total investment" value={nokM(sum((m) => m.capex))} sub="NOK m" />
+        <Kpi label="Average MOIC Y8" value={mult(averages.moic)} />
+        <Kpi label="Average IRR Y8" value={pct(averages.irr)} />
         <Kpi label={`Revenue ${label}`} value={nokM(sum((m) => m.revenue))} sub="NOK m, projects with data" />
         <Kpi label={`EBITDA ${label}`} value={nokM(sum((m) => m.ebitda))} sub="NOK m" />
       </div>

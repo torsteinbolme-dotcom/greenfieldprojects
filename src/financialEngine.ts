@@ -1,5 +1,6 @@
 // @ts-nocheck -- authoritative engine kept verbatim; strict-null type errors are suppressed rather than altering its logic.
 /** Project Mountain v1 financial engine. All amounts NOK, rates decimals. */
+import { seasonalWeightedTicket, ticketPriceGrowthIndex, type SeasonalPricing } from './lib/seasonal-pricing';
 export type Segment = {name:string;share:number;grossPrice:number;vatRate:number;commission:number;boardingsPerGuest:number};
 export type CapexItem = {name:string;quantity:number;unitCost:number};
 // cableVariableCostPerPassenger adds to cable car OPEX. maintenanceCapexRate is a legacy inert input; maintenanceCapexPct (absent = 0) is the annual investing outflow as % of initial CAPEX (mountain-v3).
@@ -14,6 +15,7 @@ export type Assumptions = {
   depreciationYears:number;maintenanceCapexRate:number;maintenanceCapexPct?:number;
   exitYear:number;exitMultiple:number;exitTransactionCostRate:number;performanceYear?:number;
   distributeCashAnnually:boolean;
+  seasonalPricing?:SeasonalPricing;
   // Optional per-cost yearly growth lists (fall back to costInflation) and merchandise OPEX as share of merchandise revenue.
   opexGrowth?:{cable?:number[];fb?:number[];merch?:number[]};
   merchOpexRate?:number|null;
@@ -44,16 +46,18 @@ export function calculate(a:Assumptions){
   if(a.debtShare<0||a.debtShare>1||a.loanYears<1||a.initialPassengers<0)throw Error('Invalid financing or passengers');
   const baseCapex=a.capexItems.reduce((s,c)=>s+c.quantity*c.unitCost,0);
   const capex=baseCapex*(1+a.contingencyRate),debt=capex*a.debtShare,equity=capex-debt;
-  const weightedTicket=a.segments.reduce((s,x)=>s+x.share*(x.grossPrice/(1+x.vatRate))*(1-x.commission),0);
-  const rows:YearResult[]=[];let passengers=a.initialPassengers,price=weightedTicket,fb=a.fbRevenueYear1,merch=a.merchRevenueYear1,openingDebt=debt,retainedCash=0,lossCarryforward=0;
+  const flatWeightedTicket=a.segments.reduce((s,x)=>s+x.share*(x.grossPrice/(1+x.vatRate))*(1-x.commission),0);
+  const seasonalTicket=seasonalWeightedTicket(a),weightedTicket=seasonalTicket??flatWeightedTicket;
+  const rows:YearResult[]=[];let passengers=a.initialPassengers,price=flatWeightedTicket,fb=a.fbRevenueYear1,merch=a.merchRevenueYear1,openingDebt=debt,retainedCash=0,lossCarryforward=0;
   for(let year=1;year<=a.years;year++){
     if(year>1){passengers*=1+growth(a.passengerGrowth,year);price*=1+growth(a.priceGrowth,year);fb*=1+growth(a.ancillaryGrowth,year);merch*=1+growth(a.ancillaryGrowth,year)}
     // F&B linked to passengers (opt-in, set by restaurant benchmark selection): revenue follows passengers and ticket price growth, costs follow passengers and cost inflation.
-    const paxIndex=a.initialPassengers>0?passengers/a.initialPassengers:0,priceIndex=weightedTicket>0?price/weightedTicket:1;
+    const paxIndex=a.initialPassengers>0?passengers/a.initialPassengers:0,priceIndex=flatWeightedTicket>0?price/flatWeightedTicket:1;
     const fbRevenueLinked=a.fbBenchmark?.revenue ? (a.fbBenchmark.revenue.adjust??a.fbBenchmark.adjust) : a.fbFollowsPassengers;
     const fbOpexLinked=a.fbBenchmark?.opex ? (a.fbBenchmark.opex.adjust??a.fbBenchmark.adjust) : a.fbFollowsPassengers;
     if(fbRevenueLinked)fb=a.fbRevenueYear1*paxIndex*priceIndex;
-    const ticketRevenue=passengers*price,revenue=ticketRevenue+fb+merch;
+    const ticketNetPrice=seasonalTicket===null||seasonalTicket===flatWeightedTicket?price:seasonalTicket*ticketPriceGrowthIndex(a,year);
+    const ticketRevenue=passengers*ticketNetPrice,revenue=ticketRevenue+fb+merch;
     const opex=(a.cableFixedOpex+(a.cableVariableCostPerPassenger||0)*passengers)*costIndex(a,'cable',year)+
       // When an F&B OPEX growth list is set, it is the only driver of F&B OPEX after Year 1 (user decision).
       (a.opexGrowth?.fb?.length ? a.fbOpexYear1 : a.fbBenchmark?.opex ? a.fbOpexYear1*(fbOpexLinked?paxIndex:1) : (fbOpexLinked? a.fbOpexYear1*paxIndex:(a.fbRevenueYear1>0? a.fbOpexYear1*fb/a.fbRevenueYear1:0)))*costIndex(a,'fb',year)+
@@ -74,7 +78,7 @@ export function calculate(a:Assumptions){
     const equityInjection=retainedCash<0?-retainedCash:0;
     retainedCash+=equityInjection;
     const debtService=interest+principal;
-    rows.push({year,calendarYear:a.openingYear+year-1,passengers,ticketNetPrice:price,ticketRevenue,fbRevenue:fb,merchRevenue:merch,revenue,opex,ebitda,depreciation,ebit,openingDebt,interest,principal,closingDebt,tax,maintenanceCapex,equityInjection,cashAfterDebt,distribution,retainedCash,dscr:debtService>0?(ebitda-tax)/debtService:null});
+    rows.push({year,calendarYear:a.openingYear+year-1,passengers,ticketNetPrice,ticketRevenue,fbRevenue:fb,merchRevenue:merch,revenue,opex,ebitda,depreciation,ebit,openingDebt,interest,principal,closingDebt,tax,maintenanceCapex,equityInjection,cashAfterDebt,distribution,retainedCash,dscr:debtService>0?(ebitda-tax)/debtService:null});
     openingDebt=closingDebt;
   }
   const exit=rows[a.exitYear-1],enterpriseValue=exit.ebitda*a.exitMultiple;

@@ -101,8 +101,11 @@ describe("tax-loss carryforward", () => {
     const r2 = calculate(base({ ...lossy(), capexItems: [{ name: "x", quantity: 1, unitCost: 400_000 }], depreciationYears: 2 }));
     expect(r2.rows[0]!.tax).toBe(0);
     expect(r2.rows[1]!.tax).toBe(0);
-    expect(r2.rows[2]!.tax).toBe(0); // 50 000 offset, 150 000 loss remains
-    expect(r2.rows[5]!.tax).toBe(0);
+    // depreciation ends after year 2: taxable 100 000/yr, 200 000 carried loss absorbs years 3-4
+    expect(r2.rows[2]!.tax).toBe(0);
+    expect(r2.rows[3]!.tax).toBe(0);
+    expect(r2.rows[4]!.tax).toBeCloseTo(100_000 * 0.22, 6);
+    expect(r2.rows[5]!.tax).toBeCloseTo(100_000 * 0.22, 6);
   });
 
   it("carries the year-3 average ticket price the Investment Summary displays", () => {

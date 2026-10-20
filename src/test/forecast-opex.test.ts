@@ -21,11 +21,12 @@ describe("forecast operating expenses", () => {
     expect(costs.merchandise).toBeCloseTo(12600, 6);
   });
 
-  it("shows zero ancillary expenses when their base revenue is zero", () => {
-    const a = { ...projectMountain, fbRevenueYear1: 0, merchRevenueYear1: 0 };
+  it("keeps configured fixed ancillary expenses when their base revenue is zero", () => {
+    const a = { ...projectMountain, fbRevenueYear1: 0, merchRevenueYear1: 0, merchOpexRate: null };
     for (const row of calculate(a).rows) {
-      expect(forecastOpex(a, row).fb).toBe(0);
-      expect(forecastOpex(a, row).merchandise).toBe(0);
+      expect(forecastOpex(a, row).fb).toBeGreaterThan(0);
+      const c = forecastOpex(a, row);
+      expect(c.cable + c.fb + c.merchandise + c.other).toBeCloseTo(row.opex, 4);
     }
   });
 

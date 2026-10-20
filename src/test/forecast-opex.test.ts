@@ -26,7 +26,7 @@ describe("forecast operating expenses", () => {
     for (const row of calculate(a).rows) {
       expect(forecastOpex(a, row).fb).toBeGreaterThan(0);
       const c = forecastOpex(a, row);
-      expect(c.cable + c.fb + c.merchandise + c.other).toBeCloseTo(row.opex, 4);
+      expect(c.cableFixed + c.cableVariable + c.fb + c.merchandise + c.other).toBeCloseTo(row.opex, 4);
     }
   });
 

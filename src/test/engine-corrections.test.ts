@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { calculate, type Assumptions } from '@/financialEngine';
-import { exampleProject } from '@/exampleProject';
+import { projectMountain as exampleProject } from '@/exampleProject';
 import { initializeFromYear1 } from '@/lib/volume-methods';
 
 const base = () => structuredClone(exampleProject) as Assumptions;

@@ -1,10 +1,10 @@
 # Tasks
-- [ ] Move annual inputs/revenue growth and restaurant benchmarks above calculation methods in Revenue & OPEX.
-- [ ] Show separate Low/High season net ticket-price rows excluding VAT and after commission for the selected operating year.
-- [ ] Tighten the gap between each month and its Low/High season buttons and verify the selected view.
-- [ ] Make Annual pass adult, Cruise, Tour operators and MICE seasonal low/high fares read-only, preserving their saved values.
-- [ ] Add opt-in independent volume-based revenue/OPEX methods with unchanged legacy results and preserved inactive values.
-- [ ] Add engine-backed unit economics to Investment Summary, project comparison and presentation exports.
+- [x] Move annual inputs/revenue growth and restaurant benchmarks above calculation methods in Revenue & OPEX; signed-in order verified.
+- [x] Show separate Low/High season net ticket-price rows excluding VAT and after commission for the selected operating year; signed-in Year 1/3 verified.
+- [x] Tighten the gap between each month and its Low/High season buttons; desktop, selected viewport and mobile verified.
+- [x] Make Annual pass adult, Cruise, Tour operators and MICE seasonal low/high fares read-only; saved values unchanged and adult fare still editable.
+- [x] Add opt-in independent volume-based revenue/OPEX methods with unchanged legacy results and retained inactive inputs; disposable save/reload, method switches and copied-scenario isolation verified.
+- [x] Add engine-backed unit economics to Investment Summary, project comparison and presentation exports; signed-in year change, comparison and PPTX download verified.
 - [ ] Run independent reference tests, complete suite and signed-in disposable-project checks; verify automatic production build.
 - [x] Move seasonal pricing and monthly ticket revenue into Ticket pricing & revenue; signed-in tab navigation, year selection, reload and separate Capacity verified; 24 seasonal tests pass and automatic build OK. Saved settings and calculations unchanged.
 - [x] Add average MOIC Y8 and average IRR Y8 to Portfolio overview; signed-in values reconcile with the three project rows (3,55x and 16,9%).

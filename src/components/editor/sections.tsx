@@ -225,6 +225,16 @@ export function RevenueOpexSection({ a, set, ro }: P) {
         </div>
         <div className="mt-4"><Field label="Ancillary revenue growth"><GrowthList values={a.ancillaryGrowth} disabled={ro} onChange={(v) => set({ ancillaryGrowth: v })} /></Field></div>
       </Card>
+      <Card title="Existing OPEX inputs & cost growth" className="lg:col-span-2">
+        <div className="grid grid-cols-2 gap-4">
+          {(!a.volumeMethods?.fb?.opex?.method || a.volumeMethods.fb.opex.method === "legacy") && <Field label="F&B OPEX year 1 (NOK)"><NumField value={a.fbOpexYear1} disabled={ro || !!fbSel?.opex} onChange={(v) => set({ fbOpexYear1: v, opexGrowth: { ...a.opexGrowth, fb: a.opexGrowth?.fb?.length ? a.opexGrowth.fb : [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation] } })} /></Field>}
+          {(!a.volumeMethods?.merch?.opex?.method || a.volumeMethods.merch.opex.method === "legacy") && <Field label="Merchandise OPEX (% of merchandise revenue)" hint="Always this share of merchandise revenue, every year"><NumField percent value={a.merchOpexRate ?? (a.merchRevenueYear1 > 0 ? a.merchOpexYear1 / a.merchRevenueYear1 : 0)} disabled={ro} onChange={(v) => set({ merchOpexRate: v, merchOpexYear1: v * a.merchRevenueYear1 })} /><span className="block text-xs text-muted-foreground">= {nok((a.merchOpexRate ?? (a.merchRevenueYear1 > 0 ? a.merchOpexYear1 / a.merchRevenueYear1 : 0)) * a.merchRevenueYear1)} NOK in year 1</span></Field>}
+        </div>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <Field label="Cost inflation (Other OPEX)"><NumField percent value={a.costInflation} disabled={ro} onChange={v => set({ costInflation: v })} /></Field>
+          <Field label="F&B OPEX growth"><GrowthList values={a.opexGrowth?.fb ?? [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, fb: v } })} /></Field>
+        </div>
+      </Card>
       <Card title="F&B from restaurant benchmarks" className="lg:col-span-2"><FbBenchmarkPanel a={a} set={set} ro={ro} /></Card>
       <Card title="Calculation methods" className="lg:col-span-2"><VolumeMethodsEditor a={a} set={set} ro={ro} /></Card>
       <Card title="Operating costs" className="lg:col-span-2">
@@ -232,14 +242,10 @@ export function RevenueOpexSection({ a, set, ro }: P) {
           <Field label="Cable car fixed OPEX year 1 (NOK)"><NumField value={a.cableFixedOpex} disabled={ro} onChange={(v) => set({ cableFixedOpex: v })} /></Field>
           <Field label="Cable car variable OPEX per passenger (NOK)" hint="Year-1 price level; grows with cable car OPEX"><NumField value={a.cableVariableCostPerPassenger ?? 0} disabled={ro} onChange={(v) => set({ cableVariableCostPerPassenger: v })} /></Field>
           <Field label="Annual maintenance CAPEX (% of initial CAPEX)" hint="Investing cash outflow, not OPEX; grows with cable car OPEX"><NumField percent value={a.maintenanceCapexPct ?? 0} disabled={ro} onChange={(v) => set({ maintenanceCapexPct: v })} /></Field>
-          {(!a.volumeMethods?.fb?.opex?.method || a.volumeMethods.fb.opex.method === "legacy") && <Field label="F&B OPEX year 1 (NOK)"><NumField value={a.fbOpexYear1} disabled={ro || !!fbSel?.opex} onChange={(v) => set({ fbOpexYear1: v, opexGrowth: { ...a.opexGrowth, fb: a.opexGrowth?.fb?.length ? a.opexGrowth.fb : [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation] } })} /></Field>}
-          {(!a.volumeMethods?.merch?.opex?.method || a.volumeMethods.merch.opex.method === "legacy") && <Field label="Merchandise OPEX (% of merchandise revenue)" hint="Always this share of merchandise revenue, every year"><NumField percent value={a.merchOpexRate ?? (a.merchRevenueYear1 > 0 ? a.merchOpexYear1 / a.merchRevenueYear1 : 0)} disabled={ro} onChange={(v) => set({ merchOpexRate: v, merchOpexYear1: v * a.merchRevenueYear1 })} /><span className="block text-xs text-muted-foreground">= {nok((a.merchOpexRate ?? (a.merchRevenueYear1 > 0 ? a.merchOpexYear1 / a.merchRevenueYear1 : 0)) * a.merchRevenueYear1)} NOK in year 1</span></Field>}
         </div>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <Field label="Cable car OPEX growth"><GrowthList values={a.opexGrowth?.cable ?? [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, cable: v } })} /></Field>
           {a.volumeMethods?.merch?.opex?.method && !["legacy", "revenuePercent"].includes(a.volumeMethods.merch.opex.method) && <Field label="Merchandise OPEX growth"><GrowthList values={a.opexGrowth?.merch ?? [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={v => set({ opexGrowth: { ...a.opexGrowth, merch: v } })} /></Field>}
-          <Field label="Cost inflation (Other OPEX)"><NumField percent value={a.costInflation} disabled={ro} onChange={v => set({ costInflation: v })} /></Field>
-          <Field label="F&B OPEX growth"><GrowthList values={a.opexGrowth?.fb ?? [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, fb: v } })} /></Field>
         </div>
       </Card>
     </div>

@@ -26,10 +26,10 @@ export function buildPresentation(d: PresentationData, options: PresentationOpti
     if (options.notes) s.addNotes(`${note}\nSource: active scenario ${d.scenario.name}, version ${d.version ?? 'current'}, calculation ${CALCULATION_VERSION}. All monetary forecasts exclude VAT. Figures are model estimates, not a guarantee of returns.`);
     return s;
   }
-  function table(s: PptxGenJS.Slide, rows: string[][], headers: string[], y = 1.9) {
+  function table(s: PptxGenJS.Slide, rows: string[][], headers: string[], y = 1.9, compact = false) {
     s.addTable([headers, ...rows].map(row => row.map(text => ({ text }))), { x: .6, y, w: 12.1, colW: headers.map(() => 12.1 / headers.length),
-      fontFace: 'Outfit', fontSize: 18, color: C.ink, fill: { color: C.white }, border: { type: 'solid', color: C.grey, pt: .5 },
-      margin: .07, rowH: .4, bold: false, autoPage: false,
+      fontFace: 'Outfit', fontSize: compact ? 15 : 18, color: C.ink, fill: { color: C.white }, border: { type: 'solid', color: C.grey, pt: .5 },
+      margin: compact ? .04 : .07, rowH: compact ? .34 : .4, bold: false, autoPage: false,
       });
   }
   function stats(s: PptxGenJS.Slide, pairs: Pair[]) {
@@ -76,7 +76,7 @@ export function buildPresentation(d: PresentationData, options: PresentationOpti
   function performance() {
     const s = slide('Year 3 performance', 'Year 3 is engine row index 2: the third operating year, excluding construction.');
     if (!y3) { text(s, 'Year 3 is outside the forecast horizon.'); return; }
-    if (d.unitEconomics) table(s, d.unitEconomics.items.map(item => [item.label, item.perPassenger === null ? 'N/A' : nok(item.perPassenger, 2), nok(item.annual, 2)]), ['Unit economics · ex VAT', 'NOK / passenger', 'Annual total · NOK'], 1.7);
+    if (d.unitEconomics) table(s, d.unitEconomics.items.map(item => [item.label, item.perPassenger === null ? 'N/A' : nok(item.perPassenger, 2), nok(item.annual, 2)]), ['Unit economics · ex VAT', 'NOK / passenger', 'Annual total · NOK'], 1.7, true);
     s.addText(`${int(y3.passengers)} cable car passengers · ${y3.calendarYear} · EBITDA margin ${pct(y3.revenue ? y3.ebitda / y3.revenue : null)}`, { x: .6, y: 6.65, w: 12.1, h: .25, fontSize: 12, color: C.ink, margin: 0 });
   }
   function benchmarks() {

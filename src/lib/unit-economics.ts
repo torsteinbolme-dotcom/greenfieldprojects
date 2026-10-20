@@ -20,7 +20,7 @@ export function unitEconomics(a: Assumptions, row: YearResult) {
   ];
   return { year: row.year, calendarYear: row.calendarYear, passengers: row.passengers,
     revenuePerPassenger: perPax(row.revenue), opexPerPassenger: perPax(row.opex), ebitdaPerPassenger: perPax(row.ebitda),
-    items: items.map(item => ({ ...item, perPassenger: perPax(item.annual) })),
+    items: items.map(item => ({ ...item, annual: item.annual === 0 ? 0 : item.annual, perPassenger: perPax(item.annual === 0 ? 0 : item.annual) })),
   };
 }
 export function economicsAtYear(a: Assumptions, rows: YearResult[], year = 3) {

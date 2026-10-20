@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
-- Preserve `src/financialEngine.ts` and `src/exampleProject.ts` except explicitly requested formula changes. Why: calculations are signed off.
+- Preserve the engine and example except requested formula changes. Why: signed-off calculations.
 - Compute outputs client-side from append-only scenario JSON; never store edited outputs. Why: auditable results.
 - Every table has `organization_id`; RLS uses `is_org_member` / `can_edit_org` / `is_org_admin` (security definer). Why: organizations must never see each other's data.
 - Scenario saves insert new versions; Base is never overwritten by other scenarios. Why: isolation and version history.

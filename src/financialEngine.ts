@@ -74,7 +74,7 @@ export function calculate(a:Assumptions){
     // Keep the original addition order for bit-identical legacy results.
     const opex=(a.cableFixedOpex+(a.cableVariableCostPerPassenger||0)*passengers)*costIndex(a,'cable',year)+fbOpex+merchOpex+otherOpex;
     // Straight-line depreciation stops once the asset is fully depreciated (useful life ended).
-    const ebitda=revenue-opex,depreciation=Math.max(0,Math.min(capex/a.depreciationYears,capex-accumulatedDepreciation)),ebit=ebitda-depreciation;
+    const ebitda=revenue-opex,remainingBook=capex-accumulatedDepreciation,depreciation=remainingBook>Math.abs(capex)*1e-9?Math.min(capex/a.depreciationYears,remainingBook):0,ebit=ebitda-depreciation;
     accumulatedDepreciation+=depreciation;
     const interest=openingDebt*a.interestRate,principal=year<=a.loanYears?Math.min(openingDebt,debt/a.loanYears):0;
     const closingDebt=Math.max(0,openingDebt-principal);

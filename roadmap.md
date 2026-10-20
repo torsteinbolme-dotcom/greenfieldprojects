@@ -1,4 +1,5 @@
 # Tasks
+- [ ] Add average MOIC Y8 and average IRR Y8 to Portfolio overview and verify values.
 - [ ] Add opt-in seasonal ticket pricing, monthly transparency and benchmark-distribution integration.
 - [ ] Verify seasonal financial references, scenario persistence/isolation and complete test suite; inspect automatic production build.
 - [x] Removed the "Source workbooks" attachment section from the project page; Project details now spans the full width. Attached files and their storage are untouched in the database.

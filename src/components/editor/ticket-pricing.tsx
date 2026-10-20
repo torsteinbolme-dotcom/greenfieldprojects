@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { Assumptions } from "@/financialEngine";
 import type { ModelResult } from "@/lib/model";
-import { Card } from "@/components/editor/sections";
+import { Card, PassengersPricingSection } from "@/components/editor/sections";
 import { Field } from "@/components/editor/inputs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SeasonalPricingSection } from "./seasonal-pricing";
@@ -14,7 +14,9 @@ export function TicketPricingSection({ a, r, ro, set }: {
   const index = Math.min(yearIdx, Math.max(rows.length - 1, 0));
   const row = rows[index];
   return (
-    <Card title="Ticket pricing & revenue">
+    <div className="space-y-4">
+      <PassengersPricingSection a={a} set={set} ro={ro} />
+      <Card title="Ticket pricing & revenue">
       <div className="space-y-4">
         {rows.length > 0 && <div className="max-w-xs">
           <Field label="Operating year">

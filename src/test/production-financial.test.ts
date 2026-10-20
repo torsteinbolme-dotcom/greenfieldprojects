@@ -25,13 +25,12 @@ describe('independent representative investment cases', () => {
   });
 });
 
-// Explicit expected failures: unresolved approved-engine defects, NOT successful validation.
-// Remove .fails only when a formula correction has been approved and independently verified.
-describe('known financial audit failures awaiting formula approval', () => {
-  it.fails('depreciation ends after the two-year useful life', () => {
+// Formerly expected failures; corrected per the Financial Engine Corrections brief.
+describe('corrected financial audit defects', () => {
+  it('depreciation ends after the two-year useful life', () => {
     expect(calculate(cases.depreciation_exhaustion as Assumptions).rows[2]?.depreciation).toBe(0);
   });
-  it.fails('legacy zero-sales restaurant retains independently specified fixed operating costs', () => {
+  it('legacy zero-sales restaurant retains independently specified fixed operating costs', () => {
     expect(calculate(cases.zero_fb_revenue_fixed_cost as unknown as Assumptions).rows[0]?.opex).toBeCloseTo(14007146.618357489,5);
   });
 });

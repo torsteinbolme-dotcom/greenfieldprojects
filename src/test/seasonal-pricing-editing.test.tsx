@@ -2,6 +2,7 @@ import { useState } from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CapacitySection } from "@/components/editor/capacity";
+import { TicketPricingSection } from "@/components/editor/ticket-pricing";
 import { initializeSeasonalPricing } from "@/lib/seasonal-pricing";
 import { calculate, type Assumptions } from "@/financialEngine";
 import { projectMountain } from "@/exampleProject";
@@ -11,7 +12,7 @@ afterEach(cleanup);
 
 describe("seasonal settings and saved distribution interaction", () => {
   it("initializes current fares without changing forecast inputs", () => {
-    const set = vi.fn(); render(<CapacitySection a={projectMountain} r={calculate(projectMountain)} ro={false} set={set} />);
+    const set = vi.fn(); render(<TicketPricingSection a={projectMountain} r={calculate(projectMountain)} ro={false} set={set} />);
     fireEvent.click(screen.getByRole("switch", { name: "Enable Seasonal Ticket Pricing" }));
     expect(set).toHaveBeenCalledExactlyOnceWith({ seasonalPricing: initializeSeasonalPricing(projectMountain) });
   });
@@ -21,7 +22,8 @@ describe("seasonal settings and saved distribution interaction", () => {
     const values: Assumptions[] = [];
     function Harness() {
       const [value, update] = useState<Assumptions>({ ...a, seasonalPricing: p, capacity: { hourlyCapacity: 0, hoursPerDay: 10, monthlyAllocation: [0.6, 0.4, ...Array(10).fill(0)] } } as Assumptions);
-      return <CapacitySection a={value} r={calculate(value)} ro={false} set={patch => { const next = { ...value, ...patch }; values.push(next); update(next); }} />;
+      const set = (patch: Partial<Assumptions>) => { const next = { ...value, ...patch }; values.push(next); update(next); };
+      return <><CapacitySection a={value} r={calculate(value)} ro={false} set={set} /><TicketPricingSection a={value} r={calculate(value)} ro={false} set={set} /></>;
     }
     render(<Harness />);
     fireEvent.change(screen.getByRole("textbox", { name: "January allocation" }), { target: { value: "20" } });
@@ -35,7 +37,7 @@ describe("seasonal settings and saved distribution interaction", () => {
     expect(calculate(changed).rows[0]?.ticketRevenue).toBeCloseTo(200000, 8);
   });
   it("prevents viewers from editing seasonal settings", () => {
-    const set = vi.fn(); render(<CapacitySection a={projectMountain} r={null} ro set={set} />);
+    const set = vi.fn(); render(<TicketPricingSection a={projectMountain} r={null} ro set={set} />);
     fireEvent.click(screen.getByRole("switch", { name: "Enable Seasonal Ticket Pricing" })); expect(set).not.toHaveBeenCalled();
   });
 });

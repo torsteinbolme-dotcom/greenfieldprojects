@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { int, pct } from "@/lib/format";
 import { allocationValid, capacityInputsValid, capacityOf, capacityTable, EQUAL_ALLOCATION, MONTHS, type Capacity, type SeasonalitySource } from "@/lib/capacity";
 import { capacityWithProfile, useSeasonalityProfiles } from "@/lib/seasonality";
-import { SeasonalPricingSection } from "./seasonal-pricing";
 
 type Props = { a: Assumptions; r: ModelResult | null; ro: boolean; set: (patch: Partial<Assumptions>) => void };
 
@@ -124,7 +123,6 @@ export function CapacitySection({ a, r, ro, set }: Props) {
           <Button size="sm" variant="outline" disabled={!dirty} onClick={() => { setAlloc([...saved.monthlyAllocation]); setAttribution(saved.seasonalitySource); }}>Cancel Changes</Button>
           <Button size="sm" variant="ghost" onClick={() => { setAlloc([...EQUAL_ALLOCATION]); setAttribution(null); }}>Reset to equal distribution</Button>
         </div>}
-        <SeasonalPricingSection a={a} passengers={row?.passengers ?? a.initialPassengers} year={row?.year ?? 1} ro={ro} set={set} />
       </Card>
     </div>
   );

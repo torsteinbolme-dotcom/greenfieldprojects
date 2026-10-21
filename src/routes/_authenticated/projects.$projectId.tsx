@@ -214,7 +214,7 @@ function EditorPage() {
         <TabsContent value="exit">{r ? <ExitSection a={draft} set={set} ro={ro} r={r} /> : <p className="text-muted-foreground">Fix the inputs to see exit analysis.</p>}</TabsContent>
         <TabsContent value="capacity"><CapacitySection key={scenario.id} a={draft} r={r} ro={ro} set={set} /></TabsContent>
         <TabsContent value="benchmarking"><BenchmarkingSection projectId={project.id} config={(project.benchmark_config ?? {}) as BenchmarkConfig} a={draft} r={r} ro={ro} apply={set} /></TabsContent>
-        <TabsContent value="advanced"><AdvancedCalculationsSection a={draft} ro={ro} set={(next) => set({ advanced: (next as AssumptionsWithAdvanced).advanced } as Partial<Assumptions>)} /></TabsContent>
+        <TabsContent value="advanced"><AdvancedCalculationsSection a={draft} r={r} ro={ro} set={(next) => set({ advanced: (next as AssumptionsWithAdvanced).advanced } as Partial<Assumptions>)} /></TabsContent>
         <TabsContent value="history">
           <Card title={`Version history — ${scenario.name}`}>
             <table className="fin-table">

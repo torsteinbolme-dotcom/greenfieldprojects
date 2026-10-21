@@ -7,7 +7,7 @@ import saved from "./fixtures/saved-scenarios-baseline.json";
 
 // Reference: the pre-Stage-1 pipeline (linked fares -> engine), applied to the original saved scenarios.
 const reference = (a: Assumptions) => calculate(withLinkedTicketPrices(a));
-const allOn = (a: Assumptions) => ADVANCED_MODULES.reduce<Assumptions>((x, m) => setModuleEnabled(x, m.key, true), a);
+const allOn = (a: Assumptions) => ADVANCED_MODULES.filter((m) => !m.implemented).reduce<Assumptions>((x, m) => setModuleEnabled(x, m.key, true), a);
 
 describe("advanced calculations foundation", () => {
   for (const s of saved as { name: string; assumptions: Assumptions }[]) {
@@ -43,6 +43,6 @@ describe("advanced calculations foundation", () => {
     const seen = ADVANCED_MODULES.flatMap((m) => m.replaces);
     expect(new Set(seen).size).toBe(seen.length);
     expect(ADVANCED_MODULES.map((m) => m.key)).toEqual(["demand", "capex", "operations", "commercialFb", "commercialMerch"]);
-    expect(ADVANCED_MODULES.every((m) => !m.implemented)).toBe(true);
+    expect(ADVANCED_MODULES.filter((m) => m.implemented).map((m) => m.key)).toEqual(["demand"]);
   });
 });

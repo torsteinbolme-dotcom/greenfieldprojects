@@ -1,6 +1,7 @@
 import { calculate, type Assumptions, type YearResult } from '@/financialEngine';
 import { passengersAt, sourceAdjust, withFbBenchmark, type AssumptionsWithFb } from './fb-benchmark';
 import { withLinkedTicketPrices } from './ticket-pricing';
+import { resolveAssumptions } from './advanced';
 
 export const DEFAULT_BREAK_EVEN_YEAR = 3;
 export type Threshold = { passengers: number | null; message: string | null };
@@ -9,7 +10,7 @@ export type BreakEven = { operating: Threshold; cash: Threshold; forecast: numbe
 /** Re-evaluate the full operating history at a trial annual volume, retaining the growth schedule and debt/tax rules. */
 export function evaluatePassengers(input: Assumptions, year: number, annualPassengers: number): YearResult {
   if (!Number.isFinite(annualPassengers) || annualPassengers < 0) throw Error('Passenger volume must be finite and non-negative.');
-  const a = withLinkedTicketPrices(input) as AssumptionsWithFb;
+  const a = resolveAssumptions(withLinkedTicketPrices(input)) as AssumptionsWithFb;
   const growth = passengersAt({ initialPassengers: 1, passengerGrowth: a.passengerGrowth }, year);
   if (!(growth > 0) || !Number.isFinite(growth)) throw Error('Passenger growth does not permit a positive volume in this year.');
   const initialPassengers = annualPassengers / growth;

@@ -1,3 +1,5 @@
+import { controlledFields, resolveAssumptions } from "@/lib/advanced";
+import { AdvancedIndicator } from "@/components/editor/advanced-indicator";
 import type { Assumptions } from "@/financialEngine";
 import { calculate } from "@/financialEngine";
 import { Button } from "@/components/ui/button";
@@ -193,15 +195,17 @@ function CapexBridge({ a }: { a: Assumptions }) {
 }
 
 export function PassengersPricingSection({ a, set, ro }: P) {
+  const demand = controlledFields(a).has("initialPassengers");
   return (
     <Card title="Passengers">
+      {demand && <AdvancedIndicator className="mb-3" />}
       <div className="grid grid-cols-2 gap-4">
         <Field label="Opening year"><NumField plain value={a.openingYear} disabled={ro} step="1" onChange={(v) => set({ openingYear: Math.round(v) })} /></Field>
         <Field label="Model years"><NumField value={a.years} disabled={ro} step="1" onChange={(v) => set({ years: Math.round(v) })} /></Field>
-        <Field label="Year-1 passengers (guests)"><NumField value={a.initialPassengers} disabled={ro} onChange={(v) => set({ initialPassengers: v })} /></Field>
+        <Field label="Year-1 passengers (guests)"><NumField value={a.initialPassengers} disabled={ro || demand} onChange={(v) => set({ initialPassengers: v })} /></Field>
       </div>
       <div className="mt-4 space-y-4">
-        <Field label="Passenger growth"><GrowthList values={a.passengerGrowth} disabled={ro} onChange={(v) => set({ passengerGrowth: v })} /></Field>
+        <Field label="Passenger growth"><GrowthList values={a.passengerGrowth} disabled={ro || demand} onChange={(v) => set({ passengerGrowth: v })} /></Field>
         <Field label="Ticket price growth"><GrowthList values={a.priceGrowth} disabled={ro} onChange={(v) => set({ priceGrowth: v })} /></Field>
       </div>
     </Card>
@@ -358,7 +362,7 @@ export function ExitSection({ a, set, ro, r }: P & { r: ModelResult }) {
   const exit = r.rows[a.exitYear - 1];
   if (!exit) return null;
   const sens = MULTIPLES.map((m) => {
-    const s = calculate({ ...a, exitMultiple: m });
+    const s = calculate(resolveAssumptions({ ...a, exitMultiple: m }));
     return { m, ev: s.enterpriseValue, eq: s.exitEquityValue, irr: s.equityIrr, moic: s.equityMultiple };
   });
   return (

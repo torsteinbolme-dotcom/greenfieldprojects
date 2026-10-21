@@ -219,6 +219,7 @@ export function RevenueOpexSection({ a, set, ro }: P) {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Card title="Existing annual inputs & revenue growth" className="lg:col-span-2">
+        {(controlledFields(a).has("volumeMethods.fb.revenue") || controlledFields(a).has("volumeMethods.merch.revenue")) && <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"><AdvancedIndicator />{[controlledFields(a).has("volumeMethods.fb.revenue") && "F&B revenue", controlledFields(a).has("volumeMethods.merch.revenue") && "Merchandise revenue"].filter(Boolean).join(" and ")} — the standard revenue inputs here are kept but not used. OPEX methods are unchanged.</div>}
         <div className="grid grid-cols-2 gap-4">
           {(!a.volumeMethods?.fb?.revenue?.method || a.volumeMethods.fb.revenue.method === "legacy") && <Field label="F&B revenue year 1 (NOK, ex VAT)"><NumField value={a.fbRevenueYear1} disabled={ro || !!fbSel?.revenue} onChange={(v) => set({ fbRevenueYear1: v })} /></Field>}
           {(!a.volumeMethods?.merch?.revenue?.method || a.volumeMethods.merch.revenue.method === "legacy") && <Field label="Merchandise revenue year 1 (NOK, ex VAT)"><NumField value={a.merchRevenueYear1} disabled={ro} onChange={(v) => set({ merchRevenueYear1: v })} /></Field>}

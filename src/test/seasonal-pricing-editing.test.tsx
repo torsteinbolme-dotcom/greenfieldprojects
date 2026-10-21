@@ -36,6 +36,12 @@ describe("seasonal settings and saved distribution interaction", () => {
     const changed = values.at(-1); if (!changed) throw Error("Missing edit");
     expect(calculate(changed).rows[0]?.ticketRevenue).toBeCloseTo(200000, 8);
   });
+  it("shows no operating-year picker and always reads Year 3", () => {
+    const set = vi.fn(); render(<TicketPricingSection a={projectMountain} r={calculate(projectMountain)} ro={false} set={set} />);
+    fireEvent.click(screen.getByRole("switch", { name: "Enable Seasonal Ticket Pricing" }));
+    expect(screen.queryByText("Operating year")).toBeNull();
+    expect(screen.getByText("Season · Year 3")).toBeTruthy();
+  });
   it("prevents viewers from editing seasonal settings", () => {
     const set = vi.fn(); render(<TicketPricingSection a={projectMountain} r={null} ro set={set} />);
     fireEvent.click(screen.getByRole("switch", { name: "Enable Seasonal Ticket Pricing" })); expect(set).not.toHaveBeenCalled();

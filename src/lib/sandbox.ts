@@ -30,6 +30,44 @@ export function normalizeFromYear1(result: ModelResult, target: SandboxTargets):
   };
 }
 
+export type Factors = { passengers?: number; price?: number; capex?: number; opex?: number; exitMultiple?: number };
+/**
+ * Shared temporary-override layer (Sandbox and Risk & Sensitivity). Mutates a resolved CLONE only.
+ * passengers: Year 1 volume (growth path kept; passenger-linked legacy F&B basis rescaled).
+ * price: every gross fare incl. seasonal prices (VAT, commission and fare ratios kept).
+ * capex: every CAPEX line (contingency, debt share and depreciation rules apply as usual).
+ * opex: cable car operating costs only (standard fixed + per-passenger, or every Advanced Operations
+ *   amount incl. step costs; thresholds unchanged). F&B, merchandise and other OPEX follow their own methods.
+ * exitMultiple: the exit EBITDA multiple.
+ */
+export function applyFactors(a: Assumptions, f: Factors): Assumptions {
+  const passengerFactor = f.passengers ?? 1, priceFactor = f.price ?? 1;
+  if (passengerFactor !== 1) {
+    a.initialPassengers *= passengerFactor;
+    // Stored passenger-linked legacy amounts have a Year 1 passenger basis.
+    // Explicit benchmark/per-passenger methods already use the new volume in the engine.
+    const revenueLegacy = !a.volumeMethods?.fb?.revenue?.method || a.volumeMethods.fb.revenue.method === 'legacy';
+    const opexLegacy = !a.volumeMethods?.fb?.opex?.method || a.volumeMethods.fb.opex.method === 'legacy';
+    const revenueLinked = a.fbBenchmark?.revenue ? (a.fbBenchmark.revenue.adjust ?? a.fbBenchmark.adjust) : a.fbFollowsPassengers;
+    const opexLinked = a.fbBenchmark?.opex ? (a.fbBenchmark.opex.adjust ?? a.fbBenchmark.adjust) : a.fbFollowsPassengers;
+    if (revenueLegacy && revenueLinked) a.fbRevenueYear1 *= passengerFactor;
+    if (opexLegacy && opexLinked && !a.opexGrowth?.fb?.length) a.fbOpexYear1 *= passengerFactor;
+  }
+  if (priceFactor !== 1) {
+    // Normalize through the same linked-fare function as Standard Comparison before scaling.
+    a.segments = withLinkedTicketPrices(a).segments.map(s => ({ ...s, grossPrice: s.grossPrice * priceFactor }));
+    if (a.seasonalPricing) a.seasonalPricing.prices = a.seasonalPricing.prices.map(p => ({ ...p, low: p.low * priceFactor, high: p.high * priceFactor }));
+  }
+  if (f.capex != null && f.capex !== 1) a.capexItems = a.capexItems.map(c => ({ ...c, unitCost: c.unitCost * f.capex! }));
+  if (f.opex != null && f.opex !== 1) {
+    const k = f.opex;
+    a.cableFixedOpex *= k; a.cableVariableCostPerPassenger = (a.cableVariableCostPerPassenger || 0) * k;
+    if (a.operationsOpex) a.operationsOpex = { ...a.operationsOpex, categories: a.operationsOpex.categories.map(c => ({ ...c, fixed: c.fixed * k, variable: c.variable * k, step: { ...c.step, base: c.step.base * k, stepCost: c.step.stepCost * k } })) };
+  }
+  if (f.exitMultiple != null && f.exitMultiple !== 1) a.exitMultiple *= f.exitMultiple;
+  return a;
+}
+
 /** Pure transient override. No persistence, refresh of snapshots, or baseline mutation. */
 export function simulateSandbox(input: Assumptions, targets?: SandboxTargets): SandboxCase {
   const baseline = safeCalculate(input);
@@ -44,22 +82,7 @@ export function simulateSandbox(input: Assumptions, targets?: SandboxTargets): S
     if (base.ticketPrice <= 0 && targets.ticketPrice !== base.ticketPrice) throw Error('A zero Year 3 ticket price cannot be scaled. Choose a scenario with a positive net fare.');
     const passengerFactor = base.passengers > 0 ? targets.passengers / base.passengers : 1;
     const priceFactor = base.ticketPrice > 0 ? targets.ticketPrice / base.ticketPrice : 1;
-    if (passengerFactor !== 1) {
-      a.initialPassengers *= passengerFactor;
-      // Stored passenger-linked legacy amounts have a Year 1 passenger basis.
-      // Explicit benchmark/per-passenger methods already use the new volume in the engine.
-      const revenueLegacy = !a.volumeMethods?.fb?.revenue?.method || a.volumeMethods.fb.revenue.method === 'legacy';
-      const opexLegacy = !a.volumeMethods?.fb?.opex?.method || a.volumeMethods.fb.opex.method === 'legacy';
-      const revenueLinked = a.fbBenchmark?.revenue ? (a.fbBenchmark.revenue.adjust ?? a.fbBenchmark.adjust) : a.fbFollowsPassengers;
-      const opexLinked = a.fbBenchmark?.opex ? (a.fbBenchmark.opex.adjust ?? a.fbBenchmark.adjust) : a.fbFollowsPassengers;
-      if (revenueLegacy && revenueLinked) a.fbRevenueYear1 *= passengerFactor;
-      if (opexLegacy && opexLinked && !a.opexGrowth?.fb?.length) a.fbOpexYear1 *= passengerFactor;
-    }
-    if (priceFactor !== 1) {
-      // Normalize through the same linked-fare function as Standard Comparison before scaling.
-      a.segments = withLinkedTicketPrices(a).segments.map(s => ({ ...s, grossPrice: s.grossPrice * priceFactor }));
-      if (a.seasonalPricing) a.seasonalPricing.prices = a.seasonalPricing.prices.map(p => ({ ...p, low: p.low * priceFactor, high: p.high * priceFactor }));
-    }
+    applyFactors(a, { passengers: passengerFactor, price: priceFactor });
   }
   const simulated = safeCalculate(a);
   if (!simulated.result) throw Error(simulated.error ?? 'Unable to simulate this scenario.');

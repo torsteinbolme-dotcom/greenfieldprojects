@@ -3,7 +3,7 @@ import { RotateCcw } from 'lucide-react';
 import type { Entry } from './selection';
 import { Button } from '@/components/ui/button';
 import { Field, NumField } from '@/components/editor/inputs';
-import { baselineTargets, simulateSandbox, type SandboxCase, type SandboxTargets } from '@/lib/sandbox';
+import { baselineTargets, normalizeFromYear1, simulateSandbox, type SandboxCase, type SandboxTargets } from '@/lib/sandbox';
 import { irrAtYear, moicAtYear } from '@/lib/portfolio';
 import { forecastOpex } from '@/lib/forecast-opex';
 import { deltaClass, formatNumber, mult, nokM, pct, signedNum, signedPct } from '@/lib/format';
@@ -69,11 +69,18 @@ function AnnualResults({ baseline, simulation }: { baseline: SandboxCase; simula
 export function SandboxComparison({ entries }: { entries: Entry[] }) {
   const [adjustments, setAdjustments] = useState<Record<string, SandboxTargets>>({});
   const [normalize, setNormalize] = useState<SandboxTargets>({ passengers: 250000, ticketPrice: 500 });
+  const [skipped, setSkipped] = useState(0);
   const key = (e: Entry) => `${e.project.id}:${e.scenario.id}:${JSON.stringify(e.a)}`;
-  const apply = () => setAdjustments(previous => ({ ...previous, ...Object.fromEntries(entries.map(e => [key(e), { ...normalize }])) }));
+  const apply = () => {
+    const updates: Record<string, SandboxTargets> = {};
+    let unnormalized = 0;
+    for (const e of entries) { const t = normalizeFromYear1(e.result, normalize); if (t) updates[key(e)] = t; else unnormalized += 1; }
+    setSkipped(unnormalized);
+    setAdjustments(previous => ({ ...previous, ...updates }));
+  };
   return <section className="space-y-5" aria-label="Sandbox Mode">
     <div className="flex flex-wrap items-center justify-between gap-3 border-l-4 border-primary bg-muted p-3"><p className="text-sm font-medium">Sandbox Mode — Simulated values. Original projects remain unchanged.</p><Button size="sm" variant="outline" onClick={() => setAdjustments({})}><RotateCcw className="mr-1 h-4 w-4" />Reset All</Button></div>
-    <section className="space-y-3" aria-label="Normalize Projects"><h2 className="font-semibold">Normalize Projects</h2><div className="flex flex-wrap items-end gap-3"><Field label="Target Year 3 passengers"><NumField aria-label="Normalize Year 3 passengers" value={normalize.passengers} onChange={v => setNormalize(n => ({ ...n, passengers: v }))} /></Field><Field label="Target average net ticket price (NOK)"><NumField aria-label="Normalize average net ticket price" value={normalize.ticketPrice} onChange={v => setNormalize(n => ({ ...n, ticketPrice: v }))} /></Field><Button onClick={apply} disabled={!entries.length || normalize.passengers < 0 || normalize.ticketPrice < 0}>Apply to Selected Projects</Button></div></section>
+    <section className="space-y-3" aria-label="Normalize Projects"><h2 className="font-semibold">Normalize Projects</h2><div className="flex flex-wrap items-end gap-3"><Field label="Target Year 1 passengers"><NumField aria-label="Normalize Year 1 passengers" value={normalize.passengers} onChange={v => setNormalize(n => ({ ...n, passengers: v }))} /></Field><Field label="Target average net ticket price Y1 (NOK)"><NumField aria-label="Normalize Year 1 average net ticket price" value={normalize.ticketPrice} onChange={v => setNormalize(n => ({ ...n, ticketPrice: v }))} /></Field><Button onClick={apply} disabled={!entries.length || normalize.passengers < 0 || normalize.ticketPrice < 0}>Apply to Selected Projects</Button></div><p className="text-xs text-muted-foreground">Each selected project is set to these Year 1 values and keeps its own growth into later years.</p>{skipped > 0 && <p className="text-sm text-warning-foreground">{skipped} project(s) have no usable Year 1 baseline and were left unchanged.</p>}</section>
     {!entries.length && <p className="text-sm text-muted-foreground">No projects selected.</p>}
     <div className="grid gap-6">{entries.map(e => <ProjectSimulation key={key(e)} entry={e} targets={adjustments[key(e)]} onChange={v => setAdjustments(p => ({ ...p, [key(e)]: v }))} onReset={() => setAdjustments(p => { const n = { ...p }; delete n[key(e)]; return n; })} />)}</div>
   </section>;

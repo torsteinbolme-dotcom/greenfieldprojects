@@ -15,6 +15,20 @@ export function baselineTargets(result: ModelResult): SandboxTargets | null {
   return row ? { passengers: row.passengers, ticketPrice: row.ticketNetPrice } : null;
 }
 
+/**
+ * Turn Year 1 normalize targets into the Year 3 targets this adapter scales from.
+ * Each project keeps its own growth path: scaling by the Year 1 ratio lands Year 1 on the target.
+ * Returns null when the project has no usable Year 1 baseline to scale from.
+ */
+export function normalizeFromYear1(result: ModelResult, target: SandboxTargets): SandboxTargets | null {
+  const y1 = result.rows[0], y3 = result.rows[2];
+  if (!y1 || !y3 || !(y1.passengers > 0) || !(y1.ticketNetPrice > 0)) return null;
+  return {
+    passengers: y3.passengers * (target.passengers / y1.passengers),
+    ticketPrice: y3.ticketNetPrice * (target.ticketPrice / y1.ticketNetPrice),
+  };
+}
+
 /** Pure transient override. No persistence, refresh of snapshots, or baseline mutation. */
 export function simulateSandbox(input: Assumptions, targets?: SandboxTargets): SandboxCase {
   const baseline = safeCalculate(input);

@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { NumField } from "@/components/editor/inputs";
 import { int, nok, nokM, pct } from "@/lib/format";
 import type { ModelResult } from "@/lib/model";
-import { resolveAssumptions } from "@/lib/advanced";
 import { forecastOpex } from "@/lib/forecast-opex";
 import {
   defaultOperationsInputs, METHOD_LABELS, METRIC_LABELS, newOpsCategory, operationsBreakdown, scheduleMonths, toModel,
@@ -21,7 +20,6 @@ export function AdvancedOperationsEditor({ a, r, inputs, on, ro, onChange }: Pro
   const [yearIdx, setYearIdx] = useState(0);
   const row = rows[Math.min(yearIdx, Math.max(rows.length - 1, 0))];
   const model = toModel(a, data);
-  const resolved = resolveAssumptions(a);
   const upd = (i: number, patch: Partial<OperationsCategory>) => onChange({ ...data, categories: data.categories.map((c, j) => (j === i ? { ...c, ...patch } : c)) });
   const updStep = (i: number, patch: Partial<OperationsCategory["step"]>) => upd(i, { step: { ...data.categories[i].step, ...patch } });
   const setSched = (key: "operatingDays" | "closureDays" | "hours", m: number, v: number) => onChange({ ...data, schedule: { ...model.schedule, [key]: model.schedule[key].map((x, j) => (j === m ? v : x)) } });
@@ -71,7 +69,6 @@ export function AdvancedOperationsEditor({ a, r, inputs, on, ro, onChange }: Pro
           <Stat label="Used in EBITDA" value={on ? (reconciles ? "Reconciles exactly" : `Mismatch ${nokM(engineCable - breakdown.total)}`) : "Standard (module off)"} />
         </div>
       )}
-      {resolved !== a && !on && null}
 
       <div className="overflow-x-auto">
         <table className="w-full text-xs">

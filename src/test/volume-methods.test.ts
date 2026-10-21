@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { calculate, type Assumptions } from '@/financialEngine';
 import { projectMountain } from '@/exampleProject';
 import { forecastOpex } from '@/lib/forecast-opex';
-import { economicsAtYear } from '@/lib/unit-economics';
+import { DEFAULT_COMPARISON_ECONOMICS_YEAR, economicsAtYear } from '@/lib/unit-economics';
 import { presentationData } from '@/lib/presentation-data';
 import { splitYear } from '@/lib/year3';
 import { withFbBenchmark, type AssumptionsWithFb } from '@/lib/fb-benchmark';
@@ -68,6 +68,12 @@ describe('independent volume method references', () => {
   });
 });
 describe('shared unit economics', () => {
+  it('comparison defaults to Year 1 without changing the shared Year 3 export default', () => {
+    const r = calculate(base);
+    expect(DEFAULT_COMPARISON_ECONOMICS_YEAR).toBe(1);
+    expect(economicsAtYear(base, r.rows, DEFAULT_COMPARISON_ECONOMICS_YEAR)?.year).toBe(1);
+    expect(economicsAtYear(base, r.rows)?.year).toBe(3);
+  });
   const a: Assumptions = { ...base, volumeMethods: { fb: { revenue: { method: 'perPassenger', perPassenger: 125 }, opex: { method: 'perPassenger', perPassenger: 90 } }, merch: { revenue: { method: 'perPassenger', perPassenger: 25 }, opex: { method: 'revenuePercent', revenuePercent: 1 } }, other: { revenue: { method: 'annual', annualAmount: 1000 }, opex: { method: 'fixedVariable', fixedAmount: 500, variablePerPassenger: 5 } } } };
   it('every component equals actual annual engine results divided by passengers and reconciles to EBITDA', () => {
     const r = calculate(a);

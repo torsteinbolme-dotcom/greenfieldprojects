@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { COLORS, encodeSc, ProjectPicker, useSelection, type Entry } from "@/components/comparison/selection";
 import { devValue, sortByMetric } from "@/lib/portfolio";
 import { formatNumber, mult, nok, nokM, pct } from "@/lib/format";
-import { economicsAtYear } from "@/lib/unit-economics";
+import { DEFAULT_COMPARISON_ECONOMICS_YEAR, economicsAtYear } from "@/lib/unit-economics";
 import { projectReturns, splitYear, year3Row } from "@/lib/year3";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SandboxComparison } from "@/components/comparison/sandbox";
@@ -65,7 +65,6 @@ const METRICS: Metric[] = [
   { key: "revPax", label: "Revenue / passenger (NOK)", group: "operations", fmt: "nok", get: (r) => r.y3?.revenuePerPax ?? null },
   { key: "opexPax", label: "OPEX / passenger (NOK)", group: "operations", fmt: "nok", get: (r) => economicsAtYear(r.a, r.result.rows, 3)?.opexPerPassenger ?? null },
   { key: "ebitdaPax", label: "EBITDA / passenger (NOK)", group: "operations", fmt: "nok", get: (r) => r.y3?.ebitdaPerPax ?? null },
-  { key: "payback", label: "Payback period", group: "returns", fmt: "years", get: (r) => r.ret.payback },
   { key: "exitYear", label: "Exit year", group: "returns", fmt: "year", get: (r) => r.a.exitYear },
   { key: "exitEbitda", label: "Exit EBITDA (NOK m)", group: "returns", fmt: "nokM", get: (r) => r.result.rows[r.a.exitYear - 1]?.ebitda ?? null },
   { key: "exitMultiple", label: "Exit multiple", group: "returns", fmt: "mult", get: (r) => r.a.exitMultiple },
@@ -94,6 +93,7 @@ function ProjectVsProject() {
   const [sort, setSort] = useState<{ key: string; dir: "asc" | "desc" }>({ key: "moic", dir: "desc" });
   const [hidden, setHidden] = useState<Set<Group>>(new Set());
   const [dev, setDev] = useState<keyof typeof DEV>("revenue");
+  const [economicsYear, setEconomicsYear] = useState(DEFAULT_COMPARISON_ECONOMICS_YEAR);
 
   const rows: Row[] = useMemo(() => entries.map((e) => { const r3 = year3Row(e.result); return { ...e, y3: r3 ? splitYear(e.a, r3) : null, ret: projectReturns(e.a, e.result) }; }), [entries]);
   const sortMetric = METRICS.find((m) => m.key === sort.key);
@@ -165,10 +165,20 @@ function ProjectVsProject() {
               ))}</tbody>
             </table>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">Year 3 = third full operating year after opening. Payback uses unlevered free cash flow (EBITDA minus tax on operating profit, losses carried forward) against total CAPEX and ignores the exit value.</p>
+          <p className="mt-3 text-xs text-muted-foreground">Year 3 = third full operating year after opening.</p>
         </Card>
 
-        <section className="space-y-3" aria-label="Year 3 unit economics comparison"><h2 className="text-lg font-semibold">Unit Economics · Year 3</h2><div className="overflow-x-auto"><table className="fin-table"><thead><tr><th>Project / scenario</th><th className="text-right">Revenue / passenger</th><th className="text-right">OPEX / passenger</th><th className="text-right">EBITDA / passenger</th></tr></thead><tbody>{sorted.map(r => { const e = economicsAtYear(r.a, r.result.rows, 3); return <tr key={r.scenario.id}><td>{label(r)}</td><td className="num text-right">{fmt("nok", e?.revenuePerPassenger ?? null)}</td><td className="num text-right text-destructive">{fmt("nok", e?.opexPerPassenger === null || e?.opexPerPassenger === undefined ? null : -e.opexPerPassenger)}</td><td className="num text-right font-semibold">{fmt("nok", e?.ebitdaPerPassenger ?? null)}</td></tr>; })}</tbody></table></div><p className="text-xs text-muted-foreground">NOK per cable car passenger · excluding VAT · costs shown negative</p></section>
+        <section className="space-y-3" aria-label={`Year ${economicsYear} unit economics comparison`}>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold">Unit Economics · Year {economicsYear}</h2>
+            <Select value={String(economicsYear)} onValueChange={v => setEconomicsYear(Number(v))}>
+              <SelectTrigger className="w-36" aria-label="Unit Economics operating year"><SelectValue /></SelectTrigger>
+              <SelectContent>{years.map(year => <SelectItem key={year} value={String(year)}>Year {year}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div className="overflow-x-auto"><table className="fin-table"><thead><tr><th>Project / scenario</th><th className="text-right">Revenue / passenger</th><th className="text-right">OPEX / passenger</th><th className="text-right">EBITDA / passenger</th></tr></thead><tbody>{sorted.map(r => { const e = economicsAtYear(r.a, r.result.rows, economicsYear); return <tr key={r.scenario.id}><td>{label(r)}</td><td className="num text-right">{fmt("nok", e?.revenuePerPassenger ?? null)}</td><td className="num text-right text-destructive">{fmt("nok", e?.opexPerPassenger === null || e?.opexPerPassenger === undefined ? null : -e.opexPerPassenger)}</td><td className="num text-right font-semibold">{fmt("nok", e?.ebitdaPerPassenger ?? null)}</td></tr>; })}</tbody></table></div>
+          <p className="text-xs text-muted-foreground">NOK per cable car passenger · excluding VAT · costs shown negative</p>
+        </section>
 
         <div className="grid gap-4 md:grid-cols-2">
           {CHARTS.map((k) => { const m = METRICS.find((x) => x.key === k); if (!m) return null; return (

@@ -16,7 +16,7 @@
 - Every table has `organization_id`; RLS uses `is_org_member` / `can_edit_org` / `is_org_admin` (security definer). Why: isolation.
 - Scenario saves insert new versions; Base is never overwritten by other scenarios. Why: isolation and version history.
 - Version reads fail explicitly; unique-version collisions retry (bounded); org relationships and Base identity are DB-guarded. Why: no corrupted history or tenancy.
-- Signups get their own organization and seeded Mountain via `handle_new_user`. Why: working examples.
+- Signups get an own org + seeded Mountain (`handle_new_user`). Why: working examples.
 - Ticket ratios live in scenario JSON; use `src/lib/ticket-pricing.ts` for edits/calculations/saves; `withDefaultProjectSegments` only for new templates. Why: preserve saved fares and history.
 - Use scoped serial autosave for assumptions and project details, including name (metadata only); undo saves a snapshot, never deletes history. Why: edits survive requests and stay isolated.
 - Comparison display years derive through `comparisonYears` in `src/lib/portfolio.ts`, independent of full forecast lengths. Why: shortening comparison graphs must not change authoritative calculations.

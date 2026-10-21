@@ -62,8 +62,8 @@ export function calculate(a:Assumptions){
     const ticketNetPrice=seasonalTicket===null||seasonalTicket===flatWeightedTicket?price:seasonalTicket*ticketPriceGrowthIndex(a,year);
     const methods=a.volumeMethods,revIndex=escalation(a.ancillaryGrowth,year);
     const fbBenchmarkRevenueIndex=fbRevenueLinked?paxIndex*priceIndex:revIndex;
-    const actualFb=volumeRevenue(methods?.fb?.revenue,passengers,revIndex,fb,benchmarkAmount(a,'revenue'),fbBenchmarkRevenueIndex);
-    const actualMerch=volumeRevenue(methods?.merch?.revenue,passengers,revIndex,merch,0,1);
+    const actualFb=volumeRevenue(methods?.fb?.revenue,passengers,revIndex,fb,benchmarkAmount(a,'revenue'),fbBenchmarkRevenueIndex,year);
+    const actualMerch=volumeRevenue(methods?.merch?.revenue,passengers,revIndex,merch,0,1,year);
     const otherRevenue=volumeRevenue(methods?.other?.revenue,passengers,revIndex,0,0,1);
     // Explicit F&B OPEX growth remains the sole driver for existing methods.
     const legacyFbOpex=(a.opexGrowth?.fb?.length ? a.fbOpexYear1 : a.fbBenchmark?.opex ? a.fbOpexYear1*(fbOpexLinked?paxIndex:1) : (fbOpexLinked? a.fbOpexYear1*paxIndex:(a.fbRevenueYear1>0? a.fbOpexYear1*actualFb/a.fbRevenueYear1:a.fbOpexYear1)))*costIndex(a,'fb',year);

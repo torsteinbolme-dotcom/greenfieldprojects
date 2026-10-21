@@ -27,6 +27,8 @@ import { withCableOpexBenchmark } from "@/lib/cable-opex-benchmark";
 import { EbitdaBridge } from "@/components/editor/ebitda-bridge";
 import { InvestmentSummary } from "@/components/editor/investment-summary";
 import { BreakEvenPanel } from "@/components/editor/break-even";
+import { AdvancedCalculationsSection } from "@/components/editor/advanced-calculations";
+import type { AssumptionsWithAdvanced } from "@/lib/advanced";
 import { SaveControls } from "@/components/editor/save-controls";
 import { CapacitySection } from "@/components/editor/capacity";
 import { TicketPricingSection } from "@/components/editor/ticket-pricing";
@@ -181,7 +183,7 @@ function EditorPage() {
 
       <Tabs value={search.tab ?? "overview"} onValueChange={(t) => navigate({ search: (s) => ({ ...s, tab: t }), replace: true })}>
         <TabsList className="h-auto flex-wrap">
-          {([["overview", "Overview"], ["summary", "Investment Summary"], ["segments", "Passenger segments"], ["tickets", "Ticket pricing & revenue"], ["capex", "CAPEX"], ["revenue", "Revenue & OPEX"], ["financing", "Financing"], ["forecast", "Forecast"], ["exit", "Exit analysis"], ["capacity", "Capacity"], ["benchmarking", "Benchmarking"], ["history", "Version history"]] as const).map(([k, l]) => (
+          {([["overview", "Overview"], ["summary", "Investment Summary"], ["segments", "Passenger segments"], ["tickets", "Ticket pricing & revenue"], ["capex", "CAPEX"], ["revenue", "Revenue & OPEX"], ["financing", "Financing"], ["forecast", "Forecast"], ["exit", "Exit analysis"], ["capacity", "Capacity"], ["benchmarking", "Benchmarking"], ["advanced", "Advanced Calculations"], ["history", "Version history"]] as const).map(([k, l]) => (
             <TabsTrigger key={k} value={k}>{l}</TabsTrigger>
           ))}
         </TabsList>
@@ -212,6 +214,7 @@ function EditorPage() {
         <TabsContent value="exit">{r ? <ExitSection a={draft} set={set} ro={ro} r={r} /> : <p className="text-muted-foreground">Fix the inputs to see exit analysis.</p>}</TabsContent>
         <TabsContent value="capacity"><CapacitySection key={scenario.id} a={draft} r={r} ro={ro} set={set} /></TabsContent>
         <TabsContent value="benchmarking"><BenchmarkingSection projectId={project.id} config={(project.benchmark_config ?? {}) as BenchmarkConfig} a={draft} r={r} ro={ro} apply={set} /></TabsContent>
+        <TabsContent value="advanced"><AdvancedCalculationsSection a={draft} ro={ro} set={(next) => set({ advanced: (next as AssumptionsWithAdvanced).advanced } as Partial<Assumptions>)} /></TabsContent>
         <TabsContent value="history">
           <Card title={`Version history — ${scenario.name}`}>
             <table className="fin-table">

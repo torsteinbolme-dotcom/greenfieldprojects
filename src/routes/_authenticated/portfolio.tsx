@@ -95,7 +95,7 @@ function PortfolioPage() {
                   {!e.error && !m.row && <div className="text-xs text-muted-foreground">Not operating in {label}</div>}</td>
                 <td>{e.scenario.name}</td>
                 <td className="num text-right">{mult(m.moic)}</td><td className="num text-right">{pct(m.irr)}</td>
-                <td className="num text-right">{formatNumber(m.baseTicket, 2, 2)}</td><td className="num text-right">{int(m.passengers)}</td>
+                <td className="num text-right">{formatNumber(m.baseTicket, 0, 0)}</td><td className="num text-right">{int(m.passengers)}</td>
                 <td className="num text-right">{nokM(m.revenue)}</td><td className="num text-right">{nokM(m.ebitda)}</td>
                 <td className="num text-right">{pct(m.margin)}</td><td className="num text-right">{nokM(m.capex)}</td>
                 <td className="num text-right">{nokM(m.exitEquity)}</td>

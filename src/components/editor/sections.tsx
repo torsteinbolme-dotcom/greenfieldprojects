@@ -157,8 +157,8 @@ export function CapexSection({ a, set, ro, r }: P & { r: ModelResult | null }) {
   return (
     <Card title="CAPEX">
       <div className="overflow-x-auto">
-        <table className="fin-table">
-          <thead><tr><th>Item</th><th>Quantity</th><th>Unit cost (NOK)</th><th className="text-right">Line total (NOK m)</th><th /></tr></thead>
+          <table className="fin-table">
+          <thead><tr><th>Item</th><th>Quantity</th><th>Unit cost (NOK)</th><th className="text-right">Line total (NOK m)</th><th>Comment</th><th /></tr></thead>
           <tbody>
             {a.capexItems.map((c, i) => (
               <tr key={i}>
@@ -166,16 +166,17 @@ export function CapexSection({ a, set, ro, r }: P & { r: ModelResult | null }) {
                 <td className="w-28"><NumField value={c.quantity} disabled={ro} onChange={(v) => upd(i, { quantity: v })} /></td>
                 <td className="w-40"><NumField value={c.unitCost} disabled={ro} onChange={(v) => upd(i, { unitCost: v })} /></td>
                 <td className="num text-right">{nokM(c.quantity * c.unitCost)}</td>
+                <td><Input className="h-8 min-w-56" value={c.comment ?? ""} disabled={ro} onChange={(e) => upd(i, { comment: e.target.value })} /></td>
                 <td>{!ro && <Button size="sm" variant="ghost" onClick={() => set({ capexItems: a.capexItems.filter((_, j) => j !== i) })}>Remove</Button>}</td>
-              </tr>
+               </tr>
             ))}
-            <tr><td colSpan={3} className="font-medium">Base CAPEX</td><td className="num text-right">{nokM(base)}</td><td /></tr>
+            <tr><td colSpan={3} className="font-medium">Base CAPEX</td><td className="num text-right">{nokM(base)}</td><td /><td /></tr>
             <tr>
               <td colSpan={2}>Contingency</td>
               <td className="w-40"><NumField percent value={a.contingencyRate} disabled={ro} onChange={(v) => set({ contingencyRate: v })} /></td>
-              <td className="num text-right">{nokM(base * a.contingencyRate)}</td><td />
+              <td className="num text-right">{nokM(base * a.contingencyRate)}</td><td /><td />
             </tr>
-            <tr className="font-semibold"><td colSpan={3}>Total investment</td><td className="num text-right">{nokM(base * (1 + a.contingencyRate))}</td><td /></tr>
+            <tr className="font-semibold"><td colSpan={3}>Total investment</td><td className="num text-right">{nokM(base * (1 + a.contingencyRate))}</td><td /><td /></tr>
           </tbody>
         </table>
       </div>

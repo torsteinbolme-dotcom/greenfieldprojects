@@ -22,7 +22,7 @@ export function AdvancedOperationsEditor({ a, r, inputs, on, ro, onChange }: Pro
   const model = toModel(a, data);
   const upd = (i: number, patch: Partial<OperationsCategory>) => onChange({ ...data, categories: data.categories.map((c, j) => (j === i ? { ...c, ...patch } : c)) });
   const updStep = (i: number, patch: Partial<OperationsCategory["step"]>) => upd(i, { step: { ...data.categories[i].step, ...patch } });
-  const setSched = (key: "operatingDays" | "closureDays" | "hours", m: number, v: number) => onChange({ ...data, schedule: { ...model.schedule, [key]: model.schedule[key].map((x, j) => (j === m ? v : x)) } });
+  const setSched = (key: "operatingDays" | "closureDays" | "hours", m: number, v: number) => onChange({ ...data, schedule: { ...model.schedule, [key]: (model.schedule[key] ?? Array(12).fill(null)).map((x, j) => (j === m ? v : x)) } });
 
   let breakdown: ReturnType<typeof operationsBreakdown> | null = null, months: ReturnType<typeof scheduleMonths> | null = null, error: string | null = null;
   if (row) {

@@ -20,9 +20,9 @@ export function coverPath(orgId: string, projectId: string, ext = "jpg") {
 
 /**
  * Image source for a card: the project's own photo (signed for display) or the
- * shared placeholder when none is saved or the signature is missing.
+ * shared placeholder only when none is saved. Wait for signing when one exists.
  */
 export function coverSrc(project: { cover_image_url: string | null }, signed: Record<string, string>) {
   const path = project.cover_image_url;
-  return (path && signed[path]) || DEFAULT_COVER_URL;
+  return path ? signed[path] : DEFAULT_COVER_URL;
 }

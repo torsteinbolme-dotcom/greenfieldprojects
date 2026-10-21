@@ -19,9 +19,12 @@ describe("project cover photos", () => {
   it("shows the project's own photo, and the placeholder when there is none", () => {
     expect(coverSrc({ cover_image_url: PATH }, { [PATH]: "https://signed/one" })).toBe("https://signed/one");
     expect(coverSrc({ cover_image_url: null }, {})).toBe(DEFAULT_COVER_URL);
-    // saved photo whose signed URL is missing -> placeholder, never a broken image
-    expect(coverSrc({ cover_image_url: PATH }, {})).toBe(DEFAULT_COVER_URL);
     expect(DEFAULT_COVER_URL).toContain("/default.jpg");
     expect(COVER_BUCKET).toBe("project-covers");
+  });
+
+  it("never substitutes the default while an uploaded photo is awaiting its signed URL", () => {
+    expect(coverSrc({ cover_image_url: PATH }, {})).toBeUndefined();
+    expect(coverSrc({ cover_image_url: PATH }, { [PATH]: "https://signed/upload" })).toBe("https://signed/upload");
   });
 });

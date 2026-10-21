@@ -89,6 +89,14 @@ describe("advanced commercial revenue", () => {
       expect(off.volumeMethods).toBe(a.volumeMethods);
     }
   });
+  it("defaults built from the current forecast reproduce every saved scenario's F&B and merch revenue", () => {
+    for (const s of saved as { assumptions: Assumptions }[]) {
+      const std = run(s.assumptions);
+      const on = run(adv(s.assumptions, { commercialFb: { enabled: true, inputs: defaultCommercialInputs(s.assumptions, "fb", std.rows) as never }, commercialMerch: { enabled: true, inputs: defaultCommercialInputs(s.assumptions, "merch", std.rows) as never } }));
+      on.rows.forEach((y, i) => { close(y.fbRevenue, std.rows[i]!.fbRevenue); close(y.merchRevenue, std.rows[i]!.merchRevenue); });
+      expect(Math.abs((on.equityMultiple ?? 0) - (std.equityMultiple ?? 0))).toBeLessThan(1e-6);
+    }
+  });
   it("scenario isolation and works on top of advanced demand passengers", () => {
     const other = structuredClone(projectMountain);
     run(fbOn);

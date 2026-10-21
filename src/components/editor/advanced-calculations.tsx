@@ -26,8 +26,8 @@ export function AdvancedCalculationsSection({ a, r, ro, set }: { a: Assumptions;
     // First activation starts from inputs that reproduce the standard forecast.
     if (key === "demand" && v && !next.advanced?.demand?.inputs) next.advanced!.demand = { enabled: true, inputs: defaultDemandInputs(a) as unknown as Record<string, unknown> };
     if (key === "capex" && v && !next.advanced?.capex?.inputs) next.advanced!.capex = { enabled: true, inputs: defaultCapexInputs(a) as unknown as Record<string, unknown> };
-    if (key === "commercialFb" && v && !next.advanced?.commercialFb?.inputs) next.advanced!.commercialFb = { enabled: true, inputs: defaultCommercialInputs(a, "fb") as unknown as Record<string, unknown> };
-    if (key === "commercialMerch" && v && !next.advanced?.commercialMerch?.inputs) next.advanced!.commercialMerch = { enabled: true, inputs: defaultCommercialInputs(a, "merch") as unknown as Record<string, unknown> };
+    if (key === "commercialFb" && v && !next.advanced?.commercialFb?.inputs) next.advanced!.commercialFb = { enabled: true, inputs: defaultCommercialInputs(a, "fb", r?.rows) as unknown as Record<string, unknown> };
+    if (key === "commercialMerch" && v && !next.advanced?.commercialMerch?.inputs) next.advanced!.commercialMerch = { enabled: true, inputs: defaultCommercialInputs(a, "merch", r?.rows) as unknown as Record<string, unknown> };
     set(next);
   };
   const setInputs = (key: AdvancedModuleKey, inputs: unknown) => set({ ...a, advanced: { ...adv, [key]: { enabled: adv[key]?.enabled ?? false, inputs: inputs as Record<string, unknown> } } } as AssumptionsWithAdvanced);

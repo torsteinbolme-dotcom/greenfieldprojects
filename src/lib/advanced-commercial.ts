@@ -25,7 +25,13 @@ export type CommercialYear = { year: number; conversion: number; spend: number; 
 const step = (list: number[] | undefined, year: number) => (list && list.length ? list[Math.min(year - 2, list.length - 1)] ?? 0 : 0);
 
 /** Starting inputs reproduce the current Year 1 revenue per passenger at 100% conversion. */
-export function defaultCommercialInputs(a: Assumptions, kind: CommercialKind): CommercialInputs {
+export function defaultCommercialInputs(a: Assumptions, kind: CommercialKind, rows?: { passengers: number; fbRevenue: number; merchRevenue: number }[]): CommercialInputs {
+  // With the current forecast available, start from its revenue per passenger in every year (reproduces any standard method).
+  const perPax = rows?.map((r) => (r.passengers > 0 ? (kind === "fb" ? r.fbRevenue : r.merchRevenue) / r.passengers : NaN));
+  if (perPax && perPax.length && perPax.every((v) => Number.isFinite(v) && v >= 0) && perPax.slice(0, -1).every((v) => v > 0)) {
+    const g = perPax.slice(1).map((v, i) => v / perPax[i]! - 1);
+    return { conversion: 1, conversionChange: [], spend: perPax[0]!, spendGrowth: g, seasonal: { enabled: false, highConversion: 1, lowConversion: 1, highSpend: perPax[0]!, lowSpend: perPax[0]! } };
+  }
   const y1 = kind === "fb" ? a.fbRevenueYear1 : a.merchRevenueYear1;
   const spend = a.initialPassengers > 0 ? y1 / a.initialPassengers : 0;
   // Spend growth net of passenger growth, so the starting forecast follows the standard ancillary growth.

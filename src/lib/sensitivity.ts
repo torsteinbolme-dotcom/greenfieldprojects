@@ -75,6 +75,5 @@ export function reconcileZero(input: Assumptions): ReconciliationMismatch[] {
   const base = safeCalculate(input);
   if (!base.result) throw Error(base.error ?? "Unable to calculate baseline.");
   const zero = runCase(input, { passengers: 0, price: 0, capex: 0, opex: 0, exitMultiple: 0 });
-  return reconcileSandbox(financialSnapshot(resolveAssumptions(input), base.result), financialSnapshot(zero.assumptions, zero.result))
-    .filter((m) => !m.metric.startsWith("assumptions"));
+  return reconcileSandbox(financialSnapshot(resolveAssumptions(input), base.result), financialSnapshot(zero.assumptions, zero.result));
 }

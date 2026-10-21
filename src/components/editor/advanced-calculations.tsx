@@ -9,6 +9,7 @@ import { AdvancedDemandEditor } from "@/components/editor/advanced-demand";
 import { AdvancedCapexEditor } from "@/components/editor/advanced-capex";
 import { AdvancedCommercialEditor } from "@/components/editor/advanced-commercial";
 import { defaultCommercialInputs, type CommercialInputs } from "@/lib/advanced-commercial";
+import { RiskSensitivity } from "@/components/editor/risk-sensitivity";
 import { AdvancedOperationsEditor } from "@/components/editor/advanced-operations";
 import { defaultOperationsInputs, type OperationsInputs } from "@/lib/advanced-operations";
 import { defaultCapexInputs, type CapexInputs } from "@/lib/advanced-capex";
@@ -18,7 +19,7 @@ const SECTIONS: { id: string; title: string; modules: AdvancedModuleKey[]; note?
   { id: "capex", title: "Detailed CAPEX", modules: ["capex"] },
   { id: "operations", title: "Advanced Operations", modules: ["operations"] },
   { id: "commercial", title: "Advanced Commercial Revenue", modules: ["commercialFb", "commercialMerch"] },
-  { id: "risk", title: "Risk & Sensitivity Analysis", modules: [], note: "A temporary analysis tool: it will test ranges of key assumptions on copies of this scenario and never change saved data. No activation needed." },
+  { id: "risk", title: "Risk & Sensitivity Analysis", modules: [], note: "A temporary analysis tool that tests ranges of key assumptions on copies of this scenario and never changes saved data. No activation needed." },
 ];
 
 export function AdvancedCalculationsSection({ a, r, ro, set }: { a: Assumptions; r: ModelResult | null; ro: boolean; set: (next: Assumptions) => void }) {
@@ -36,7 +37,7 @@ export function AdvancedCalculationsSection({ a, r, ro, set }: { a: Assumptions;
   const setInputs = (key: AdvancedModuleKey, inputs: unknown) => set({ ...a, advanced: { ...adv, [key]: { enabled: adv[key]?.enabled ?? false, inputs: inputs as Record<string, unknown> } } } as AssumptionsWithAdvanced);
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">Optional modules that will replace — never add to — the matching standard inputs. All are off by default and settings are saved per scenario. Modules marked “coming in a later stage” do not change any results yet.</p>
+      <p className="text-sm text-muted-foreground">Optional modules that will replace — never add to — the matching standard inputs. All are off by default and settings are saved per scenario.</p>
       <Accordion type="multiple" className="rounded-lg border bg-card">
         {SECTIONS.map((s) => (
           <AccordionItem key={s.id} value={s.id} className="px-4">
@@ -66,6 +67,7 @@ export function AdvancedCalculationsSection({ a, r, ro, set }: { a: Assumptions;
                 : s.id === "operations"
                 ? <AdvancedOperationsEditor a={a} r={r} on={isModuleOn(a, "operations")} ro={ro} inputs={adv.operations?.inputs as unknown as OperationsInputs | undefined} onChange={(i) => setInputs("operations", i)} />
                 : s.id === "commercial" ? null
+                : s.id === "risk" ? <RiskSensitivity a={a} />
                 : <p className="text-xs text-muted-foreground">Detailed inputs: coming in a later stage.</p>}
             </AccordionContent>
           </AccordionItem>

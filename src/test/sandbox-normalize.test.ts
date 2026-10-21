@@ -7,23 +7,34 @@ import { safeCalculate } from '@/lib/model';
 const writes = vi.fn(() => { throw Error('Sandbox must never write'); });
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: writes, rpc: writes } }));
 
-const base = (): Assumptions => structuredClone(projectMountain);
-const result = (a: Assumptions) => { const r = safeCalculate(a); if (!r.result) throw Error(r.error ?? 'missing result'); return r.result; };
+const fixture = () => {
+  const a = structuredClone(projectMountain) as Assumptions;
+  const r = safeCalculate(a);
+  if (!r.result) throw Error(r.error ?? 'missing result');
+  const y1 = r.result.rows[0], y3 = r.result.rows[2];
+  if (!y1 || !y3) throw Error('expected Year 1 and Year 3 rows');
+  return { a, r: r.result, y1, y3 };
+};
+const simulated = (a: Assumptions, t: { passengers: number; ticketPrice: number }) => {
+  const s = simulateSandbox(a, t);
+  const y1 = s.result.rows[0], y3 = s.result.rows[2];
+  if (!y1 || !y3) throw Error('expected simulated Year 1 and Year 3 rows');
+  return { ...s, y1, y3 };
+};
 
 describe('Year 1 normalization', () => {
   it('lands each project’s Year 1 on the target and keeps its own growth', () => {
-    const a = base(), r = result(a);
+    const { a, r, y3 } = fixture();
     const t = normalizeFromYear1(r, { passengers: 200000, ticketPrice: 450 });
     if (!t) throw Error('expected a usable Year 1 baseline');
-    const s = simulateSandbox(a, t);
-    expect(s.result.rows[0].passengers).toBeCloseTo(200000, 0);
-    expect(s.result.rows[0].ticketNetPrice).toBeCloseTo(450, 2);
-    expect(s.result.rows[2].passengers).toBeGreaterThan(s.result.rows[0].passengers);
+    const s = simulated(a, t);
+    expect(s.y1.passengers).toBeCloseTo(200000, 0);
+    expect(s.y1.ticketNetPrice).toBeCloseTo(450, 2);
+    expect(s.y3.passengers).toBeGreaterThan(s.y1.passengers);
   });
 
   it('scales the Year 3 target by the Year 1 ratio, not by the Year 3 baseline', () => {
-    const r = result(base());
-    const y1 = r.rows[0], y3 = r.rows[2];
+    const { r, y1, y3 } = fixture();
     const doubled = normalizeFromYear1(r, { passengers: y1.passengers * 2, ticketPrice: y1.ticketNetPrice });
     expect(doubled?.passengers).toBeCloseTo(y3.passengers * 2, 0);
     expect(doubled?.ticketPrice).toBeCloseTo(y3.ticketNetPrice, 6);

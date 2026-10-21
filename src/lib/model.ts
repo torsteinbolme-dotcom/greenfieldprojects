@@ -1,12 +1,13 @@
 import { calculate, type Assumptions, type YearResult } from "@/financialEngine";
 import { withLinkedTicketPrices } from "./ticket-pricing";
+import { resolveAssumptions } from "./advanced";
 
 export const CALCULATION_VERSION = "mountain-v5-volume";
 export type ModelResult = ReturnType<typeof calculate>;
 
 export function safeCalculate(a: Assumptions): { result: ModelResult | null; error: string | null } {
   try {
-    return { result: calculate(withLinkedTicketPrices(a)), error: null };
+    return { result: calculate(resolveAssumptions(withLinkedTicketPrices(a))), error: null };
   } catch (e) {
     return { result: null, error: e instanceof Error ? e.message : String(e) };
   }

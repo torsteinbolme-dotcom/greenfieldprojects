@@ -12,14 +12,14 @@
 ## Architecture rules
 - `src/test/` has its own `AGENTS.md`; read it before changing tests.
 - Preserve the engine and example except requested formula changes. Why: signed-off calculations.
-- Compute from append-only JSON; `lib/sandbox.ts` uses cloned overrides, never saves. Why: auditability and isolation.
+- Compute from append-only JSON; `applyFactors` (`lib/sandbox.ts`) is the shared clone override for Sandbox and sensitivity; never saves. Why: auditability and isolation.
 - Every table has `organization_id`; RLS uses `is_org_member` / `can_edit_org` / `is_org_admin` (security definer). Why: isolation.
 - Scenario saves insert new versions; Base is never overwritten by other scenarios. Why: isolation and version history.
 - Version reads fail explicitly; unique-version collisions retry (bounded); org relationships and Base identity are DB-guarded. Why: no corrupted history or tenancy.
 - Signups get an own org + seeded Mountain (`handle_new_user`). Why: working examples.
 - Ticket ratios live in scenario JSON; use `src/lib/ticket-pricing.ts` for edits/calculations/saves; `withDefaultProjectSegments` only for new templates. Why: preserve saved fares and history.
 - Use scoped serial autosave for assumptions and project details, including name (metadata only); undo saves a snapshot, never deletes history. Why: edits survive requests and stay isolated.
-- Comparison display years derive through `comparisonYears` in `src/lib/portfolio.ts`, independent of full forecast lengths. Why: shortening comparison graphs must not change authoritative calculations.
+- Comparison display years derive through `comparisonYears` in `src/lib/portfolio.ts`, independent of full forecast lengths. Why: graph length never changes calculations.
 - Numeric displays and text inputs share `src/lib/format.ts`; retain stored precision. Why: locale formatting must not rewrite calculations or saved assumptions.
 - Forecast expense detail derives for presentation through `src/lib/forecast-opex.ts`; the engine total stays authoritative. Why: expose costs without touching signed-off formulas.
 - Engine v3 (saves tagged `mountain-v3`): variable cable OPEX per passenger, opt-in `maintenanceCapexPct` (absent = 0; legacy `maintenanceCapexRate` inert, never surfaced as UI warnings) and automatic equity injections keeping closing cash ≥ 0, counted in IRR/MOIC. Tax losses carry forward; depreciation stops at full write-off; zero-Y1-revenue legacy ancillary OPEX stays fixed. Why: returns must be funding-complete.

@@ -34,7 +34,7 @@ function PortfolioPage() {
   );
   const [sort, setSort] = useState<{ key: SortKey; dir: "asc" | "desc" }>({ key: "moic", dir: "desc" });
   const all = entries.map((e) => ({ e, m: metricsAt(e, mode, year) }));
-  const rows = sortByMetric(all, (r) => (sort.key === "project" ? r.e.project.name : sort.key === "scenario" ? r.e.scenario.name : sort.key === "ticket" ? r.m.baseTicket : r.m[sort.key] ?? -Infinity), sort.dir);
+  const rows = sortByMetric(all, (r) => (sort.key === "project" ? r.e.project.name : sort.key === "scenario" ? r.e.scenario.name : sort.key === "ticket" ? r.m.baseTicket ?? -Infinity : r.m[sort.key] ?? -Infinity), sort.dir);
   const Th = ({ k, children, right = true }: { k: SortKey; children: ReactNode; right?: boolean }) => (
     <th className={right ? "text-right" : ""}>
       <button className="inline-flex items-center gap-1 hover:underline" onClick={() => setSort((s) => ({ key: k, dir: s.key === k ? (s.dir === "desc" ? "asc" : "desc") : k === "project" || k === "scenario" ? "asc" : "desc" }))}>

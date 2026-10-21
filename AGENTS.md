@@ -20,7 +20,7 @@
 - Ticket ratios live in scenario JSON; use `src/lib/ticket-pricing.ts` for edits/calculations/saves; `withDefaultProjectSegments` only for new templates. Why: preserve saved fares and history.
 - Use scoped serial autosave for assumptions and project details, including name (metadata only); undo saves a snapshot, never deletes history. Why: edits survive requests and stay isolated.
 - Comparison display years derive through `comparisonYears` in `src/lib/portfolio.ts`, independent of full forecast lengths. Why: graph length never changes calculations.
-- Numeric displays and text inputs share `src/lib/format.ts`; retain stored precision. Why: locale formatting must not rewrite calculations or saved assumptions.
+- Numeric displays and text inputs share `src/lib/format.ts`; retain stored precision. Why: formatting never rewrites values.
 - Forecast expense detail derives for presentation through `src/lib/forecast-opex.ts`; the engine total stays authoritative. Why: expose costs without touching signed-off formulas.
 - Engine v3 (saves tagged `mountain-v3`): variable cable OPEX per passenger, opt-in `maintenanceCapexPct` (absent = 0; legacy `maintenanceCapexRate` inert, never surfaced as UI warnings) and automatic equity injections keeping closing cash ≥ 0, counted in IRR/MOIC. Tax losses carry forward; depreciation stops at full write-off; zero-Y1-revenue legacy ancillary OPEX stays fixed. Why: returns must be funding-complete.
 - Project benchmarking selections live in `projects.benchmark_config`; records stay in `benchmark_assets`/`benchmark_records`; suggestions apply only via normal autosave as a new version. Why: benchmarks stay separate and every change is versioned.

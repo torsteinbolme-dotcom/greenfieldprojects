@@ -97,7 +97,7 @@ export function AdvancedOperationsEditor({ a, r, inputs, on, ro, onChange }: Pro
                 <td className="w-28">{step && <NumField aria-label={`${c.name} step cost`} value={c.step.stepCost} disabled={ro} onChange={(v) => updStep(i, { stepCost: v })} />}</td>
                 <td className="w-20">{step && <NumField aria-label={`${c.name} max steps`} value={c.step.maxSteps ?? 0} disabled={ro} onChange={(v) => updStep(i, { maxSteps: v > 0 ? Math.floor(v) : null })} />}</td>
                 <td className="text-right">{step && cost ? int(cost.steps) : ""}</td>
-                <td className="text-right">{cost ? nok(cost.total) : "—"}</td>
+                <td className="whitespace-nowrap pl-2 text-right">{cost ? nok(cost.total) : "—"}</td>
                 <td>{!ro && <Button size="sm" variant="ghost" onClick={() => onChange({ ...data, categories: data.categories.filter((_, j) => j !== i) })}>Remove</Button>}</td>
               </tr>
             );

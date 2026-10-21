@@ -122,3 +122,4 @@
 - Photo change moved to Project details; explain Source workbooks
 - [x] Removed the "Operating year" dropdown from Ticket pricing & revenue; the card always reads Year 3; signed-in preview verified, 332 tests pass and build OK.
 - [x] Portfolio table: added a "Base ticket price" column right after IRR Y8 (the scenario's adult round-trip gross fare, sortable) and moved CAPEX four columns right, now between Margin and Exit equity; verified column order and sorting in the signed-in preview, 346 tests pass and typecheck clean.
+- [x] Portfolio table: "Base ticket price" now shows whole kroner (699 instead of 699,00); verified in the signed-in preview for all four projects, no page errors.

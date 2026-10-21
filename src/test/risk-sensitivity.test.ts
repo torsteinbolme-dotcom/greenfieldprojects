@@ -1,4 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+const db = vi.hoisted(() => ({ from: vi.fn(), rpc: vi.fn(), storage: { from: vi.fn() } }));
+vi.mock("@/integrations/supabase/client", () => ({ supabase: db }));
 import type { Assumptions } from "@/financialEngine";
 import { projectMountain } from "@/exampleProject";
 import { safeCalculate } from "@/lib/model";
@@ -85,6 +88,11 @@ describe("risk & sensitivity", () => {
     const c = runCase(projectMountain, { passengers: 0.1, price: -0.1 });
     close(c.result.equityMultiple!, sb.result.equityMultiple!);
     close(c.result.rows[2]!.ebitda, sb.result.rows[2]!.ebitda);
+  });
+  it("no database writes or new scenarios", () => {
+    sensitivityMatrix(projectMountain, "opex", "exitMultiple", steps(0.2, 0.1), steps(0.2, 0.1), "exitEquity");
+    reconcileZero(projectMountain);
+    expect(db.from).not.toHaveBeenCalled(); expect(db.rpc).not.toHaveBeenCalled(); expect(db.storage.from).not.toHaveBeenCalled();
   });
   it("scenario isolation: a case on one scenario leaves another unchanged", () => {
     const [x, y] = scenarios; const before = JSON.stringify(y!.assumptions);

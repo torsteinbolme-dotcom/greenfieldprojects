@@ -4,32 +4,17 @@ import type { Entry } from './selection';
 import { Button } from '@/components/ui/button';
 import { Field, NumField } from '@/components/editor/inputs';
 import { baselineTargets, simulateSandbox, type SandboxCase, type SandboxTargets } from '@/lib/sandbox';
-import { breakEven } from '@/lib/break-even';
+import { irrAtYear, moicAtYear } from '@/lib/portfolio';
 import { forecastOpex } from '@/lib/forecast-opex';
 import { deltaClass, formatNumber, mult, nokM, pct, signedNum, signedPct } from '@/lib/format';
 
 type Metric = { label: string; format?: 'pct' | 'mult' | 'count'; get: (c: SandboxCase) => number | null | undefined };
 const row = (c: SandboxCase) => c.result.rows[2];
-const metrics: Metric[] = [
-  { label: 'Year 3 passengers', format: 'count', get: c => row(c)?.passengers },
-  { label: 'Average net ticket price Y3 (NOK)', get: c => row(c)?.ticketNetPrice },
-  { label: 'Ticket revenue Y3 (NOK)', get: c => row(c)?.ticketRevenue },
-  { label: 'F&B revenue Y3 (NOK)', get: c => row(c)?.fbRevenue },
-  { label: 'Merchandise revenue Y3 (NOK)', get: c => row(c)?.merchRevenue },
-  { label: 'Other revenue Y3 (NOK)', get: c => row(c)?.otherRevenue ?? 0 },
-  { label: 'Total revenue Y3 (NOK)', get: c => row(c)?.revenue },
-  { label: 'OPEX Y3 (NOK)', get: c => row(c)?.opex },
+export const metrics: Metric[] = [
+  { label: 'MOIC Y8', format: 'mult', get: c => moicAtYear(c.assumptions, c.result) },
+  { label: 'IRR Y8', format: 'pct', get: c => irrAtYear(c.assumptions, c.result) },
   { label: 'EBITDA Y3 (NOK)', get: c => row(c)?.ebitda },
-  { label: 'EBITDA margin Y3', format: 'pct', get: c => { const r = row(c); return r && r.revenue > 0 ? r.ebitda / r.revenue : null; } },
-  { label: 'EBITDA / passenger Y3 (NOK)', get: c => { const r = row(c); return r && r.passengers > 0 ? r.ebitda / r.passengers : null; } },
-  { label: 'Operating break-even passengers Y3', format: 'count', get: c => breakEven(c.assumptions, 3).operating.passengers },
-  { label: 'Cash break-even passengers Y3', format: 'count', get: c => breakEven(c.assumptions, 3).cash.passengers },
-  { label: 'CAPEX (NOK)', get: c => c.result.capex },
-  { label: 'Total equity invested to exit (NOK)', get: c => c.result.totalEquityInvested },
-  { label: 'Equity IRR at exit', format: 'pct', get: c => c.result.equityIrr },
-  { label: 'MOIC at exit', format: 'mult', get: c => c.result.equityMultiple },
-  { label: 'Exit enterprise value (NOK)', get: c => c.result.enterpriseValue },
-  { label: 'Exit equity proceeds (NOK)', get: c => c.result.exitEquityValue },
+  { label: 'Revenue Y3 (NOK)', get: c => row(c)?.revenue },
 ];
 const value = (v: number | null | undefined, f?: Metric['format']) => v == null || !Number.isFinite(v) ? 'N/A' : f === 'pct' ? pct(v, 2) : f === 'mult' ? mult(v) : formatNumber(v, 0, f === 'count' ? 0 : 2);
 const delta = (a: number | null | undefined, b: number | null | undefined, f?: Metric['format']) => {

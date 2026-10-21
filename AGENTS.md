@@ -11,7 +11,7 @@
 
 ## Architecture rules
 - Preserve the engine and example except requested formula changes. Why: signed-off calculations.
-- Compute outputs client-side from append-only scenario JSON; never store edited outputs. Why: auditable results.
+- Compute from append-only JSON; `lib/sandbox.ts` uses cloned overrides, never saves. Why: auditability and isolation.
 - Every table has `organization_id`; RLS uses `is_org_member` / `can_edit_org` / `is_org_admin` (security definer). Why: isolation.
 - Scenario saves insert new versions; Base is never overwritten by other scenarios. Why: isolation and version history.
 - Scenario version reads must fail explicitly and unique-version collisions retry within a bounded limit; organization relationships and Base identity are guarded in the database. Why: concurrent saves and raw requests must not corrupt history or tenant relationships.

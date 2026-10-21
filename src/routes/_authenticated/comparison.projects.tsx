@@ -14,9 +14,11 @@ import { devValue, sortByMetric } from "@/lib/portfolio";
 import { formatNumber, mult, nok, nokM, pct } from "@/lib/format";
 import { economicsAtYear } from "@/lib/unit-economics";
 import { projectReturns, splitYear, year3Row } from "@/lib/year3";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SandboxComparison } from "@/components/comparison/sandbox";
 
 export const Route = createFileRoute("/_authenticated/comparison/projects")({
-  validateSearch: z.object({ ids: z.string().optional(), sc: z.string().optional() }),
+  validateSearch: z.object({ ids: z.string().optional(), sc: z.string().optional(), mode: z.enum(['standard', 'sandbox']).optional() }),
   head: () => ({ meta: [
     { title: "Project vs. Project — Cable Car Portfolio" },
     { name: "description", content: "Compare investment projects and scenarios on CAPEX, Year 3 performance and returns." },
@@ -125,10 +127,11 @@ function ProjectVsProject() {
   return (
     <div className="space-y-6">
       <div><p className="eyebrow">Comparison</p><h1 className="mt-1 text-3xl font-semibold">Project vs. Project</h1></div>
+      <Tabs value={search.mode ?? 'standard'} onValueChange={v => navigate({ search: s => ({ ...s, mode: v === 'sandbox' ? 'sandbox' : 'standard' }), replace: true })}><TabsList><TabsTrigger value="standard">Standard Comparison</TabsTrigger><TabsTrigger value="sandbox">Sandbox Mode</TabsTrigger></TabsList></Tabs>
       <ProjectPicker projects={projects} scenarios={scenarios} ids={ids} scMap={scMap}
         onChange={(nextIds, sc) => navigate({ search: (s) => ({ ...s, ids: nextIds.join(",") || undefined, sc: encodeSc(new Map([...sc].filter(([p]) => nextIds.includes(p)))) }), replace: true })} />
 
-      {rows.length === 0 ? <p className="text-muted-foreground">Select one or more projects. Each uses its Base Case unless you pick another scenario.</p> : (<>
+      {search.mode === 'sandbox' ? <SandboxComparison entries={entries} /> : rows.length === 0 ? <p className="text-muted-foreground">Select one or more projects. Each uses its Base Case unless you pick another scenario.</p> : (<>
         <Card title="Comparison">
           <div className="mb-4 flex flex-wrap items-end gap-4">
             {(Object.keys(GROUPS) as Group[]).map((g) => (
@@ -168,7 +171,7 @@ function ProjectVsProject() {
         <section className="space-y-3" aria-label="Year 3 unit economics comparison"><h2 className="text-lg font-semibold">Unit Economics · Year 3</h2><div className="overflow-x-auto"><table className="fin-table"><thead><tr><th>Project / scenario</th><th className="text-right">Revenue / passenger</th><th className="text-right">OPEX / passenger</th><th className="text-right">EBITDA / passenger</th></tr></thead><tbody>{sorted.map(r => { const e = economicsAtYear(r.a, r.result.rows, 3); return <tr key={r.scenario.id}><td>{label(r)}</td><td className="num text-right">{fmt("nok", e?.revenuePerPassenger ?? null)}</td><td className="num text-right text-destructive">{fmt("nok", e?.opexPerPassenger === null || e?.opexPerPassenger === undefined ? null : -e.opexPerPassenger)}</td><td className="num text-right font-semibold">{fmt("nok", e?.ebitdaPerPassenger ?? null)}</td></tr>; })}</tbody></table></div><p className="text-xs text-muted-foreground">NOK per cable car passenger · excluding VAT · costs shown negative</p></section>
 
         <div className="grid gap-4 md:grid-cols-2">
-          {CHARTS.map((k) => { const m = METRICS.find((x) => x.key === k)!; return (
+          {CHARTS.map((k) => { const m = METRICS.find((x) => x.key === k); if (!m) return null; return (
             <Card key={k} title={m.key === "capex" ? metricLabel(m) : m.group === "operations" ? `Year 3 ${/^[A-Z][a-z]/.test(m.label) ? m.label.charAt(0).toLowerCase() + m.label.slice(1) : m.label}` : metricLabel(m)}>
               <div className="h-56"><ResponsiveContainer>
                 <BarChart margin={{ top: 18, right: 12, left: 4, bottom: 0 }} data={sorted.map((r) => { const v = m.get(r); return { name: label(r), id: r.project.id, v: v == null ? null : m.fmt === "nokM" ? v / 1e6 : m.fmt === "pct" ? v * 100 : v }; })}>

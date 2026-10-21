@@ -1,4 +1,6 @@
 # Tasks
+- [ ] Add isolated Sandbox Mode, project/scenario selection, Investment Summary entry, synchronized commercial inputs, normalization, resets and full comparisons.
+- [ ] Validate sandbox engine reconciliation, complete tests and signed-in no-write workflows; report deployment limitations.
 - [x] Move annual inputs/revenue growth and restaurant benchmarks above calculation methods in Revenue & OPEX; signed-in order verified.
 - [x] Show separate Low/High season net ticket-price rows excluding VAT and after commission for the selected operating year; signed-in Year 1/3 verified.
 - [x] Tighten the gap between each month and its Low/High season buttons; desktop, selected viewport and mobile verified.

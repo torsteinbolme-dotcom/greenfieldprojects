@@ -1,0 +1,95 @@
+import { useMemo, useState } from 'react';
+import { RotateCcw } from 'lucide-react';
+import type { Entry } from './selection';
+import { Button } from '@/components/ui/button';
+import { Field, NumField } from '@/components/editor/inputs';
+import { baselineTargets, simulateSandbox, type SandboxCase, type SandboxTargets } from '@/lib/sandbox';
+import { breakEven } from '@/lib/break-even';
+import { forecastOpex } from '@/lib/forecast-opex';
+import { deltaClass, formatNumber, mult, nokM, pct, signedNum, signedPct } from '@/lib/format';
+
+type Metric = { label: string; format?: 'pct' | 'mult' | 'count'; get: (c: SandboxCase) => number | null | undefined };
+const row = (c: SandboxCase) => c.result.rows[2];
+const metrics: Metric[] = [
+  { label: 'Year 3 passengers', format: 'count', get: c => row(c)?.passengers },
+  { label: 'Average net ticket price Y3 (NOK)', get: c => row(c)?.ticketNetPrice },
+  { label: 'Ticket revenue Y3 (NOK)', get: c => row(c)?.ticketRevenue },
+  { label: 'F&B revenue Y3 (NOK)', get: c => row(c)?.fbRevenue },
+  { label: 'Merchandise revenue Y3 (NOK)', get: c => row(c)?.merchRevenue },
+  { label: 'Other revenue Y3 (NOK)', get: c => row(c)?.otherRevenue ?? 0 },
+  { label: 'Total revenue Y3 (NOK)', get: c => row(c)?.revenue },
+  { label: 'OPEX Y3 (NOK)', get: c => row(c)?.opex },
+  { label: 'EBITDA Y3 (NOK)', get: c => row(c)?.ebitda },
+  { label: 'EBITDA margin Y3', format: 'pct', get: c => { const r = row(c); return r && r.revenue > 0 ? r.ebitda / r.revenue : null; } },
+  { label: 'EBITDA / passenger Y3 (NOK)', get: c => { const r = row(c); return r && r.passengers > 0 ? r.ebitda / r.passengers : null; } },
+  { label: 'Operating break-even passengers Y3', format: 'count', get: c => breakEven(c.assumptions, 3).operating.passengers },
+  { label: 'Cash break-even passengers Y3', format: 'count', get: c => breakEven(c.assumptions, 3).cash.passengers },
+  { label: 'CAPEX (NOK)', get: c => c.result.capex },
+  { label: 'Total equity invested to exit (NOK)', get: c => c.result.totalEquityInvested },
+  { label: 'Equity IRR at exit', format: 'pct', get: c => c.result.equityIrr },
+  { label: 'MOIC at exit', format: 'mult', get: c => c.result.equityMultiple },
+  { label: 'Exit enterprise value (NOK)', get: c => c.result.enterpriseValue },
+  { label: 'Exit equity proceeds (NOK)', get: c => c.result.exitEquityValue },
+];
+const value = (v: number | null | undefined, f?: Metric['format']) => v == null || !Number.isFinite(v) ? 'N/A' : f === 'pct' ? pct(v, 2) : f === 'mult' ? mult(v) : formatNumber(v, 0, f === 'count' ? 0 : 2);
+const delta = (a: number | null | undefined, b: number | null | undefined, f?: Metric['format']) => {
+  if (a == null || b == null) return { text: 'N/A', relative: '' };
+  const d = b - a;
+  return { text: f === 'pct' ? `${signedNum(d * 100, 2)} pp` : f === 'mult' ? `${signedNum(d, 2)}x` : signedNum(d, f === 'count' ? 0 : 2), relative: f !== 'pct' && a !== 0 ? signedPct(d / Math.abs(a), 2) : '' };
+};
+
+function ProjectSimulation({ entry, targets, onChange, onReset }: { entry: Entry; targets?: SandboxTargets; onChange: (v: SandboxTargets) => void; onReset: () => void }) {
+  const baseline = useMemo(() => ({ assumptions: entry.a, result: entry.result }), [entry.a, entry.result]);
+  const base = baselineTargets(entry.result);
+  const requested = targets ?? base;
+  const simulation = useMemo(() => {
+    try { return { data: simulateSandbox(entry.a, targets), error: null }; }
+    catch (e) { return { data: null, error: e instanceof Error ? e.message : 'Unable to calculate.' }; }
+  }, [entry.a, targets]);
+  const pairs = useMemo(() => simulation.data ? metrics.map(m => ({ m, a: m.get(baseline), b: m.get(simulation.data as SandboxCase) })) : [], [baseline, simulation.data]);
+  return <article className="min-w-0 space-y-4 border-t pt-5" aria-label={`Sandbox ${entry.project.name}`}>
+    <div className="flex flex-wrap items-start justify-between gap-2"><div><h2 className="text-lg font-semibold">{entry.project.name}</h2><p className="text-sm text-muted-foreground">{entry.scenario.name} · CAPEX {nokM(entry.result.capex)} NOK m · Exit Year {entry.a.exitYear} ({entry.a.openingYear + entry.a.exitYear - 1})</p></div><Button variant="outline" size="sm" onClick={onReset}><RotateCcw className="mr-1 h-4 w-4" />Reset project</Button></div>
+    {base && requested ? <>
+      <p className="text-xs text-muted-foreground">Baseline Year 3: {value(base.passengers, 'count')} passengers · {value(base.ticketPrice)} NOK average net ticket price</p>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Year 3 passengers"><NumField aria-label={`${entry.project.name} Year 3 passengers`} value={requested.passengers} disabled={base.passengers <= 0} onChange={v => onChange({ ...requested, passengers: v })} /></Field>
+        <Field label="Passenger change"><NumField aria-label={`${entry.project.name} passenger change`} percent value={base.passengers > 0 ? requested.passengers / base.passengers - 1 : 0} disabled={base.passengers <= 0} onChange={v => onChange({ ...requested, passengers: base.passengers * (1 + v) })} /></Field>
+        <Field label="Average net ticket price Y3 (NOK)"><NumField aria-label={`${entry.project.name} average net ticket price`} value={requested.ticketPrice} disabled={base.ticketPrice <= 0} onChange={v => onChange({ ...requested, ticketPrice: v })} /></Field>
+        <Field label="Ticket price change"><NumField aria-label={`${entry.project.name} ticket price change`} percent value={base.ticketPrice > 0 ? requested.ticketPrice / base.ticketPrice - 1 : 0} disabled={base.ticketPrice <= 0} onChange={v => onChange({ ...requested, ticketPrice: base.ticketPrice * (1 + v) })} /></Field>
+      </div>
+      <p className="text-xs text-muted-foreground">Effective net fare · excluding VAT and after Cruise / Tour operator commissions</p>
+      {(base.passengers <= 0 || base.ticketPrice <= 0) && <p className="text-sm text-warning-foreground">Zero baseline values cannot be scaled; the corresponding adjustment is unavailable.</p>}
+    </> : <p className="text-warning-foreground">Year 3 is outside this scenario’s forecast horizon.</p>}
+    {simulation.error && <p role="alert" className="text-sm text-destructive">{simulation.error}</p>}
+    {simulation.data && <>
+      <div className="overflow-x-auto"><table className="fin-table"><thead><tr><th>Metric</th><th className="text-right text-muted-foreground">Baseline</th><th className="text-right text-primary">Sandbox</th><th className="text-right">Difference</th></tr></thead><tbody>{pairs.map(({ m, a, b }) => { const d = delta(a, b, m.format); return <tr key={m.label}><td>{m.label}</td><td className="num whitespace-nowrap text-right text-muted-foreground">{value(a, m.format)}</td><td className="num whitespace-nowrap text-right font-semibold">{value(b, m.format)}</td><td className={`num whitespace-nowrap text-right ${deltaClass(d.text)}`}>{d.text}{d.relative && <div className="text-xs">{d.relative}</div>}</td></tr>; })}</tbody></table></div>
+      <details><summary className="cursor-pointer text-sm font-medium">Annual financial results · baseline / Sandbox</summary><AnnualResults baseline={baseline} simulation={simulation.data} /></details>
+    </>}
+  </article>;
+}
+
+function AnnualResults({ baseline, simulation }: { baseline: SandboxCase; simulation: SandboxCase }) {
+  const annual: Metric[] = [
+    ...['passengers', 'ticketNetPrice', 'ticketRevenue', 'fbRevenue', 'merchRevenue', 'otherRevenue', 'revenue', 'opex', 'ebitda', 'depreciation', 'ebit', 'openingDebt', 'interest', 'principal', 'closingDebt', 'tax', 'maintenanceCapex', 'equityInjection', 'cashAfterDebt', 'distribution', 'retainedCash', 'dscr'].map(key => ({ label: key, get: () => null })),
+  ];
+  return <div className="mt-3 overflow-x-auto"><table className="fin-table"><thead><tr><th>Operating year</th>{annual.map(m => <th key={m.label} className="text-right">{m.label}</th>)}<th>Operating cash flow</th><th>Free cash flow</th><th>Cable fixed OPEX</th><th>Cable variable OPEX</th><th>F&B OPEX</th><th>Merchandise OPEX</th><th>Other OPEX</th><th>Equity cash flow</th></tr></thead><tbody>{simulation.result.rows.map((r, i) => {
+    const b = baseline.result.rows[i];
+    if (!b) return null;
+    const c = forecastOpex(simulation.assumptions, r), bc = forecastOpex(baseline.assumptions, b);
+    const pair = (left: number | null | undefined, right: number | null | undefined) => <><div className="text-xs text-muted-foreground">{value(left)}</div><div className="font-medium">{value(right)}</div></>;
+    return <tr key={r.year}><td className="whitespace-nowrap">Y{r.year} · {r.calendarYear}</td>{annual.map(m => <td key={m.label} className="num whitespace-nowrap text-right">{pair(b[m.label as keyof typeof b], r[m.label as keyof typeof r])}</td>)}<td className="num whitespace-nowrap">{pair(b.ebitda - b.tax, r.ebitda - r.tax)}</td><td className="num whitespace-nowrap">{pair(b.ebitda - b.tax - b.maintenanceCapex, r.ebitda - r.tax - r.maintenanceCapex)}</td>{(['cableFixed', 'cableVariable', 'fb', 'merchandise', 'other'] as const).map(k => <td key={k} className="num whitespace-nowrap">{pair(bc[k], c[k])}</td>)}<td className="num whitespace-nowrap">{pair(baseline.result.cashflows[r.year], simulation.result.cashflows[r.year])}</td></tr>;
+  })}</tbody></table><p className="mt-2 text-xs text-muted-foreground">NOK unless passengers or DSCR · cash flows exclude noncash depreciation · returns stop at the selected exit year</p></div>;
+}
+
+export function SandboxComparison({ entries }: { entries: Entry[] }) {
+  const [adjustments, setAdjustments] = useState<Record<string, SandboxTargets>>({});
+  const [normalize, setNormalize] = useState<SandboxTargets>({ passengers: 250000, ticketPrice: 500 });
+  const key = (e: Entry) => `${e.project.id}:${e.scenario.id}:${JSON.stringify(e.a)}`;
+  const apply = () => setAdjustments(previous => ({ ...previous, ...Object.fromEntries(entries.map(e => [key(e), { ...normalize }])) }));
+  return <section className="space-y-5" aria-label="Sandbox Mode">
+    <div className="flex flex-wrap items-center justify-between gap-3 border-l-4 border-primary bg-muted p-3"><p className="text-sm font-medium">Sandbox Mode — Simulated values. Original projects remain unchanged.</p><Button size="sm" variant="outline" onClick={() => setAdjustments({})}><RotateCcw className="mr-1 h-4 w-4" />Reset All</Button></div>
+    <section className="space-y-3" aria-label="Normalize Projects"><h2 className="font-semibold">Normalize Projects</h2><div className="flex flex-wrap items-end gap-3"><Field label="Target Year 3 passengers"><NumField aria-label="Normalize Year 3 passengers" value={normalize.passengers} onChange={v => setNormalize(n => ({ ...n, passengers: v }))} /></Field><Field label="Target average net ticket price (NOK)"><NumField aria-label="Normalize average net ticket price" value={normalize.ticketPrice} onChange={v => setNormalize(n => ({ ...n, ticketPrice: v }))} /></Field><Button onClick={apply} disabled={!entries.length || normalize.passengers < 0 || normalize.ticketPrice < 0}>Apply to Selected Projects</Button></div></section>
+    {!entries.length && <p className="text-sm text-muted-foreground">No projects selected.</p>}
+    <div className="grid gap-6 xl:grid-cols-2">{entries.map(e => <ProjectSimulation key={key(e)} entry={e} targets={adjustments[key(e)]} onChange={v => setAdjustments(p => ({ ...p, [key(e)]: v }))} onReset={() => setAdjustments(p => { const n = { ...p }; delete n[key(e)]; return n; })} />)}</div>
+  </section>;
+}

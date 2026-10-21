@@ -9,13 +9,15 @@ import { Kpi } from './sections';
 import { EbitdaBridge } from './ebitda-bridge';
 import { BreakEvenPanel } from './break-even';
 import { UnitEconomics } from './unit-economics';
+import { Button } from '@/components/ui/button';
+import { FlaskConical } from 'lucide-react';
 
 function DevelopmentChart({ title, data, lines, passengers = false, bar = false }: { title: string; data: { year: number; [key: string]: number }[]; lines: string[]; passengers?: boolean; bar?: boolean }) {
   // Recharts does not process axis children wrapped in a JSX fragment — pass them as an array.
   const axes = [<CartesianGrid key="grid" stroke="var(--border)" vertical={false} />, <XAxis key="x" dataKey="year" tickFormatter={v => `Y${v}`} />, <YAxis key="y" width={80} tickFormatter={v => passengers ? int(Number(v)) : nokM(Number(v))} />, <Tooltip key="tip" labelFormatter={v => `Operating year ${v}`} formatter={(v, name) => [passengers ? int(Number(v)) : nokM(Number(v)), String(name)]} />, <Legend key="legend" />];
   return <section className="min-w-0 space-y-3"><h3 className="font-semibold">{title}{!passengers && ' · NOK m'}</h3><div className="h-64"><ResponsiveContainer width="100%" height="100%">{bar ? <BarChart data={data}>{axes}{lines.map((line,i) => <Bar key={line} dataKey={line} fill={`var(--chart-${i + 1})`} isAnimationActive={false} />)}</BarChart> : <LineChart data={data}>{axes}{lines.map((line,i) => <Line key={line} dataKey={line} stroke={`var(--chart-${i + 1})`} strokeWidth={2} dot={false} isAnimationActive={false} />)}</LineChart>}</ResponsiveContainer></div></section>;
 }
-export function InvestmentSummary({ a, r, name, location, onPerformanceYear, onExitYear }: { a: Assumptions; r: ModelResult; name: string; location: string | null; onPerformanceYear?: (year: number) => void; onExitYear?: (year: number) => void }) {
+export function InvestmentSummary({ a, r, name, location, onPerformanceYear, onExitYear, onSandbox }: { a: Assumptions; r: ModelResult; name: string; location: string | null; onPerformanceYear?: (year: number) => void; onExitYear?: (year: number) => void; onSandbox?: () => void }) {
   const perfYear = performanceYearOf(a, r);
   const perfRow = r.rows[perfYear - 1];
   const exit = r.rows[a.exitYear - 1];
@@ -24,7 +26,7 @@ export function InvestmentSummary({ a, r, name, location, onPerformanceYear, onE
   const perfSelect = onPerformanceYear && <Select value={String(perfYear)} onValueChange={v => onPerformanceYear(Number(v))}><SelectTrigger className="h-7 w-24 text-sm"><SelectValue /></SelectTrigger><SelectContent>{r.rows.map(row => <SelectItem key={row.year} value={String(row.year)}>Year {row.year}</SelectItem>)}</SelectContent></Select>;
   const exitSelect = onExitYear && <Select value={String(a.exitYear)} onValueChange={v => onExitYear(Number(v))}><SelectTrigger className="h-7 w-24 text-sm"><SelectValue /></SelectTrigger><SelectContent>{r.rows.map(row => <SelectItem key={row.year} value={String(row.year)}>Year {row.year}</SelectItem>)}</SelectContent></Select>;
   return <section className="space-y-6" aria-label="Investment Summary">
-    <section className="space-y-3"><div><h2 className="text-xl font-semibold">Investment Summary</h2><p className="text-sm text-muted-foreground">{name} · {location ?? 'Location not specified'} · Opening {a.openingYear}</p></div>
+    <section className="space-y-3"><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-xl font-semibold">Investment Summary</h2><p className="text-sm text-muted-foreground">{name} · {location ?? 'Location not specified'} · Opening {a.openingYear}</p></div>{onSandbox && <Button variant="outline" onClick={onSandbox}><FlaskConical className="mr-2 h-4 w-4" />Open in Sandbox</Button>}</div>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-5"><Kpi label="Total CAPEX" value={nokM(r.capex)} sub="NOK m incl. contingency" /><Kpi label="Initial equity" value={nokM(r.equity)} sub={`NOK m · ${pct(1 - a.debtShare)}`} /><Kpi label="Debt financing" value={nokM(r.debt)} sub={`NOK m · ${pct(a.debtShare)}`} /><Kpi label="Additional Equity Required" value={nokM(r.additionalEquity)} sub={`NOK m · to exit Year ${a.exitYear}`} /><Kpi label="Total Equity Invested" value={nokM(r.totalEquityInvested)} sub="NOK m · initial + additional" /></div>
     </section>
     <section className="space-y-3"><div className="flex flex-wrap items-center gap-3"><h3 className="text-lg font-semibold">Year {perfYear} performance{perfRow ? ` · ${perfRow.calendarYear}` : ''}</h3>{perfSelect}</div>{perfRow && split ? <><div className="grid grid-cols-2 gap-3 lg:grid-cols-4"><Kpi label="Passengers" value={int(perfRow.passengers)} /><Kpi label="Revenue" value={nokM(perfRow.revenue)} sub="NOK m, ex VAT" /><Kpi label="OPEX" value={nokM(perfRow.opex)} sub="NOK m" /><Kpi label="EBITDA" value={nokM(perfRow.ebitda)} sub={`NOK m · ${pct(perfRow.revenue ? perfRow.ebitda / perfRow.revenue : null)} margin`} /></div>

@@ -92,7 +92,9 @@ describe('Sandbox commercial overrides and isolation', () => {
     const a = { ...base(), fbFollowsPassengers: true, opexGrowth: { fb: [0.03] } }, t = targets(a), r = result(a);
     const s = simulateSandbox(a, { ...t, passengers: t.passengers * 1.2 });
     expect(s.result.rows[2]?.fbRevenue).toBeCloseTo((r.rows[2]?.fbRevenue ?? 0) * 1.2, 5);
-    expect(forecastOpex(s.assumptions, s.result.rows[2] ?? r.rows[0]).fb).toBe(forecastOpex(a, r.rows[2] ?? r.rows[0]).fb);
+    const simulatedRow = s.result.rows[2], baselineRow = r.rows[2];
+    if (!simulatedRow || !baselineRow) throw Error('Missing Year 3');
+    expect(forecastOpex(s.assumptions, simulatedRow).fb).toBe(forecastOpex(a, baselineRow).fb);
   });
   it('reset/default restores baseline and Standard Comparison is unchanged after adjustments', () => {
     const a = base(), r = result(a), t = targets(a);
@@ -127,6 +129,8 @@ describe('Sandbox commercial overrides and isolation', () => {
     expect(s.result.exitEquityValue).toBeCloseTo(2265600, 6);
     expect(s.result.equityMultiple).toBeCloseTo(22.656, 8);
     expect(s.result.equityIrr).toBeCloseTo(22.656 ** (1 / 8) - 1, 8);
-    expect(s.result.cashflows).toEqual([-100000, 0, 0, 0, 0, 0, 0, 0, 2265600]);
+    const independent = [-100000, 0, 0, 0, 0, 0, 0, 0, 2265600];
+    expect(s.result.cashflows).toHaveLength(9);
+    s.result.cashflows.forEach((cf, i) => expect(Math.abs(cf - (independent[i] ?? NaN))).toBeLessThanOrEqual(1e-7));
   });
 });

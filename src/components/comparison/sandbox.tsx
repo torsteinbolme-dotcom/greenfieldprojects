@@ -38,7 +38,7 @@ const delta = (a: number | null | undefined, b: number | null | undefined, f?: M
   return { text: f === 'pct' ? `${signedNum(d * 100, 2)} pp` : f === 'mult' ? `${signedNum(d, 2)}x` : signedNum(d, f === 'count' ? 0 : 2), relative: f !== 'pct' && a !== 0 ? signedPct(d / Math.abs(a), 2) : '' };
 };
 
-function ProjectSimulation({ entry, targets, onChange, onReset }: { entry: Entry; targets?: SandboxTargets; onChange: (v: SandboxTargets) => void; onReset: () => void }) {
+function ProjectSimulation({ entry, targets, onChange, onReset }: { entry: Entry; targets?: SandboxTargets | undefined; onChange: (v: SandboxTargets) => void; onReset: () => void }) {
   const baseline = useMemo(() => ({ assumptions: entry.a, result: entry.result }), [entry.a, entry.result]);
   const base = baselineTargets(entry.result);
   const requested = targets ?? base;

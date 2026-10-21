@@ -71,18 +71,9 @@ export function SegmentsSection({ a, set, ro }: P) {
           Segment shares sum to {pct(sum, 2)} — they must total 100% before the forecast can be calculated.
         </div>
       )}
-      {adultFare && (
-        <div className="mb-4 flex flex-wrap items-end gap-3 rounded-md border border-primary/30 bg-primary/5 p-4">
-          <label className="block space-y-1">
-            <span className="text-xs font-semibold text-primary">Adult round-trip gross incl VAT (NOK)</span>
-            <NumField value={adultFare.grossPrice} disabled={ro} onChange={(v) => upd(a.segments.indexOf(adultFare), { grossPrice: v })} className="w-32 rounded-md ring-1 ring-primary [&_input]:font-semibold [&_input]:text-primary" />
-            <span className="block text-[11px] text-muted-foreground">Base fare — all other fares are set as % of this</span>
-          </label>
-        </div>
-      )}
       <div className="overflow-x-auto">
         <table className="fin-table [&_td]:min-w-24">
-          <thead><tr><th>Segment</th><th>Share</th><th className="text-right">Passengers year 1</th><th>% of adult round trip</th><th className="text-primary"><span className="font-semibold">Ticket gross incl VAT (NOK)</span><span className="block font-normal text-[11px]">From base fare above</span></th><th>VAT</th><th>Commission</th><th className="text-right">Net realized / guest (NOK)</th><th /></tr></thead>
+          <thead><tr><th>Segment</th><th>Share</th><th className="text-right">Passengers year 1</th><th>% of adult round trip</th><th className="text-primary"><span className="font-semibold">Ticket gross incl VAT (NOK)</span><span className="block font-normal text-[11px]">From Ticket pricing & revenue</span></th><th>VAT</th><th>Commission</th><th className="text-right">Net realized / guest (NOK)</th><th /></tr></thead>
           <tbody>
             {a.segments.map((s, i) => (
               <tr key={i}>
@@ -113,7 +104,7 @@ export function SegmentsSection({ a, set, ro }: P) {
         </table>
       </div>
       {!ro && <Button size="sm" variant="outline" className="mt-3" onClick={() => setSegments([...a.segments, { name: "New segment", share: 0, grossPrice: 0, vatRate: 0.12, commission: 0, boardingsPerGuest: 1 }], [...a.segments.map((_, j) => j), -1])}>Add segment</Button>}
-      <p className="mt-3 text-xs text-muted-foreground">The base fare above is the basis for every other fare — the other segments are set as % of it. Net realized revenue is per guest, excluding VAT and after commission.</p>
+      <p className="mt-3 text-xs text-muted-foreground">The base fare in Ticket pricing & revenue is the basis for every other fare — the other segments are set as % of it. Net realized revenue is per guest, excluding VAT and after commission.</p>
       <SegmentBridge a={a} />
     </Card>
   );

@@ -1,4 +1,5 @@
 # Tasks
+- [x] Move the adult round-trip base fare field from Passenger segments to Ticket pricing & revenue, preserving fare edits and autosave.
 - [x] Add cable car OPEX benchmark selection with passenger adjustment, frozen source/confirmed refresh and restored manual costs; 343 tests pass, build OK, temporary scenario selection/save/reload/toggle/refresh/Manual verified and removed.
 - [x] Change Ticket pricing & revenue to Year 1 passengers, net prices and monthly/annual revenue without changing saved assumptions or forecast formulas.
 - [x] Add isolated Sandbox Mode, project/scenario selection, Investment Summary entry, synchronized commercial inputs, normalization, resets and full comparisons.

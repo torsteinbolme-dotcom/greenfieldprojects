@@ -13,6 +13,8 @@ import { forecastOpex } from "@/lib/forecast-opex";
 import { buildWaterfall, capexRows, segmentRows } from "@/lib/bridges";
 import { WaterfallChart } from "./waterfall";
 import { FbBenchmarkPanel } from "./fb-benchmark";
+import { CableOpexBenchmarkPanel } from "./cable-opex-benchmark";
+import type { AssumptionsWithCableBenchmark } from "@/lib/cable-opex-benchmark";
 import type { AssumptionsWithFb } from "@/lib/fb-benchmark";
 import { useState } from "react";
 import { VolumeMethodsEditor } from "./volume-methods";
@@ -217,6 +219,7 @@ export function PassengersPricingSection({ a, set, ro }: P) {
 
 export function RevenueOpexSection({ a, set, ro }: P) {
   const fbSel = (a as AssumptionsWithFb).fbBenchmark;
+  const cableSel = (a as AssumptionsWithCableBenchmark).cableOpexBenchmark;
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Card title="Existing annual inputs & revenue growth" className="lg:col-span-2">
@@ -239,9 +242,10 @@ export function RevenueOpexSection({ a, set, ro }: P) {
       <Card title="F&B from restaurant benchmarks" className="lg:col-span-2"><FbBenchmarkPanel a={a} set={set} ro={ro} /></Card>
       <Card title="Calculation methods" className="lg:col-span-2"><VolumeMethodsEditor a={a} set={set} ro={ro} /></Card>
       <Card title="Operating costs" className="lg:col-span-2">
+        <CableOpexBenchmarkPanel a={a} set={set} ro={ro} />
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-          <Field label="Cable car fixed OPEX year 1 (NOK)"><NumField value={a.cableFixedOpex} disabled={ro} onChange={(v) => set({ cableFixedOpex: v })} /></Field>
-          <Field label="Cable car variable OPEX per passenger (NOK)" hint="Year-1 price level; grows with cable car OPEX"><NumField value={a.cableVariableCostPerPassenger ?? 0} disabled={ro} onChange={(v) => set({ cableVariableCostPerPassenger: v })} /></Field>
+          <Field label={cableSel ? "Cable car benchmark OPEX year 1 (NOK)" : "Cable car fixed OPEX year 1 (NOK)"}><NumField value={a.cableFixedOpex} disabled={ro || !!cableSel} onChange={(v) => set({ cableFixedOpex: v })} /></Field>
+          {!cableSel && <Field label="Cable car variable OPEX per passenger (NOK)" hint="Year-1 price level; grows with cable car OPEX"><NumField value={a.cableVariableCostPerPassenger ?? 0} disabled={ro} onChange={(v) => set({ cableVariableCostPerPassenger: v })} /></Field>}
           <Field label="Annual maintenance CAPEX (% of initial CAPEX)" hint="Investing cash outflow, not OPEX; grows with cable car OPEX"><NumField percent value={a.maintenanceCapexPct ?? 0} disabled={ro} onChange={(v) => set({ maintenanceCapexPct: v })} /></Field>
         </div>
         <div className="mt-4 grid gap-4 md:grid-cols-2">

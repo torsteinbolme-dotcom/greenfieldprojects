@@ -17,7 +17,7 @@ describe("advanced demand forecast", () => {
   it("grows each source at its own schedule (independent reference)", () => {
     const f = demandForecast({ sources: [src({ id: "a", market: 100_000, marketGrowth: [0.1], capture: 0.5 }), src({ id: "b", market: 200_000, marketGrowth: [0.02, 0.05], capture: 0.25, captureChange: [0.01] })] }, 3);
     // Y1 50 000 + 50 000; Y2 55 000 + 204 000×0.26=53 040; Y3 60 500 + 214 200×0.27=57 834
-    expect(f.totals).toEqual([100_000, 55_000 + 53_040, 60_500.000000000015 + 57_834.00000000001].map((v, i) => i < 2 ? v : f.totals[2]));
+    close(f.totals[0]!, 100_000); close(f.totals[1]!, 55_000 + 53_040);
     close(f.totals[2]!, 60_500 + 57_834);
   });
   it("applies year-specific market and capture overrides only to that year", () => {
@@ -26,7 +26,7 @@ describe("advanced demand forecast", () => {
   });
   it("cruise port-call method: calls × arriving passengers × capture, no extra occupancy", () => {
     const cruise = src({ cruise: true, method: "calls", market: 999_999, calls: 100, callsGrowth: [0.1], paxPerCall: 3000, capture: 0.2, overrides: { "3": { calls: 50 } } });
-    expect(sourceForecast(cruise, 3).map((r) => r.passengers)).toEqual([60_000, 66_000.00000000001, 30_000]);
+    sourceForecast(cruise, 3).forEach((r, i) => close(r.passengers, [60_000, 66_000, 30_000][i]!));
     expect(sourceForecast({ ...cruise, method: "market" }, 1)[0]!.passengers).toBeCloseTo(199_999.8, 6);
   });
   it("handles 0% and 100% capture and rejects capture outside 0–100%", () => {

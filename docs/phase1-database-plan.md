@@ -1,12 +1,12 @@
 # Phase 1 database migration and rollback plan
 
-Status: review only. No production query, migration or data update has been executed.
+Status: review only. Codex has executed no production query, migration or data update. On 21 October 2026 the user reported a read-only Lovable Cloud inspection confirming the default_fb_opex_growth trigger/function is deployed and enabled (O) on public.scenario_assumptions. Historical scenario impact and migration-on-sync behaviour remain unverified. See phase1-release-readiness.md.
 
 ## Investigation before calculation changes
 
 Migration `0007_default_independent_fb_opex_growth` is tracked in the repository migration journal. Its BEFORE INSERT trigger injects a nonempty `opexGrowth.fb` list into any new assumptions version with a missing or empty list. The engine interprets a nonempty list differently from legacy revenue/passenger-linked costs. Source presence is not evidence of production deployment.
 
-Only public/publishable application configuration is available locally; no database connection string, service credential or connected database administration tool is available. Deployment status and affected live scenario counts are therefore UNKNOWN. Do not infer them from repository fixtures. An authorized database administrator can run `scripts/phase1-fb-opex-inspection.sql` in a read-only transaction. It returns trigger state and aggregate candidate counts, not user assumptions. Candidates require review; matching values do not prove that a trigger rather than a user supplied them.
+Only public/publishable application configuration is available locally; no database connection string, service credential or connected database administration tool is available. The user has now confirmed deployment through an authorized inspection. Affected live scenario counts, deployed seed-function hash and migration ledger remain UNKNOWN. Do not infer them from repository fixtures. An authorized database administrator can run `scripts/phase1-fb-opex-inspection.sql` in a read-only transaction. It returns trigger state and aggregate candidate counts, not user assumptions. Candidates require review; matching values do not prove that a trigger rather than a user supplied them.
 
 ## Proposed migration
 

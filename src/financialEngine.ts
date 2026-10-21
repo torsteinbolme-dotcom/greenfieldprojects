@@ -89,7 +89,8 @@ export function calculate(a:Assumptions){
     if(taxableIncome<0){lossCarryforward+=-taxableIncome;}
     else{const offset=Math.min(lossCarryforward,taxableIncome);lossCarryforward-=offset;tax=(taxableIncome-offset)*a.taxRate;}
     // Maintenance CAPEX is an investing outflow: reduces cash, never EBITDA.
-    const maintenanceCapex=capex*(a.maintenanceCapexPct||0)*costIndex(a,'cable',year);
+    const maintenanceRate=a.maintenanceCapexPct||0;
+    const maintenanceCapex=maintenanceRate===0?0:capex*maintenanceRate*costIndex(a,'cable',year);
     const cashAfterDebt=ebitda-interest-principal-tax-maintenanceCapex;
     const distribution=a.distributeCashAnnually?Math.max(0,cashAfterDebt):0;
     retainedCash+=cashAfterDebt-distribution;

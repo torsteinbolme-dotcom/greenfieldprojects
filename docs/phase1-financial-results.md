@@ -35,7 +35,7 @@ Reference C: first-year ticket revenue 100 then 200, fixed OPEX 150, CAPEX 100, 
 
 The repository's actual 0007 trigger was executed in disposable in-memory PostgreSQL (PGlite), with no production connection. Year 1 F&B revenue/OPEX 100, ancillary growth 10%, inflation 2.5%, no explicit F&B OPEX growth: the pre-save legacy Year 2 OPEX is 112.75. The trigger injects `[0.025,0.025,0.025]`, changing reload OPEX to 102.50. Correct preservation is 112.75 both before and after saving. Explicit user growth lists must stay explicit and unchanged.
 
-Deployment status and affected production scenarios remain unknown: local configuration contains publishable credentials only; no authorized database administration connection is available. Repository presence is not deployment evidence. Read-only inspection queries, a no-backfill migration, and rollback are supplied separately. No live records have been read or modified.
+At the original audit, deployment status and affected production scenarios were unknown; the user subsequently confirmed the trigger is enabled in production. Existing scenario impact remains unknown: local configuration contains publishable credentials only; no authorized database administration connection is available. Repository presence is not deployment evidence. Read-only inspection queries, a no-backfill migration, and rollback are supplied separately. No live records have been read or modified.
 
 ## Scope and release restrictions
 
@@ -72,4 +72,8 @@ The standalone database test is an additional check, not part of the 449 Vitest 
 
 ## Remaining risks
 
-Production trigger state and affected scenario counts still require authorized read-only inspection. The prospective database fix and rollback are prepared for review, not applied. Previously injected F&B lists remain intact. Broader business-split/currency benchmark issues, IRR ambiguity, concurrency/transaction redesign and new financial modelling features are intentionally deferred. Sandbox cash-flow displays continue to use the existing actual-tax cash-flow convention; project comparisons use the explicitly unlevered definition above. Invalid legacy inputs now show a calculation error rather than returning an invalid forecast, and are never rewritten.
+The user has confirmed that the production trigger is deployed and enabled. Affected scenario counts, seed-function hash and migration execution on GitHub sync still require authorized read-only verification. The prospective database fix and rollback are prepared for review, not applied. Previously injected F&B lists remain intact. Broader business-split/currency benchmark issues, IRR ambiguity, concurrency/transaction redesign and new financial modelling features are intentionally deferred. Sandbox cash-flow displays continue to use the existing actual-tax cash-flow convention; project comparisons use the explicitly unlevered definition above. Invalid legacy inputs now show a calculation error rather than returning an invalid forecast, and are never rewritten.
+
+## Validation compatibility follow-up
+
+See [phase1-release-readiness.md](phase1-release-readiness.md) for the updated method-aware validation, signed CAPEX support, 494-test result and current operational blockers. The compatibility issue is resolved; merge/release remains NO-GO pending those checks. No database migrations were executed during this follow-up.

@@ -27,6 +27,27 @@
       "passed": 449,
       "failed": 0,
       "pending": 0
+    },
+    "compatibility_baseline": {
+      "files": 49,
+      "total": 449,
+      "passed": 449,
+      "failed": 0,
+      "pending": 0
+    },
+    "compatibility_initial_reproductions": {
+      "files": 1,
+      "total": 39,
+      "passed": 21,
+      "failed": 18,
+      "pending": 0
+    },
+    "compatibility_after_fix": {
+      "files": 50,
+      "total": 494,
+      "passed": 494,
+      "failed": 0,
+      "pending": 0
     }
   },
   "other_checks": {
@@ -34,5 +55,14 @@
     "build": "passed; chunk-size and inlineDynamicImports warnings",
     "new_typescript_files_lint": "passed",
     "disposable_database": "six exact JSON and engine-result round trips; historical rows unchanged; new-user defaults preserved; rollback passed; unknown seed function rejected"
+  },
+  "compatibility_update": {
+    "database_migrations_executed": false,
+    "production_data_accessed": false,
+    "trigger_deployment": "User-confirmed via Lovable Cloud SQL Editor: default_fb_opex_growth enabled (O) on public.scenario_assumptions",
+    "production_scenario_impact": "unknown",
+    "migration_execution_on_sync": "unverified",
+    "financial_fixture_fingerprints_preserved": 10,
+    "release_recommendation": "NO-GO until operational prerequisites in phase1-release-readiness.md are resolved"
   }
 }

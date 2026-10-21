@@ -89,8 +89,9 @@ export function categoryCosts(m: OperationsModel, passengers: number, calendarYe
   let months: ScheduleMonth[] | null = null;
   const sched = () => (months ??= scheduleMonths(m, calendarYear, passengers));
   return m.categories.map((c) => {
-    const nums = [c.fixed, c.variable, c.step?.base, c.step?.threshold, c.step?.stepCost];
-    if (nums.some((x) => !Number.isFinite(x) || x < 0) || (c.step?.maxSteps != null && !(c.step.maxSteps >= 0))) throw Error(`${c.name}: costs, thresholds and steps must be non-negative.`);
+    if (!["fixed", "variable", "fixedVariable", "step"].includes(c.method)) throw Error(`${c.name}: invalid operating-cost method.`);
+    const nums = c.method === "fixed" ? [c.fixed] : c.method === "variable" ? [c.variable] : c.method === "fixedVariable" ? [c.fixed, c.variable] : [c.step?.base, c.step?.threshold, c.step?.stepCost];
+    if (nums.some((x) => !Number.isFinite(x) || x < 0) || (c.method === "step" && c.step?.maxSteps != null && !(Number.isFinite(c.step.maxSteps) && c.step.maxSteps >= 0))) throw Error(`${c.name}: active costs, thresholds and steps must be finite and non-negative.`);
     let fixed = 0, variable = 0, step = 0, steps = 0;
     if (c.method === "fixed") fixed = c.fixed;
     else if (c.method === "variable") variable = c.variable * passengers;

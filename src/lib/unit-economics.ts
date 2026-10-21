@@ -1,6 +1,8 @@
 import type { Assumptions, YearResult } from '@/financialEngine';
 import { forecastOpex } from './forecast-opex';
 
+export const DEFAULT_COMPARISON_ECONOMICS_YEAR = 1;
+
 /** Read-only economics from actual engine components; negative costs are a display convention. */
 export function unitEconomics(a: Assumptions, row: YearResult) {
   const costs = forecastOpex(a, row);

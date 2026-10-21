@@ -4,11 +4,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { CapacitySection } from "@/components/editor/capacity";
 import { TicketPricingSection } from "@/components/editor/ticket-pricing";
 import { initializeSeasonalPricing } from "@/lib/seasonal-pricing";
+import * as seasonalPricing from "@/lib/seasonal-pricing";
 import { calculate, type Assumptions } from "@/financialEngine";
 import { projectMountain } from "@/exampleProject";
 vi.mock("@/components/editor/sections", () => ({ Card: ({ children }: { children: React.ReactNode }) => <section>{children}</section>, PassengersPricingSection: () => null }));
 vi.mock("@/lib/seasonality", () => ({ useSeasonalityProfiles: () => ({ data: [] }) }));
-afterEach(cleanup);
+afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
 describe("seasonal settings and saved distribution interaction", () => {
   it("initializes current fares without changing forecast inputs", () => {
@@ -36,11 +37,20 @@ describe("seasonal settings and saved distribution interaction", () => {
     const changed = values.at(-1); if (!changed) throw Error("Missing edit");
     expect(calculate(changed).rows[0]?.ticketRevenue).toBeCloseTo(200000, 8);
   });
-  it("shows no operating-year picker and always reads Year 3", () => {
-    const pricing = initializeSeasonalPricing(projectMountain); pricing.enabled = true;
-    const set = vi.fn(); render(<TicketPricingSection a={{ ...projectMountain, seasonalPricing: pricing }} r={calculate(projectMountain)} ro={false} set={set} />);
-    expect(screen.queryByText("Operating year")).toBeNull();
-    expect(screen.getByText("Season · Year 3")).toBeTruthy();
+  it("uses Year 1 passengers and uninflated Year 1 prices for ticket revenue", () => {
+    const a = { ...projectMountain, initialPassengers: 1000, segments: [{ name: "Adult", share: 1, grossPrice: 100, vatRate: 0, commission: 0, boardingsPerGuest: 2 }], passengerGrowth: [1], priceGrowth: [0.5] };
+    const pricing = initializeSeasonalPricing(a);
+    const assumptions = { ...a, seasonalPricing: pricing };
+    const revenue = vi.spyOn(seasonalPricing, "seasonalRevenueTable");
+    render(<TicketPricingSection a={assumptions} r={calculate(assumptions)} ro={false} set={vi.fn()} />);
+    expect(revenue).toHaveBeenLastCalledWith(assumptions, 1000, 1);
+    expect(revenue.mock.results.at(-1)?.value).toMatchObject({ netPrice: 100, revenue: 100000 });
+  });
+  it("keeps Year 1 inputs when the forecast is unavailable", () => {
+    const a = { ...projectMountain, initialPassengers: 1234, seasonalPricing: initializeSeasonalPricing(projectMountain) };
+    const revenue = vi.spyOn(seasonalPricing, "seasonalRevenueTable");
+    render(<TicketPricingSection a={a} r={null} ro={false} set={vi.fn()} />);
+    expect(revenue).toHaveBeenLastCalledWith(a, 1234, 1);
   });
   it("prevents viewers from editing seasonal settings", () => {
     const set = vi.fn(); render(<TicketPricingSection a={projectMountain} r={null} ro set={set} />);

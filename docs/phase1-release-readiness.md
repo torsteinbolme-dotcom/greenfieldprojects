@@ -4,6 +4,10 @@
 
 **NO-GO for merge/release until the remaining operational gates below are resolved.** The validation compatibility blocker is resolved in this PR update. This is not permission to merge, deploy or execute a migration.
 
+## Production migration ledger comparison
+
+The supplied 12-row export matches repository migrations **0000–0011** by exact SQL SHA-256 and exact journal timestamps, with no observed history discrepancies. **0012 is pending in the exported ledger.** Numeric ledger IDs were not used to infer filenames. See [full comparison](phase1-production-migration-comparison.md). The latest `created_at` is a journal timestamp, not proof of actual execution time. This resolves the ledger-comparison evidence gate; older requests below for obtaining that ledger are superseded. Actual Lovable synchronization/migration execution behaviour remains a release blocker.
+
 ## Validation compatibility resolved
 
 - Standard CAPEX item quantities and unit costs may be signed, supporting supplier rebates, credits and returned quantities. Each number and the resulting net investment must be finite. Net CAPEX and total investment after contingency must be nonnegative. Zero investment remains supported. No input lines are netted, clamped, deleted or rewritten.
@@ -34,14 +38,33 @@ On 21 October 2026 the user reported an authorized inspection through Lovable Cl
 | Function | `default_fb_opex_growth` |
 | Status | `O` — enabled for ordinary sessions |
 
-This supersedes the earlier unknown deployment status. Codex did not independently connect to production. Whether existing scenario assumptions were affected is still unknown; a pattern matching the injected rates does not prove who supplied them. Do not backfill or restore any assumptions without separate approval and provenance review.
+This supersedes the earlier unknown deployment status. Codex did not independently connect to production.
+
+### Authorized aggregate inspection results
+
+The user subsequently reported these read-only Lovable Cloud SQL Editor results on 21 October 2026:
+
+| Inspection metric | Reported result |
+|---|---:|
+| Total assumption versions | 306 |
+| Legacy versions | 108 |
+| Versions matching the trigger pattern | 1 |
+| Candidate scenarios | 0 |
+
+The inspection detected no candidate scenarios under the supplied heuristic. This is indicative, not conclusive proof of historical integrity. The one pattern-matching version may be a seed/default or user-entered value; its origin is not established. Legacy versions can remain unchanged because the trigger affects inserts rather than retrospectively updating older rows. The candidate query can miss first-version injections, cross-scenario copies and cases outside its exact pattern; it cannot reconstruct an unsaved draft. Inspection-role/RLS coverage and historical trigger timing were not supplied.
+
+The requested aggregate inspection is now complete; it is no longer an outstanding evidence-collection task. There is no identified candidate justifying a historical repair or backfill. Preserve all historical assumptions. Further provenance work, if needed, must remain read-only unless separately authorized. The enabled trigger still justifies a prospective future-save correction.
 
 ## Remaining blockers and prerequisites
 
-1. **Existing scenario impact:** an authorized read-only inspection must establish candidate scenarios, relevant version transitions and migration timing. Confirm inspection role coverage/RLS before treating a count of zero as comprehensive. Retain user-entered rates; obtain separate approval for any historical correction.
+1. **Historical-data decision:** retain all historical assumptions. The aggregate inspection is complete (306 total, 108 legacy, 1 pattern match, 0 candidates); it does not establish universal historical integrity. No historical repair is part of this release.
 2. **Migration execution on GitHub sync:** establish the actual Lovable workspace behaviour, synced branch, migration permissions, runner and external deployment integrations. Repository inspection alone cannot guarantee that merging main will not execute backend SQL. An unpublished frontend is not a database isolation boundary. Keep this PR in draft until that boundary is confirmed.
 3. **Deployed seed definition and migration history:** capture the current seed function/hash and applied migration ledger. The prepared migration refuses an unrecognized seed body. Confirm 0012 is the only intended pending migration and ensure transactional execution through the approved runner.
 4. **Isolated staging release rehearsal:** use a genuinely separate backend to test signup, save/reload, benchmark fallbacks and the migration/rollback sequence. A Lovable code branch or draft must not be assumed to provide a separate database.
 5. **Explicit release authorization:** review the updated PR and establish the desired approval gate on main. No merge, migration, deployment, rollback or production-record change is authorized by this report.
 
 Relevant vendor documentation, checked in the preceding assessment: [Lovable GitHub sync](https://docs.lovable.dev/integrations/github), [Lovable database and migrations](https://docs.lovable.dev/features/database), [Lovable publishing](https://docs.lovable.dev/features/publish), [Drizzle migrations](https://orm.drizzle.team/docs/drizzle-kit-migrate). Documentation describes product capabilities; workspace-specific settings still need confirmation.
+
+## Safest release procedure and current investigation
+
+See [phase1-sync-release-plan.md](phase1-sync-release-plan.md) for the evidence matrix, exact remaining owner confirmations and the gated release sequence. Public documentation and source inspection establish the product mechanisms, but not this workspace's treatment of an externally synchronized migration. A read-only Chrome settings inspection could not proceed because computer-use access was not approved. No settings, synced branches or Cloud permissions were changed. This report-only update does not rerun or change financial calculations; the latest code verification remains 494 passing tests.

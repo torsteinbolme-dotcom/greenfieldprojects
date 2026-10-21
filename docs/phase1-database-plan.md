@@ -1,12 +1,12 @@
 # Phase 1 database migration and rollback plan
 
-Status: review only. Codex has executed no production query, migration or data update. On 21 October 2026 the user reported a read-only Lovable Cloud inspection confirming the default_fb_opex_growth trigger/function is deployed and enabled (O) on public.scenario_assumptions. Historical scenario impact and migration-on-sync behaviour remain unverified. See phase1-release-readiness.md.
+Status: review only. Codex has executed no production query, migration or data update. On 21 October 2026 the user reported a read-only Lovable Cloud inspection confirming the default_fb_opex_growth trigger/function is deployed and enabled (O) on public.scenario_assumptions. The authorized aggregate inspection subsequently reported 306 assumption versions, 108 legacy versions, 1 trigger-pattern match and 0 candidate scenarios. This is indicative, not conclusive proof of historical integrity. Migration-on-sync behaviour remains unverified; preserve all historical assumptions. See phase1-release-readiness.md.
 
 ## Investigation before calculation changes
 
 Migration `0007_default_independent_fb_opex_growth` is tracked in the repository migration journal. Its BEFORE INSERT trigger injects a nonempty `opexGrowth.fb` list into any new assumptions version with a missing or empty list. The engine interprets a nonempty list differently from legacy revenue/passenger-linked costs. Source presence is not evidence of production deployment.
 
-Only public/publishable application configuration is available locally; no database connection string, service credential or connected database administration tool is available. The user has now confirmed deployment through an authorized inspection. Affected live scenario counts, deployed seed-function hash and migration ledger remain UNKNOWN. Do not infer them from repository fixtures. An authorized database administrator can run `scripts/phase1-fb-opex-inspection.sql` in a read-only transaction. It returns trigger state and aggregate candidate counts, not user assumptions. Candidates require review; matching values do not prove that a trigger rather than a user supplied them.
+Only public/publishable application configuration is available locally; no database connection string, service credential or connected database administration tool is available. The user has now confirmed deployment through an authorized inspection. The user reported 0 candidate scenarios under the supplied heuristic (306 versions, 108 legacy, 1 pattern match). This does not prove there were no historical effects. Deployed seed-function hash and migration ledger remain UNKNOWN. Do not infer them from repository fixtures. An authorized database administrator can run `scripts/phase1-fb-opex-inspection.sql` in a read-only transaction. It returns trigger state and aggregate candidate counts, not user assumptions. Candidates require review; matching values do not prove that a trigger rather than a user supplied them.
 
 ## Proposed migration
 
@@ -24,4 +24,4 @@ Pause writes, revert the application release, then explicitly run `docs/sql/phas
 
 ## Release gate
 
-Production deployment remains out of scope. Local tests cannot establish deployed RLS/trigger state. The PR must retain this limitation until an authorized operator supplies the read-only inspection results.
+Production deployment remains out of scope. Local tests cannot establish deployed RLS/trigger state. The aggregate inspection results are now recorded. The PR remains in draft pending verified SQL-on-sync approval boundaries, seed/ledger checks and isolated staging rehearsal; see phase1-sync-release-plan.md.

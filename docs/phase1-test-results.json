@@ -60,9 +60,21 @@
     "database_migrations_executed": false,
     "production_data_accessed": false,
     "trigger_deployment": "User-confirmed via Lovable Cloud SQL Editor: default_fb_opex_growth enabled (O) on public.scenario_assumptions",
-    "production_scenario_impact": "unknown",
+    "production_scenario_impact": "Aggregate inspection complete: 0 heuristic candidates; historical integrity not conclusively established; preserve all assumptions",
     "migration_execution_on_sync": "unverified",
     "financial_fixture_fingerprints_preserved": 10,
     "release_recommendation": "NO-GO until operational prerequisites in phase1-release-readiness.md are resolved"
+  },
+  "authorized_production_inspection": {
+    "source": "User-reported read-only Lovable Cloud SQL Editor inspection",
+    "date": "2026-10-21",
+    "trigger": "default_fb_opex_growth",
+    "enabled_status": "O",
+    "total_assumption_versions": 306,
+    "legacy_versions": 108,
+    "versions_matching_trigger_pattern": 1,
+    "candidate_scenarios": 0,
+    "interpretation": "Indicative only; no candidate scenarios detected by the supplied heuristic; not conclusive proof of historical integrity",
+    "historical_assumptions_modified": false
   }
 }

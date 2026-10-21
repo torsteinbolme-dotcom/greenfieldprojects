@@ -52,7 +52,7 @@ export function AdvancedCalculationsSection({ a, r, ro, set }: { a: Assumptions;
                     </div>
                     <Switch aria-label={m.label} checked={on} disabled={ro} onCheckedChange={(v) => toggle(key, v)} />
                   </div>
-                  {(key === "commercialFb" || key === "commercialMerch") && <AdvancedCommercialEditor a={a} r={r} kind={key === "commercialFb" ? "fb" : "merch"} on={on} ro={ro} inputs={adv[key]?.inputs as unknown as CommercialInputs | undefined} onChange={(i) => setInputs(key, i)} />}
+                  {(key === "commercialFb" || key === "commercialMerch") && <AdvancedCommercialEditor a={a} r={r} kind={key === "commercialFb" ? "fb" : "merch"} on={on} ro={ro} inputs={adv[key]?.inputs as unknown as CommercialInputs | undefined} onChange={(i: CommercialInputs) => setInputs(key, i)} />}
                   </div>
                 );
               })}

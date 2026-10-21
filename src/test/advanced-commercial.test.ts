@@ -11,7 +11,7 @@ const run = (a: Assumptions) => { const r = safeCalculate(a); if (!r.result) thr
 const close = (x: number, y: number) => expect(Math.abs(x - y)).toBeLessThanOrEqual(Math.max(1e-6, Math.abs(y) * 1e-9));
 const fbIn: CommercialInputs = { conversion: 0.4, conversionChange: [0.02, 0], spend: 150, spendGrowth: [0.03] };
 const merchIn: CommercialInputs = { conversion: 0.1, conversionChange: [], spend: 200, spendGrowth: [] };
-const adv = (a: Assumptions, x: AssumptionsWithAdvanced["advanced"]): AssumptionsWithAdvanced => ({ ...a, advanced: x });
+const adv = (a: Assumptions, x: NonNullable<AssumptionsWithAdvanced["advanced"]>): AssumptionsWithAdvanced => ({ ...a, advanced: x });
 const fbOn = adv(projectMountain, { commercialFb: { enabled: true, inputs: fbIn as never } });
 
 describe("advanced commercial revenue", () => {

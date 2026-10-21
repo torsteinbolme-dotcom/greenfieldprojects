@@ -28,7 +28,11 @@ const step = (list: number[] | undefined, year: number) => (list && list.length 
 export function defaultCommercialInputs(a: Assumptions, kind: CommercialKind): CommercialInputs {
   const y1 = kind === "fb" ? a.fbRevenueYear1 : a.merchRevenueYear1;
   const spend = a.initialPassengers > 0 ? y1 / a.initialPassengers : 0;
-  return { conversion: 1, conversionChange: [], spend, spendGrowth: [...a.ancillaryGrowth], seasonal: { enabled: false, highConversion: 1, lowConversion: 1, highSpend: spend, lowSpend: spend } };
+  // Spend growth net of passenger growth, so the starting forecast follows the standard ancillary growth.
+  const n = Math.max(a.ancillaryGrowth.length, a.passengerGrowth.length);
+  const at = (l: number[], i: number) => l[Math.min(i, l.length - 1)] ?? 0;
+  const spendGrowth = Array.from({ length: n }, (_, i) => (1 + at(a.ancillaryGrowth, i)) / (1 + at(a.passengerGrowth, i)) - 1);
+  return { conversion: 1, conversionChange: [], spend, spendGrowth, seasonal: { enabled: false, highConversion: 1, lowConversion: 1, highSpend: spend, lowSpend: spend } };
 }
 
 /** Season of each month from the existing ticket season assignment (shared, never duplicated). */
@@ -65,8 +69,6 @@ export function commercialSchedule(a: Assumptions, inputs: CommercialInputs): Co
 export function commercialMonthly(a: Assumptions, inputs: CommercialInputs, year: number, passengers: number) {
   const seasonal = inputs.seasonal;
   if (!seasonal?.enabled) return null;
-  const sched = commercialSchedule(a, { ...inputs, seasonal: { ...seasonal, highConversion: seasonal.highConversion, lowConversion: seasonal.lowConversion } });
-  void sched;
   let convShift = 0, spendIndex = 1;
   for (let y = 2; y <= year; y++) { convShift += step(inputs.conversionChange, y); spendIndex *= 1 + step(inputs.spendGrowth, y); }
   const alloc = capacityOf(a).monthlyAllocation;

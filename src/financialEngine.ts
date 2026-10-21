@@ -3,7 +3,7 @@
 import { seasonalWeightedTicket, ticketPriceGrowthIndex, type SeasonalPricing } from './lib/seasonal-pricing';
 import { benchmarkAmount, escalation, validateVolumeMethods, volumeRevenue, volumeOpex, type VolumeMethods } from './lib/volume-methods';
 export type Segment = {name:string;share:number;grossPrice:number;vatRate:number;commission:number;boardingsPerGuest:number};
-export type CapexItem = {name:string;quantity:number;unitCost:number};
+export type CapexItem = {name:string;quantity:number;unitCost:number;comment?:string};
 // cableVariableCostPerPassenger adds to cable car OPEX. maintenanceCapexRate is a legacy inert input; maintenanceCapexPct (absent = 0) is the annual investing outflow as % of initial CAPEX (mountain-v3).
 export type Assumptions = {
   name:string;openingYear:number;years:number;initialPassengers:number;

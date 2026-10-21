@@ -1,5 +1,6 @@
 import type { Assumptions } from '@/financialEngine';
 import { safeCalculate, type ModelResult } from './model';
+import { resolveAssumptions } from './advanced';
 import { withLinkedTicketPrices } from './ticket-pricing';
 import { breakEven } from './break-even';
 import { forecastOpex } from './forecast-opex';
@@ -33,7 +34,8 @@ export function normalizeFromYear1(result: ModelResult, target: SandboxTargets):
 export function simulateSandbox(input: Assumptions, targets?: SandboxTargets): SandboxCase {
   const baseline = safeCalculate(input);
   if (!baseline.result) throw Error(baseline.error ?? 'Unable to calculate baseline.');
-  const a = structuredClone(input);
+  // Scale the resolved forecast (e.g. Advanced Demand) without touching its saved market assumptions.
+  const a = structuredClone(resolveAssumptions(withLinkedTicketPrices(input)));
   const base = baselineTargets(baseline.result);
   if (targets) {
     if (!base) throw Error('Year 3 is outside this scenario’s forecast horizon.');

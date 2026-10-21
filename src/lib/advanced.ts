@@ -1,4 +1,5 @@
 import type { Assumptions } from "@/financialEngine";
+import { resolveDemand, type DemandInputs } from "./advanced-demand";
 
 /**
  * Advanced Calculations foundation (Stage 1).
@@ -16,6 +17,8 @@ type ModuleDef = {
   description: string;
   /** Standard assumption fields this module replaces when implemented and active. */
   replaces: readonly (keyof Assumptions)[];
+  /** Year-1 basis fields a module may rescale to keep per-passenger amounts (never replaced). */
+  adjusts?: readonly (keyof Assumptions)[];
   /** True only once the detailed calculation exists; unfinished modules never alter inputs. */
   implemented: boolean;
   /** Replaces the mapped standard fields on a clone. Must only write fields listed in `replaces`. */
@@ -23,7 +26,7 @@ type ModuleDef = {
 };
 
 export const ADVANCED_MODULES: readonly ModuleDef[] = [
-  { key: "demand", label: "Advanced Demand", description: "Builds passenger volumes from market size, visitor flows and capture rates instead of the standard passenger and growth inputs.", replaces: ["initialPassengers", "passengerGrowth"], implemented: false },
+  { key: "demand", label: "Advanced Demand", description: "Builds passenger volumes from market size, visitor flows and capture rates instead of the standard passenger and growth inputs.", replaces: ["initialPassengers", "passengerGrowth"], adjusts: ["fbRevenueYear1", "fbOpexYear1"], implemented: true, resolve: (a, inputs) => resolveDemand(a, inputs as unknown as DemandInputs) },
   { key: "capex", label: "Detailed CAPEX", description: "Builds the investment from detailed cost components and phasing instead of the standard CAPEX lines and contingency.", replaces: ["capexItems", "contingencyRate"], implemented: false },
   { key: "operations", label: "Advanced Operations", description: "Builds cable car operating costs from staffing, energy and maintenance drivers instead of the standard operating cost inputs.", replaces: ["cableFixedOpex", "cableVariableCostPerPassenger", "opexGrowth"], implemented: false },
   { key: "commercialFb", label: "Advanced Commercial — F&B", description: "Builds restaurant revenue and costs from spend per guest, conversion and margins instead of the standard F&B inputs.", replaces: ["fbRevenueYear1", "fbOpexYear1"], implemented: false },
@@ -57,8 +60,11 @@ export function resolveAssumptions(a: Assumptions): Assumptions {
     if (!m.implemented || !m.resolve || adv[m.key]?.enabled !== true) continue;
     const patch = m.resolve(out ?? a, adv[m.key]?.inputs ?? {});
     const safe: Partial<Assumptions> = {};
-    for (const f of m.replaces) if (f in patch) (safe as Record<string, unknown>)[f] = patch[f];
+    for (const f of [...m.replaces, ...(m.adjusts ?? [])]) if (f in patch) (safe as Record<string, unknown>)[f] = patch[f];
     out = { ...(out ?? a), ...safe };
   }
-  return out ?? a;
+  if (!out) return a;
+  // Resolved assumptions carry no module flags, so resolving again is a no-op (e.g. Sandbox scaling).
+  const { advanced: _drop, ...plain } = out as AssumptionsWithAdvanced;
+  return plain;
 }

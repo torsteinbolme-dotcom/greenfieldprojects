@@ -10,12 +10,12 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
+- `src/test/` has its own `AGENTS.md`; read it before changing tests.
 - Preserve the engine and example except requested formula changes. Why: signed-off calculations.
 - Compute from append-only JSON; `lib/sandbox.ts` uses cloned overrides, never saves. Why: auditability and isolation.
 - Every table has `organization_id`; RLS uses `is_org_member` / `can_edit_org` / `is_org_admin` (security definer). Why: isolation.
 - Scenario saves insert new versions; Base is never overwritten by other scenarios. Why: isolation and version history.
-- Scenario version reads must fail explicitly and unique-version collisions retry within a bounded limit; organization relationships and Base identity are guarded in the database. Why: concurrent saves and raw requests must not corrupt history or tenant relationships.
-- Audit investment fixtures use independent literal financial references and explicit expected-failure tests for unresolved signed-off formula defects; the disposable browser security regression must never target existing records. Why: passing test execution must not conceal unresolved economics or endanger user data.
+- Version reads fail explicitly; unique-version collisions retry (bounded); org relationships and Base identity are DB-guarded. Why: no corrupted history or tenancy.
 - Signups get their own organization and seeded Mountain via `handle_new_user`. Why: working examples.
 - Ticket ratios live in scenario JSON; use `src/lib/ticket-pricing.ts` for edits/calculations/saves; `withDefaultProjectSegments` only for new templates. Why: preserve saved fares and history.
 - Use scoped serial autosave for assumptions and project details, including name (metadata only); undo saves a snapshot, never deletes history. Why: edits survive requests and stay isolated.
@@ -34,6 +34,5 @@
 - Capacity validation is nonfinancial; scenario-keyed distribution drafts require valid explicit Save. Profile imports are org-scoped and atomic; averages count each normalized year once, attribution is frozen. Why: isolation and provenance.
 - Seasonal JSON uses `seasonal-pricing.ts` for linked fares and allocation weights; retain flat F&B growth (v4-seasonal). The scenario-keyed ticket tab owns the base fare and reads Year 1 (row 0). Why: base-year pricing and isolated navigation.
 - Project delete is soft; RLS hides deleted projects/scenarios. Why: recoverable.
-
 - Optional methods preserve legacy/inactive inputs and frozen scenario snapshots. Cable OPEX snapshots set fixed cost, zero variable cost, restore manual on deselection. Why: isolation and no double costs.
 - Advanced Calculations: per-scenario module flags/inputs live in assumptions JSON `advanced`; `resolveAssumptions` in `src/lib/advanced.ts` (called by `safeCalculate`) replaces only each module's mapped standard fields on a clone, and only for implemented modules. Why: one engine, no double counting, standard inputs preserved.

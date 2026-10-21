@@ -35,7 +35,7 @@ export function simulateSandbox(input: Assumptions, targets?: SandboxTargets): S
   const baseline = safeCalculate(input);
   if (!baseline.result) throw Error(baseline.error ?? 'Unable to calculate baseline.');
   // Scale the resolved forecast (e.g. Advanced Demand) without touching its saved market assumptions.
-  const a = structuredClone(resolveAssumptions(withLinkedTicketPrices(input)));
+  const a = structuredClone(resolveAssumptions(input));
   const base = baselineTargets(baseline.result);
   if (targets) {
     if (!base) throw Error('Year 3 is outside this scenario’s forecast horizon.');

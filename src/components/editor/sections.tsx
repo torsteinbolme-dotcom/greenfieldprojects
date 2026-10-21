@@ -239,6 +239,7 @@ export function RevenueOpexSection({ a, set, ro }: P) {
       <Card title="F&B from restaurant benchmarks" className="lg:col-span-2"><FbBenchmarkPanel a={a} set={set} ro={ro} /></Card>
       <Card title="Calculation methods" className="lg:col-span-2"><VolumeMethodsEditor a={a} set={set} ro={ro} /></Card>
       <Card title="Operating costs" className="lg:col-span-2">
+        {controlledFields(a).has("cableFixedOpex") && <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"><AdvancedIndicator />Advanced Operations is on: cable car fixed and variable OPEX below are kept but not used. Maintenance CAPEX and cable car OPEX growth still apply.</div>}
         <CableOpexBenchmarkPanel a={a} set={set} ro={ro} />
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
           <Field label={cableSel ? "Cable car benchmark OPEX year 1 (NOK)" : "Cable car fixed OPEX year 1 (NOK)"}><NumField value={a.cableFixedOpex} disabled={ro || !!cableSel} onChange={(v) => set({ cableFixedOpex: v })} /></Field>

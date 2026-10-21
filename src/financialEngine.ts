@@ -1,6 +1,7 @@
 // @ts-nocheck -- authoritative engine kept verbatim; strict-null type errors are suppressed rather than altering its logic.
 /** Project Mountain v1 financial engine. All amounts NOK, rates decimals. */
 import { seasonalWeightedTicket, ticketPriceGrowthIndex, type SeasonalPricing } from './lib/seasonal-pricing';
+import { operationsCableOpex, type OperationsModel } from './lib/advanced-operations';
 import { benchmarkAmount, escalation, validateVolumeMethods, volumeRevenue, volumeOpex, type VolumeMethods } from './lib/volume-methods';
 export type Segment = {name:string;share:number;grossPrice:number;vatRate:number;commission:number;boardingsPerGuest:number};
 export type CapexItem = {name:string;quantity:number;unitCost:number;comment?:string};
@@ -21,6 +22,8 @@ export type Assumptions = {
   // Optional per-cost yearly growth lists (fall back to costInflation) and merchandise OPEX as share of merchandise revenue.
   opexGrowth?:{cable?:number[];fb?:number[];merch?:number[]};
   merchOpexRate?:number|null;
+  // Set only by the Advanced Operations resolver: replaces the cable car OPEX block (fixed + variable).
+  operationsOpex?:OperationsModel;
   fbFollowsPassengers?:boolean;
   fbBenchmark?:{adjust:boolean;revenue?:{assetId:string;year:number;adjust?:boolean}|null;opex?:{assetId:string;year:number;adjust?:boolean}|null};
 };
@@ -72,7 +75,7 @@ export function calculate(a:Assumptions){
     const otherOpex=volumeOpex(methods?.other?.opex,passengers,otherRevenue,Math.pow(1+a.costInflation,year-1),0,0);
     const ticketRevenue=passengers*ticketNetPrice,revenue=ticketRevenue+actualFb+actualMerch+otherRevenue;
     // Keep the original addition order for bit-identical legacy results.
-    const opex=(a.cableFixedOpex+(a.cableVariableCostPerPassenger||0)*passengers)*costIndex(a,'cable',year)+fbOpex+merchOpex+otherOpex;
+    const opex=(a.operationsOpex?operationsCableOpex(a.operationsOpex,passengers,year,a.openingYear+year-1,costIndex(a,'cable',year)):(a.cableFixedOpex+(a.cableVariableCostPerPassenger||0)*passengers)*costIndex(a,'cable',year))+fbOpex+merchOpex+otherOpex;
     // Straight-line depreciation stops once the asset is fully depreciated (useful life ended).
     const ebitda=revenue-opex,remainingBook=capex-accumulatedDepreciation,depreciation=remainingBook>Math.abs(capex)*1e-9?Math.min(capex/a.depreciationYears,remainingBook):0,ebit=ebitda-depreciation;
     accumulatedDepreciation+=depreciation;

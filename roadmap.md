@@ -127,3 +127,4 @@
 - [x] Advanced Calculations Stage 2: Advanced Demand & Market (sources, cruise methods, overrides, engine integration, sandbox, capacity warnings). Stage 3 awaits instruction.
 - [x] Advanced Calculations Stage 3: Detailed CAPEX (categories, contingency/escalation, informational timeline, engine integration). Stage 4 awaits instruction.
 - [x] Advanced Calculations Stage 4: Advanced F&B / Merchandise conversion revenue (annual + seasonal), unit economics. Stage 5 awaits instruction.
+- [x] Stage 5: Advanced Operations

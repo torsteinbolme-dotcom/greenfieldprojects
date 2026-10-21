@@ -16,7 +16,7 @@
 - Every table has `organization_id`; RLS uses `is_org_member` / `can_edit_org` / `is_org_admin` (security definer). Why: isolation.
 - Scenario saves insert new versions; Base is never overwritten by other scenarios. Why: isolation and version history.
 - Version reads fail explicitly; unique-version collisions retry (bounded); org relationships and Base identity are DB-guarded. Why: no corrupted history or tenancy.
-- Signups get their own organization and seeded Mountain via `handle_new_user`. Why: working examples.
+- Signups get an own org + seeded Mountain (`handle_new_user`). Why: working examples.
 - Ticket ratios live in scenario JSON; use `src/lib/ticket-pricing.ts` for edits/calculations/saves; `withDefaultProjectSegments` only for new templates. Why: preserve saved fares and history.
 - Use scoped serial autosave for assumptions and project details, including name (metadata only); undo saves a snapshot, never deletes history. Why: edits survive requests and stay isolated.
 - Comparison display years derive through `comparisonYears` in `src/lib/portfolio.ts`, independent of full forecast lengths. Why: shortening comparison graphs must not change authoritative calculations.
@@ -35,4 +35,4 @@
 - Seasonal JSON uses `seasonal-pricing.ts` for linked fares and allocation weights; retain flat F&B growth (v4-seasonal). The scenario-keyed ticket tab owns the base fare and reads Year 1 (row 0). Why: base-year pricing and isolated navigation.
 - Project delete is soft; RLS hides deleted projects/scenarios. Why: recoverable.
 - Optional methods preserve legacy/inactive inputs and frozen scenario snapshots. Cable OPEX snapshots set fixed cost, zero variable cost, restore manual on deselection. Why: isolation and no double costs.
-- Advanced Calculations: per-scenario module flags/inputs live in assumptions JSON `advanced`; `resolveAssumptions` in `src/lib/advanced.ts` (called by `safeCalculate`) writes only each module's whitelisted fields on a clone (commercial: `perPassengerSeries`). Why: one engine, no double counting, standard inputs preserved.
+- Advanced Calculations: per-scenario module flags/inputs live in assumptions JSON `advanced`; `resolveAssumptions` in `src/lib/advanced.ts` (called by `safeCalculate`) writes only each module's whitelisted fields on a clone (commercial `perPassengerSeries`; operations `operationsOpex` = whole cable OPEX block). Why: one engine, no double counting, standard inputs preserved.

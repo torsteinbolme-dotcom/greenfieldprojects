@@ -9,6 +9,8 @@ import { AdvancedDemandEditor } from "@/components/editor/advanced-demand";
 import { AdvancedCapexEditor } from "@/components/editor/advanced-capex";
 import { AdvancedCommercialEditor } from "@/components/editor/advanced-commercial";
 import { defaultCommercialInputs, type CommercialInputs } from "@/lib/advanced-commercial";
+import { AdvancedOperationsEditor } from "@/components/editor/advanced-operations";
+import { defaultOperationsInputs, type OperationsInputs } from "@/lib/advanced-operations";
 import { defaultCapexInputs, type CapexInputs } from "@/lib/advanced-capex";
 
 const SECTIONS: { id: string; title: string; modules: AdvancedModuleKey[]; note?: string }[] = [
@@ -26,6 +28,7 @@ export function AdvancedCalculationsSection({ a, r, ro, set }: { a: Assumptions;
     // First activation starts from inputs that reproduce the standard forecast.
     if (key === "demand" && v && !next.advanced?.demand?.inputs) next.advanced!.demand = { enabled: true, inputs: defaultDemandInputs(a) as unknown as Record<string, unknown> };
     if (key === "capex" && v && !next.advanced?.capex?.inputs) next.advanced!.capex = { enabled: true, inputs: defaultCapexInputs(a) as unknown as Record<string, unknown> };
+    if (key === "operations" && v && !next.advanced?.operations?.inputs) next.advanced!.operations = { enabled: true, inputs: defaultOperationsInputs(a) as unknown as Record<string, unknown> };
     if (key === "commercialFb" && v && !next.advanced?.commercialFb?.inputs) next.advanced!.commercialFb = { enabled: true, inputs: defaultCommercialInputs(a, "fb", r?.rows) as unknown as Record<string, unknown> };
     if (key === "commercialMerch" && v && !next.advanced?.commercialMerch?.inputs) next.advanced!.commercialMerch = { enabled: true, inputs: defaultCommercialInputs(a, "merch", r?.rows) as unknown as Record<string, unknown> };
     set(next);
@@ -60,6 +63,8 @@ export function AdvancedCalculationsSection({ a, r, ro, set }: { a: Assumptions;
                 ? <AdvancedDemandEditor a={a} r={r} on={isModuleOn(a, "demand")} ro={ro} inputs={adv.demand?.inputs as unknown as DemandInputs | undefined} onChange={(inputs) => set({ ...a, advanced: { ...adv, demand: { enabled: adv.demand?.enabled ?? false, inputs: inputs as unknown as Record<string, unknown> } } } as AssumptionsWithAdvanced)} />
                 : s.id === "capex"
                 ? <AdvancedCapexEditor a={a} on={isModuleOn(a, "capex")} ro={ro} inputs={adv.capex?.inputs as unknown as CapexInputs | undefined} onChange={(inputs) => set({ ...a, advanced: { ...adv, capex: { enabled: adv.capex?.enabled ?? false, inputs: inputs as unknown as Record<string, unknown> } } } as AssumptionsWithAdvanced)} />
+                : s.id === "operations"
+                ? <AdvancedOperationsEditor a={a} r={r} on={isModuleOn(a, "operations")} ro={ro} inputs={adv.operations?.inputs as unknown as OperationsInputs | undefined} onChange={(i) => setInputs("operations", i)} />
                 : s.id === "commercial" ? null
                 : <p className="text-xs text-muted-foreground">Detailed inputs: coming in a later stage.</p>}
             </AccordionContent>

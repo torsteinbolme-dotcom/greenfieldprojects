@@ -25,6 +25,7 @@ export function AdvancedCommercialEditor({ a, r, kind, inputs, on, ro, onChange 
     <div className="space-y-3 rounded-md border border-dashed p-3">
       {!on && <p className="text-xs text-muted-foreground">Off: the {label} revenue method selected in Revenue & OPEX is used. Inputs below are kept.</p>}
       {error && <div className="rounded-md bg-warning p-2 text-xs text-warning-foreground">{error}</div>}
+      {!ro && r && <button type="button" className="text-xs text-accent hover:underline" onClick={() => onChange(defaultCommercialInputs(a, kind, r.rows))}>Reset to the current standard forecast</button>}
       <label className="flex items-center gap-2 text-sm"><Switch aria-label={`${label} seasonal conversion`} checked={seasonal.enabled} disabled={ro} onCheckedChange={(v) => setSeasonal({ enabled: v })} />Seasonal conversion and spend (high / low season)</label>
       {seasonal.enabled ? (
         <>

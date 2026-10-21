@@ -1,5 +1,6 @@
 import type { Assumptions } from "@/financialEngine";
 import { resolveDemand, type DemandInputs } from "./advanced-demand";
+import { resolveCapex, type CapexInputs } from "./advanced-capex";
 
 /**
  * Advanced Calculations foundation (Stage 1).
@@ -27,7 +28,7 @@ type ModuleDef = {
 
 export const ADVANCED_MODULES: readonly ModuleDef[] = [
   { key: "demand", label: "Advanced Demand", description: "Builds passenger volumes from market size, visitor flows and capture rates instead of the standard passenger and growth inputs.", replaces: ["initialPassengers", "passengerGrowth"], adjusts: ["fbRevenueYear1", "fbOpexYear1"], implemented: true, resolve: (a, inputs) => resolveDemand(a, inputs as unknown as DemandInputs) },
-  { key: "capex", label: "Detailed CAPEX", description: "Builds the investment from detailed cost components and phasing instead of the standard CAPEX lines and contingency.", replaces: ["capexItems", "contingencyRate"], implemented: false },
+  { key: "capex", label: "Detailed CAPEX", description: "Builds the investment from detailed cost components and phasing instead of the standard CAPEX lines and contingency.", replaces: ["capexItems", "contingencyRate"], implemented: true, resolve: (a, inputs) => resolveCapex(a, inputs as unknown as CapexInputs) },
   { key: "operations", label: "Advanced Operations", description: "Builds cable car operating costs from staffing, energy and maintenance drivers instead of the standard operating cost inputs.", replaces: ["cableFixedOpex", "cableVariableCostPerPassenger", "opexGrowth"], implemented: false },
   { key: "commercialFb", label: "Advanced Commercial — F&B", description: "Builds restaurant revenue and costs from spend per guest, conversion and margins instead of the standard F&B inputs.", replaces: ["fbRevenueYear1", "fbOpexYear1"], implemented: false },
   { key: "commercialMerch", label: "Advanced Commercial — Merchandise", description: "Builds merchandise revenue and costs from spend per guest and margins instead of the standard merchandise inputs.", replaces: ["merchRevenueYear1", "merchOpexYear1", "merchOpexRate"], implemented: false },

@@ -6,6 +6,8 @@ import { ADVANCED_MODULES, isModuleOn, setModuleEnabled, type AdvancedModuleKey,
 import { defaultDemandInputs, type DemandInputs } from "@/lib/advanced-demand";
 import type { ModelResult } from "@/lib/model";
 import { AdvancedDemandEditor } from "@/components/editor/advanced-demand";
+import { AdvancedCapexEditor } from "@/components/editor/advanced-capex";
+import { defaultCapexInputs, type CapexInputs } from "@/lib/advanced-capex";
 
 const SECTIONS: { id: string; title: string; modules: AdvancedModuleKey[]; note?: string }[] = [
   { id: "demand", title: "Demand & Market", modules: ["demand"] },
@@ -21,6 +23,7 @@ export function AdvancedCalculationsSection({ a, r, ro, set }: { a: Assumptions;
     const next = setModuleEnabled(a, key, v);
     // First activation starts from inputs that reproduce the standard forecast.
     if (key === "demand" && v && !next.advanced?.demand?.inputs) next.advanced!.demand = { enabled: true, inputs: defaultDemandInputs(a) as unknown as Record<string, unknown> };
+    if (key === "capex" && v && !next.advanced?.capex?.inputs) next.advanced!.capex = { enabled: true, inputs: defaultCapexInputs(a) as unknown as Record<string, unknown> };
     set(next);
   };
   return (
@@ -47,6 +50,8 @@ export function AdvancedCalculationsSection({ a, r, ro, set }: { a: Assumptions;
               })}
               {s.id === "demand"
                 ? <AdvancedDemandEditor a={a} r={r} on={isModuleOn(a, "demand")} ro={ro} inputs={adv.demand?.inputs as unknown as DemandInputs | undefined} onChange={(inputs) => set({ ...a, advanced: { ...adv, demand: { enabled: adv.demand?.enabled ?? false, inputs: inputs as unknown as Record<string, unknown> } } } as AssumptionsWithAdvanced)} />
+                : s.id === "capex"
+                ? <AdvancedCapexEditor a={a} on={isModuleOn(a, "capex")} ro={ro} inputs={adv.capex?.inputs as unknown as CapexInputs | undefined} onChange={(inputs) => set({ ...a, advanced: { ...adv, capex: { enabled: adv.capex?.enabled ?? false, inputs: inputs as unknown as Record<string, unknown> } } } as AssumptionsWithAdvanced)} />
                 : <p className="text-xs text-muted-foreground">Detailed inputs: coming in a later stage.</p>}
             </AccordionContent>
           </AccordionItem>

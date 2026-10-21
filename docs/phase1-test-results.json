@@ -78,15 +78,19 @@
     "historical_assumptions_modified": false
   },
   "release_rehearsal": {
-    "checks_passed": 17,
-    "environment": "PostgreSQL 18.6 / PGlite 0.5.10 in-memory; auth/storage stubs",
+    "repository_seed_checks_passed": 26,
+    "exported_production_seed_checks_passed": 30,
+    "environment": "PostgreSQL 18.6 / PGlite 0.5.10 in-memory; auth/storage and invitation dependency stubs",
     "full_suite_rerun": {
       "passed": 494,
       "failed": 0,
       "skipped": 0
     },
-    "details": "phase1-release-rehearsal-results.json",
-    "production_seed_verified": false,
+    "details": [
+      "phase1-release-rehearsal-results.json",
+      "phase1-production-seed-rehearsal-results.json"
+    ],
+    "production_seed_body_verified_from_export": true,
     "published_build_identity_verified": false,
     "production_access": false
   }

@@ -40,6 +40,10 @@ const vite = await createServer({
   ],
 });
 const db = new PGlite();
+const productionSeed = process.argv.includes("--production-seed");
+const expectedSeedHash = productionSeed
+  ? "dba5cac31a644e281737569429904ec6"
+  : "9bc90882dbbe580fe2f2a21b9bc46ba1";
 const checks = [];
 const check = (name, fn) => {
   fn();
@@ -54,12 +58,36 @@ try {
   const { calculate: oldCalculate } = await vite.ssrLoadModule("virtual:phase1-old-engine");
   const { phase1Case } = await vite.ssrLoadModule("/src/test/fixtures/phase1.ts");
   await db.exec(`CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role;
-    CREATE SCHEMA auth; CREATE TABLE auth.users(id uuid PRIMARY KEY DEFAULT gen_random_uuid(), email text);
+    CREATE SCHEMA auth; CREATE TABLE auth.users(id uuid PRIMARY KEY DEFAULT gen_random_uuid(), email text, raw_user_meta_data jsonb DEFAULT '{}'::jsonb);
     CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT null::uuid $$;
     CREATE SCHEMA storage; CREATE TABLE storage.objects(id uuid DEFAULT gen_random_uuid(), bucket_id text, name text);
     CREATE FUNCTION storage.foldername(text) RETURNS text[] LANGUAGE sql IMMUTABLE AS $$ SELECT string_to_array($1,'/') $$;`);
   const journal = JSON.parse(await sql("drizzle/migrations/meta/_journal.json")).entries;
   for (const e of journal.slice(0, 12)) await db.exec(await sql(`drizzle/migrations/${e.tag}.sql`));
+  if (productionSeed) {
+    // Minimal dependency model from exported body/types, not a production schema clone.
+    await db.exec(`CREATE TABLE public.organization_invites(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      organization_id uuid NOT NULL REFERENCES public.organizations(id), email text NOT NULL,
+      token text NOT NULL UNIQUE, role public.org_role NOT NULL, accepted_at timestamptz,
+      expires_at timestamptz NOT NULL);`);
+    await db.exec(await sql("scripts/fixtures/phase1-production-seed.sql"));
+  }
+  const entitySnapshot = async () => {
+    const names = ["organizations", "organization_members", "projects", "scenarios"];
+    if (productionSeed) names.push("organization_invites");
+    return Object.fromEntries(
+      await Promise.all(
+        names.map(async (name) => [
+          name,
+          (
+            await db.query(
+              `SELECT row_to_json(t) AS row FROM public.${name} t ORDER BY row_to_json(t)::text`,
+            )
+          ).rows,
+        ]),
+      ),
+    );
+  };
   const catalog = async () => ({
     seed: (
       await db.query(
@@ -83,8 +111,8 @@ try {
   await db.exec(await sql("scripts/phase1-seed-compatibility-inspection.sql"));
   checks.push("Read-only seed/dependency inspection SQL executes locally");
   const beforeCatalog = await catalog();
-  check("Repository seed matches migration guard", () =>
-    assert.equal(beforeCatalog.seed.hash, "9bc90882dbbe580fe2f2a21b9bc46ba1"),
+  check("Selected reviewed seed matches migration guard", () =>
+    assert.equal(beforeCatalog.seed.hash, expectedSeedHash),
   );
   const seed = async () => {
     const user = (
@@ -96,6 +124,97 @@ try {
       .rows[0];
   };
   const initialSeed = await seed();
+  const verifyInvites = async (stage) => {
+    if (!productionSeed) return;
+    for (const kind of [
+      "valid",
+      "expired",
+      "accepted",
+      "wrong-email",
+      "missing-token",
+      "revoked",
+    ]) {
+      await db.exec("BEGIN");
+      const token = "isolated-" + kind;
+      const email = "invited@example.invalid";
+      if (kind !== "revoked")
+        await db.query(
+          `INSERT INTO public.organization_invites
+        (organization_id,email,token,role,accepted_at,expires_at) VALUES ($1,$2,$3,'editor',$4,$5)`,
+          [
+            initialSeed.organization_id,
+            kind === "wrong-email" ? "other@example.invalid" : email,
+            token,
+            kind === "accepted" ? "2020-01-01T00:00:00Z" : null,
+            kind === "expired" ? "2020-01-01T00:00:00Z" : "2099-01-01T00:00:00Z",
+          ],
+        );
+      const counts = async () =>
+        (
+          await db.query(`SELECT
+        (SELECT count(*)::int FROM public.organizations) orgs,
+        (SELECT count(*)::int FROM public.organization_members) members,
+        (SELECT count(*)::int FROM public.projects) projects,
+        (SELECT count(*)::int FROM public.scenarios) scenarios,
+        (SELECT count(*)::int FROM public.scenario_assumptions) assumptions`)
+        ).rows[0];
+      const before = await counts();
+      const inviteBefore = (await db.query("SELECT * FROM public.organization_invites ORDER BY id"))
+        .rows;
+      const user = (
+        await db.query(
+          `INSERT INTO auth.users(email,raw_user_meta_data) VALUES ($1,$2::jsonb) RETURNING id`,
+          [
+            email.toUpperCase(),
+            JSON.stringify(kind === "missing-token" ? {} : { invite_token: token }),
+          ],
+        )
+      ).rows[0].id;
+      const membership = (
+        await db.query("SELECT * FROM public.organization_members WHERE user_id=$1", [user])
+      ).rows;
+      assert.equal(membership.length, 1);
+      const after = await counts();
+      if (kind === "valid") {
+        assert.equal(membership[0].organization_id, initialSeed.organization_id);
+        assert.equal(membership[0].role, "editor");
+        assert.deepEqual(after, { ...before, members: before.members + 1 });
+        assert.ok(
+          (
+            await db.query("SELECT accepted_at FROM public.organization_invites WHERE token=$1", [
+              token,
+            ])
+          ).rows[0].accepted_at,
+        );
+      } else {
+        assert.equal(membership[0].role, "admin");
+        assert.notEqual(membership[0].organization_id, initialSeed.organization_id);
+        assert.deepEqual(
+          after,
+          Object.fromEntries(Object.entries(before).map(([k, v]) => [k, v + 1])),
+        );
+        assert.deepEqual(
+          (
+            await db.query(
+              "SELECT assumptions FROM public.scenario_assumptions WHERE created_by=$1",
+              [user],
+            )
+          ).rows[0].assumptions,
+          initialSeed.assumptions,
+        );
+        assert.deepEqual(
+          (await db.query("SELECT * FROM public.organization_invites ORDER BY id")).rows,
+          inviteBefore,
+        );
+      }
+      await db.exec("ROLLBACK");
+    }
+    checks.push(
+      `${stage}: six invitation paths preserve membership, acceptance, organization/project seeding and sample JSON`,
+    );
+  };
+  await verifyInvites("Before migration");
+
   const insert = async (a) =>
     (
       await db.query(
@@ -135,7 +254,65 @@ try {
   });
   const migration = await sql("drizzle/migrations/0012_preserve_saved_fb_opex_growth.sql");
   const rollback = await sql("docs/sql/phase1-fb-opex-rollback.sql");
+  // A valid formatting-only variant models an unrecognized deployed body; it is
+  // deliberately NOT claimed to reproduce the production body from its hash.
+  const originalFunction = (
+    await db.query(
+      "SELECT pg_get_functiondef('public.handle_new_user()'::regprocedure) definition, prosrc FROM pg_proc WHERE oid='public.handle_new_user()'::regprocedure",
+    )
+  ).rows[0];
+  await db.exec(
+    originalFunction.definition.replace(
+      originalFunction.prosrc,
+      originalFunction.prosrc + "\n-- isolated harmless body drift\n",
+    ),
+  );
+  const driftCatalog = await catalog();
+  const driftRows = await snapshot();
+  assert.notEqual(driftCatalog.seed.hash, beforeCatalog.seed.hash);
+  await db.exec("BEGIN");
+  await assert.rejects(db.exec(migration), /unrecognized new-user seed function/);
+  await db.exec("ROLLBACK");
+  assert.deepEqual(await catalog(), driftCatalog);
+  checks.push(
+    "Valid unrecognized seed: rejected migration preserves function, auth/default triggers, policies and constraints",
+  );
+  assert.deepEqual(await snapshot(), driftRows);
+  checks.push("Rejected migration preserves all existing scenario rows exactly");
+  await db.exec("BEGIN");
+  assert.deepEqual((await seed()).assumptions, initialSeed.assumptions);
+  await db.exec("ROLLBACK");
+  assert.deepEqual(await snapshot(), driftRows);
+  checks.push(
+    "Valid drift fixture signup still creates organization, membership, project, Base scenario and original sample after rejected migration",
+  );
+  await db.exec(originalFunction.definition);
+  await db.exec("BEGIN; ALTER FUNCTION public.handle_new_user() SECURITY INVOKER;");
+  await assert.rejects(db.exec(migration), /unexpected seed function attributes/);
+  await db.exec("ROLLBACK");
+  checks.push("Unexpected seed security attributes fail closed");
+  await db.exec("BEGIN; DROP TRIGGER on_auth_user_created ON auth.users;");
+  await assert.rejects(db.exec(migration), /expected enabled auth signup trigger missing/);
+  await db.exec("ROLLBACK");
+  checks.push("Missing auth signup trigger fails closed");
+  await db.exec("BEGIN; DROP TRIGGER default_fb_opex_growth ON public.scenario_assumptions;");
+  await assert.rejects(db.exec(migration), /expected enabled F&B insert trigger missing/);
+  await db.exec("ROLLBACK");
+  checks.push("Missing original F&B trigger fails closed");
+  if (productionSeed) {
+    await db.exec(
+      "BEGIN; ALTER TABLE public.organization_invites RENAME TO isolated_missing_invites;",
+    );
+    await assert.rejects(db.exec(migration), /invitation onboarding dependencies missing/);
+    await db.exec("ROLLBACK");
+    checks.push("Missing invitation table fails closed");
+  }
+  await assert.rejects(db.exec(rollback), /unrecognized migrated seed function/);
+  await db.exec("ROLLBACK");
+  assert.deepEqual(await catalog(), beforeCatalog);
+  checks.push("Rollback refuses an unmigrated seed without changing catalog");
   const history = await snapshot();
+  const entitiesBeforeApply = await entitySnapshot();
   await db.exec("BEGIN");
   await db.exec(
     `CREATE OR REPLACE FUNCTION public.handle_new_user() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RETURN NEW; END $$;`,
@@ -146,15 +323,20 @@ try {
   await db.exec(
     "BEGIN; DROP TRIGGER on_auth_user_created ON auth.users; DROP FUNCTION public.handle_new_user();",
   );
-  await assert.rejects(db.exec(migration), /does not exist/);
+  await assert.rejects(db.exec(migration), /unrecognized new-user seed function/);
   await db.exec("ROLLBACK");
   checks.push("Missing seed function fails closed");
   await db.exec("BEGIN");
   await db.exec(migration);
   await db.exec("COMMIT");
   const afterCatalog = await catalog();
+  await verifyInvites("After migration");
   assert.deepEqual(await snapshot(), history);
   checks.push("Apply preserves historical rows exactly");
+  assert.deepEqual(await entitySnapshot(), entitiesBeforeApply);
+  checks.push(
+    "Apply preserves existing organizations, memberships, projects, scenarios and invitation records",
+  );
   check("Function OID, owner, ACL, security definer, search path and signature preserved", () => {
     const { hash: ignoredBefore, ...b } = beforeCatalog.seed;
     const { hash: ignoredAfter, ...a } = afterCatalog.seed;
@@ -197,9 +379,14 @@ try {
   await db.exec("ROLLBACK");
   checks.push("Raw migration reapplication fails closed (runner must use ledger)");
   const beforeRollback = await snapshot();
+  const entitiesBeforeRollback = await entitySnapshot();
   await db.exec(rollback);
   assert.deepEqual(await snapshot(), beforeRollback);
   checks.push("Rollback preserves every historical and newly saved row exactly");
+  assert.deepEqual(await entitySnapshot(), entitiesBeforeRollback);
+  checks.push(
+    "Rollback preserves existing organizations, memberships, projects, scenarios and invitation records",
+  );
   assert.deepEqual(await catalog(), beforeCatalog);
   checks.push(
     "Rollback restores seed metadata, trigger definitions, policies and constraints exactly",
@@ -207,6 +394,7 @@ try {
   assert.deepEqual((await insert(legacy)).assumptions.opexGrowth.fb, [0.025, 0.025, 0.025]);
   assert.deepEqual((await seed()).assumptions, initialSeed.assumptions);
   checks.push("Rollback restores original save transformation and signup defaults");
+  await verifyInvites("After rollback");
   await db.exec("BEGIN");
   await db.exec(migration);
   await db.exec("COMMIT");
@@ -216,6 +404,7 @@ try {
     isolation:
       "In-memory PGlite PostgreSQL; no network or production data; auth/storage stubs; privileged schema owner",
     baseline_ref: baseline,
+    seed_fixture: productionSeed ? "user-exported production definition" : "repository original",
     passed: checks.length,
     checks,
     historical_rows: history.length,
@@ -223,14 +412,20 @@ try {
     before_rollback_rows: beforeRollback.length,
     original_seed_body_md5: beforeCatalog.seed.hash,
     updated_seed_body_md5: afterCatalog.seed.hash,
+    reported_production_seed_body_md5: "dba5cac31a644e281737569429904ec6",
+    production_0012_guard_result:
+      "Revised migration accepts the exact exported body hash and preserves onboarding; unknown bodies fail closed",
+    drift_fixture_seed_body_md5: driftCatalog.seed.hash,
     caveats: [
-      "Production seed definition/hash not supplied; ledger matching is indirect evidence only",
+      "Exported production body is rehearsed when --production-seed is selected; managed role/auth/invitation-schema parity is not established",
       "Published application artifact SHA not supplied; main reference is a proxy",
       "No managed auth/storage service or production role/permission parity; not a production restore rehearsal",
     ],
   };
   await writeFile(
-    "docs/phase1-release-rehearsal-results.json",
+    productionSeed
+      ? "docs/phase1-production-seed-rehearsal-results.json"
+      : "docs/phase1-release-rehearsal-results.json",
     JSON.stringify(report, null, 2) + "\n",
   );
   console.log(JSON.stringify(report, null, 2));

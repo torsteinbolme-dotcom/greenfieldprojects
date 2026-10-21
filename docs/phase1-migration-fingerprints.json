@@ -115,8 +115,8 @@
     {
       "file": "drizzle/migrations/0012_preserve_saved_fb_opex_growth.sql",
       "journal_when": 1792585200000,
-      "sha256": "3cfc05db05d8d33f7c1a2a805a3fd3f2a0282001f13fb85a1e8e7567ff08d325",
-      "state": "Pending (absent from export)",
+      "sha256": "0880280944d60caed0b5cca5c588aa6ba40d1bf71d0c1f56023fcdbdc3690c7d",
+      "state": "Revised unapplied candidate; pending in supplied ledger",
       "export_ledger_ids": []
     }
   ],
@@ -128,5 +128,17 @@
     "timestamp_mismatches": 0,
     "unknown_hashes": 0,
     "source": "User-supplied read-only export; no production access by Codex"
-  }
+  },
+  "reviewed_original_seed_body_md5s": [
+    "9bc90882dbbe580fe2f2a21b9bc46ba1",
+    "dba5cac31a644e281737569429904ec6"
+  ],
+  "production_seed_export": {
+    "filename": "query-results-export-2026-10-21_23-04-24 (2).csv",
+    "file_sha256": "9389db89fe02da0d8138a9e0bb303f8e819cbbd7ec713e76522ccc16d91e1231",
+    "body_md5": "dba5cac31a644e281737569429904ec6",
+    "full_definition_md5": "b959a14314626e9a06da94947f57ff18",
+    "source": "User-supplied read-only export; no production connection"
+  },
+  "expected_deployed_seed_body_md5": "dba5cac31a644e281737569429904ec6"
 }

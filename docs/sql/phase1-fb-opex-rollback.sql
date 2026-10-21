@@ -1,23 +1,29 @@
--- REVIEW ONLY. Requires separate deployment approval. Restores the known legacy defect.
--- Pause writes and review the migration runner history before executing this rollback.
+-- REVIEW ONLY; separate approval required. Restores the known save-time defect.
+-- Pause writes; verify deployed catalog and runner ledger before rollback.
 BEGIN;
-CREATE TRIGGER default_fb_opex_growth
-BEFORE INSERT ON public.scenario_assumptions
-FOR EACH ROW EXECUTE FUNCTION public.default_fb_opex_growth();
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-DECLARE _org uuid; _proj uuid; _scen uuid;
+DO $phase1_rollback$
+DECLARE seed record; original_body text;
 BEGIN
-  INSERT INTO public.organizations(name) VALUES (coalesce(split_part(NEW.email,'@',1),'My') || '''s organization') RETURNING id INTO _org;
-  INSERT INTO public.organization_members(organization_id,user_id,email,role) VALUES (_org, NEW.id, NEW.email, 'admin');
-  INSERT INTO public.projects(organization_id,name,location,description,assumption_notes,created_by)
-  VALUES (_org,'Project Mountain','Norway','Seed example based on visible Project Mountain workbook inputs.',
-   'Illustrative assumptions not taken from the original workbook: cable variable cost per passenger (0), debt share, interest rate, loan tenor, depreciation period, maintenance capex rate, exit transaction costs, and growth rates beyond year 4. Verify before use.', NEW.id)
-  RETURNING id INTO _proj;
-  INSERT INTO public.scenarios(organization_id,project_id,name,kind) VALUES (_org,_proj,'Base','base') RETURNING id INTO _scen;
-  INSERT INTO public.scenario_assumptions(organization_id,scenario_id,version,assumptions,note,created_by) VALUES (_org,_scen,1,
-  '{"name":"Project Mountain","openingYear":2030,"years":30,"initialPassengers":225000,"segments":[{"name":"Roundtrip adult","share":0.39,"grossPrice":699,"vatRate":0.12,"commission":0,"boardingsPerGuest":2},{"name":"Roundtrip child","share":0.07,"grossPrice":349.5,"vatRate":0.12,"commission":0,"boardingsPerGuest":2},{"name":"One-way adult","share":0.15,"grossPrice":489.3,"vatRate":0.12,"commission":0,"boardingsPerGuest":1},{"name":"One-way child","share":0.03,"grossPrice":244.65,"vatRate":0.12,"commission":0,"boardingsPerGuest":1},{"name":"Annual pass adult","share":0.01,"grossPrice":3495,"vatRate":0.12,"commission":0,"boardingsPerGuest":8},{"name":"Cruise","share":0.25,"grossPrice":699,"vatRate":0.12,"commission":0.2,"boardingsPerGuest":2},{"name":"Tour operators","share":0.1,"grossPrice":699,"vatRate":0.12,"commission":0.15,"boardingsPerGuest":2}],"passengerGrowth":[0.2,0.15,0.04],"priceGrowth":[0.05,0.05,0.03],"fbRevenueYear1":26368000,"merchRevenueYear1":5000000,"ancillaryGrowth":[0.2,0.15,0.04],"cableFixedOpex":28224587,"cableVariableCostPerPassenger":0,"fbOpexYear1":24515000,"merchOpexYear1":3000000,"costInflation":0.025,"capexItems":[{"name":"Top station (m²)","quantity":3500,"unitCost":175000},{"name":"Lower station (m²)","quantity":1000,"unitCost":80000},{"name":"Skywalk","quantity":1,"unitCost":40000000},{"name":"Architect","quantity":1,"unitCost":10000000},{"name":"Cable car","quantity":1,"unitCost":250000000},{"name":"Zoning process","quantity":1,"unitCost":10000000},{"name":"Engineering design","quantity":1,"unitCost":60000000},{"name":"Outdoor areas","quantity":1,"unitCost":20000000},{"name":"Tunnel","quantity":1,"unitCost":300000000}],"contingencyRate":0.2,"debtShare":0.6,"interestRate":0.06,"loanYears":15,"taxRate":0.22,"depreciationYears":25,"maintenanceCapexRate":0.01,"exitYear":8,"exitMultiple":15,"exitTransactionCostRate":0.01,"distributeCashAnnually":false}'::jsonb,
-  'Seeded from Project Mountain example', NEW.id);
-  RETURN NEW;
-END $$;
+  SELECT oid, prosrc INTO seed FROM pg_proc
+  WHERE oid=to_regprocedure('public.handle_new_user()');
+  IF NOT FOUND OR md5(seed.prosrc) NOT IN
+    ('8bccc675f3dc982b131ebbb72d0055c1', '16f91e1d10c86c988cf9713e8fba778e') THEN
+    RAISE EXCEPTION 'Phase 1 rollback: unrecognized migrated seed function';
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid='public.scenario_assumptions'::regclass
+    AND tgname='default_fb_opex_growth') THEN
+    RAISE EXCEPTION 'Phase 1 rollback: default trigger already exists; inspect state';
+  END IF;
+  IF to_regprocedure('public.default_fb_opex_growth()') IS NULL THEN
+    RAISE EXCEPTION 'Phase 1 rollback: retained defaulting function missing';
+  END IF;
+  original_body := replace(seed.prosrc, '"costInflation":0.025,"opexGrowth":{"fb":[0.025,0.025,0.025]},"capexItems":', '"costInflation":0.025,"capexItems":');
+  IF md5(original_body) NOT IN
+    ('9bc90882dbbe580fe2f2a21b9bc46ba1', 'dba5cac31a644e281737569429904ec6') THEN
+    RAISE EXCEPTION 'Phase 1 rollback: unexpected seed transformation';
+  END IF;
+  EXECUTE replace(pg_get_functiondef(seed.oid), seed.prosrc, original_body);
+  CREATE TRIGGER default_fb_opex_growth BEFORE INSERT ON public.scenario_assumptions
+    FOR EACH ROW EXECUTE FUNCTION public.default_fb_opex_growth();
+END $phase1_rollback$;
 COMMIT;

@@ -114,3 +114,4 @@
 - [x] Hidden the "Edit with Lovable" badge on the published site (Pro plan); badge visibility confirmed hidden, propagates within ~30 seconds.
 - Project delete is soft (hidden, restorable)
 - Photo change moved to Project details; explain Source workbooks
+- [x] Removed the "Operating year" dropdown from Ticket pricing & revenue; the card always reads Year 3; signed-in preview verified, 332 tests pass and build OK.

@@ -151,6 +151,7 @@ export function CapexSection({ a, set, ro, r }: P & { r: ModelResult | null }) {
     set({ capexItems: a.capexItems.map((c, j) => (j === i ? { ...c, ...patch } : c)) });
   return (
     <Card title="CAPEX">
+      {controlledFields(a).has("capexItems") && <div className="mb-3 space-y-1"><AdvancedIndicator /><p className="text-xs text-muted-foreground">Detailed CAPEX is on: the totals below are standard inputs kept for reference and are not used in the calculation.</p></div>}
       <div className="overflow-x-auto">
           <table className="fin-table">
           <thead><tr><th>Item</th><th>Quantity</th><th>Unit cost (NOK)</th><th className="text-right">Line total (NOK m)</th><th>Comment</th><th /></tr></thead>

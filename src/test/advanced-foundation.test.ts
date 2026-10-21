@@ -43,6 +43,6 @@ describe("advanced calculations foundation", () => {
     const seen = ADVANCED_MODULES.flatMap((m) => m.replaces);
     expect(new Set(seen).size).toBe(seen.length);
     expect(ADVANCED_MODULES.map((m) => m.key)).toEqual(["demand", "capex", "operations", "commercialFb", "commercialMerch"]);
-    expect(ADVANCED_MODULES.filter((m) => m.implemented).map((m) => m.key)).toEqual(["demand", "capex"]);
+    expect(ADVANCED_MODULES.filter((m) => m.implemented).map((m) => m.key)).toEqual(["demand", "capex", "commercialFb", "commercialMerch"]);
   });
 });

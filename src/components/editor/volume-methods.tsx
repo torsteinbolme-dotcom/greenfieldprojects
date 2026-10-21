@@ -20,7 +20,7 @@ export function VolumeMethodsEditor({ a, set, ro }: { a: Assumptions; set: (p: P
     const divide = (v: number | null) => v !== null && row && row.passengers > 0 ? nok(v / row.passengers, 2) : 'N/A';
     return <section key={kind} className="space-y-4 py-5 first:pt-0 last:pb-0" aria-label={`${names[kind]} calculation methods`}><h4 className="font-semibold">{names[kind]}</h4><div className="grid gap-5 md:grid-cols-2">{(['revenue', 'opex'] as const).map(side => {
       const line = a.volumeMethods?.[kind]?.[side] ?? {};
-      const method = line.method ?? 'legacy';
+      const method = (line.method ?? 'legacy') as OpexMethod; // the advanced-only series method never reaches saved inputs
       const base = kind === 'fb' ? side === 'revenue' ? a.fbRevenueYear1 : a.fbOpexYear1 : kind === 'merch' ? side === 'revenue' ? a.merchRevenueYear1 : a.merchOpexYear1 : 0;
       const update = (patch: Partial<VolumeLine>) => set({ volumeMethods: { ...a.volumeMethods, [kind]: { ...a.volumeMethods?.[kind], [side]: { ...line, ...patch } } } });
       const methods: OpexMethod[] = side === 'revenue' ? ['legacy', 'annual', 'perPassenger'] : ['legacy', 'annual', 'perPassenger', 'revenuePercent', 'fixedVariable'];

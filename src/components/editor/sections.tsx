@@ -194,7 +194,7 @@ function CapexBridge({ a }: { a: Assumptions }) {
 
 export function PassengersPricingSection({ a, set, ro }: P) {
   return (
-    <Card title="Passengers & pricing">
+    <Card title="Passengers">
       <div className="grid grid-cols-2 gap-4">
         <Field label="Opening year"><NumField plain value={a.openingYear} disabled={ro} step="1" onChange={(v) => set({ openingYear: Math.round(v) })} /></Field>
         <Field label="Model years"><NumField value={a.years} disabled={ro} step="1" onChange={(v) => set({ years: Math.round(v) })} /></Field>

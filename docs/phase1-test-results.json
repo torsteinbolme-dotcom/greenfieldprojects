@@ -1,0 +1,38 @@
+{
+  "base_commit": "5ca84c7042dabb18276c920d31cf193e5480e257",
+  "environment": {
+    "node": "24.19.0",
+    "bun": "1.4.3",
+    "vitest": "4.1.11",
+    "dependencies": "clean frozen bun.lock installation; scripts disabled"
+  },
+  "runs": {
+    "baseline": {
+      "files": 47,
+      "total": 416,
+      "passed": 416,
+      "failed": 0,
+      "pending": 0
+    },
+    "reproductions_before_fix": {
+      "files": 2,
+      "total": 33,
+      "passed": 6,
+      "failed": 27,
+      "pending": 0
+    },
+    "after_fix": {
+      "files": 49,
+      "total": 449,
+      "passed": 449,
+      "failed": 0,
+      "pending": 0
+    }
+  },
+  "other_checks": {
+    "typescript": "passed",
+    "build": "passed; chunk-size and inlineDynamicImports warnings",
+    "new_typescript_files_lint": "passed",
+    "disposable_database": "six exact JSON and engine-result round trips; historical rows unchanged; new-user defaults preserved; rollback passed; unknown seed function rejected"
+  }
+}

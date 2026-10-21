@@ -38,14 +38,16 @@ export type YearSplit = ReturnType<typeof splitYear>;
 
 /**
  * Unlevered project cash flows derived for presentation from engine rows (engine untouched):
- * FCF = EBITDA − tax on EBIT (losses carried forward); investment at year 0; exit EV net of transaction costs in the exit year.
+ * FCF = EBITDA − tax on EBIT (losses carried forward) − maintenance CAPEX.
+ * Interest and principal are financing flows, excluded here. Initial investment is at year 0;
+ * exit adds EV net of transaction costs, not retained cash already included in annual FCF.
  */
 export function projectReturns(a: Assumptions, r: ModelResult) {
   let carry = 0;
   const fcf = r.rows.map((row) => {
     let taxable = row.ebit;
     if (taxable < 0) { carry += -taxable; taxable = 0; } else { const o = Math.min(carry, taxable); carry -= o; taxable -= o; }
-    return row.ebitda - taxable * a.taxRate;
+    return row.ebitda - taxable * a.taxRate - row.maintenanceCapex;
   });
   const exitEv = r.enterpriseValue * (1 - a.exitTransactionCostRate);
   const flows = [-r.capex, ...fcf.slice(0, a.exitYear)];

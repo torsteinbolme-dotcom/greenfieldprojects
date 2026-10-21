@@ -3,6 +3,7 @@
 import { seasonalWeightedTicket, ticketPriceGrowthIndex, type SeasonalPricing } from './lib/seasonal-pricing';
 import { operationsCableOpex, type OperationsModel } from './lib/advanced-operations';
 import { benchmarkAmount, escalation, validateVolumeMethods, volumeRevenue, volumeOpex, type VolumeMethods } from './lib/volume-methods';
+import { assertFiniteFinancialValues, validateFinancialInputs } from './lib/financial-validation';
 export type Segment = {name:string;share:number;grossPrice:number;vatRate:number;commission:number;boardingsPerGuest:number};
 export type CapexItem = {name:string;quantity:number;unitCost:number;comment?:string};
 // cableVariableCostPerPassenger adds to cable car OPEX. maintenanceCapexRate is a legacy inert input; maintenanceCapexPct (absent = 0) is the annual investing outflow as % of initial CAPEX (mountain-v3).
@@ -45,6 +46,7 @@ export function irr(cashflows:number[]):number|null {
   return (lo+hi)/2;
 }
 export function calculate(a:Assumptions){
+  validateFinancialInputs(a);
   validateVolumeMethods(a.volumeMethods);
   if(a.years<1||a.years>40||a.exitYear<1||a.exitYear>a.years)throw Error('Invalid model horizon or exit year');
   if(Math.abs(a.segments.reduce((s,x)=>s+x.share,0)-1)>1e-6)throw Error('Passenger segment shares must sum to 100%');
@@ -54,6 +56,7 @@ export function calculate(a:Assumptions){
   const capex=baseCapex*(1+a.contingencyRate),debt=capex*a.debtShare,equity=capex-debt;
   const flatWeightedTicket=a.segments.reduce((s,x)=>s+x.share*(x.grossPrice/(1+x.vatRate))*(1-x.commission),0);
   const seasonalTicket=seasonalWeightedTicket(a),weightedTicket=seasonalTicket??flatWeightedTicket;
+  assertFiniteFinancialValues({capex,debt,equity,weightedTicket});
   const rows:YearResult[]=[];let passengers=a.initialPassengers,price=flatWeightedTicket,fb=a.fbRevenueYear1,merch=a.merchRevenueYear1,openingDebt=debt,retainedCash=0,lossCarryforward=0,accumulatedDepreciation=0;
   for(let year=1;year<=a.years;year++){
     if(year>1){passengers*=1+growth(a.passengerGrowth,year);price*=1+growth(a.priceGrowth,year);fb*=1+growth(a.ancillaryGrowth,year);merch*=1+growth(a.ancillaryGrowth,year)}
@@ -95,6 +98,7 @@ export function calculate(a:Assumptions){
     retainedCash+=equityInjection;
     const debtService=interest+principal;
     rows.push({year,calendarYear:a.openingYear+year-1,passengers,ticketNetPrice,ticketRevenue,fbRevenue:actualFb,merchRevenue:actualMerch,...(methods?{otherRevenue,fbOpex,merchOpex,otherOpex}:{}),revenue,opex,ebitda,depreciation,ebit,openingDebt,interest,principal,closingDebt,tax,maintenanceCapex,equityInjection,cashAfterDebt,distribution,retainedCash,dscr:debtService>0?(ebitda-tax)/debtService:null});
+    assertFiniteFinancialValues(rows[rows.length-1]);
     openingDebt=closingDebt;
   }
   const exit=rows[a.exitYear-1],enterpriseValue=exit.ebitda*a.exitMultiple;
@@ -103,6 +107,7 @@ export function calculate(a:Assumptions){
   const additionalEquity=held.reduce((s,r)=>s+r.equityInjection,0),totalEquityInvested=equity+additionalEquity;
   const cashflows=[-equity,...held.map(r=>r.distribution-r.equityInjection)];
   cashflows[a.exitYear]+=exitEquityValue;
+  assertFiniteFinancialValues({enterpriseValue,exitEquityValue,totalEquityInvested,...cashflows});
   const equityIrr=irr(cashflows);
   const proceeds=held.reduce((s,r)=>s+r.distribution,0)+exitEquityValue;
   return {capex,debt,equity,additionalEquity,totalEquityInvested,weightedTicket,rows,enterpriseValue,exitEquityValue,equityIrr,equityMultiple:totalEquityInvested>0?proceeds/totalEquityInvested:null,cashflows};

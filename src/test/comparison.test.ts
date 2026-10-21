@@ -116,10 +116,10 @@ describe("metricsAt base ticket price", () => {
       { name: "Round trip adult", grossPrice: 240 },
       { name: "Cruise", grossPrice: 200 },
     ]);
-    expect(metricsAt(e, "operating", 3).baseTicket).toBe(240);
+    expect(metricsAt(e as never, "operating", 3).baseTicket).toBe(240);
   });
   it("is null when the scenario has no adult round-trip segment", () => {
-    expect(metricsAt(withSegments([{ name: "Cruise", grossPrice: 200 }]), "operating", 3).baseTicket).toBeNull();
+    expect(metricsAt(withSegments([{ name: "Cruise", grossPrice: 200 }]) as never, "operating", 3).baseTicket).toBeNull();
   });
 });
 

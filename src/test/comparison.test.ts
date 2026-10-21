@@ -106,6 +106,23 @@ describe("moicAtYear", () => {
   });
 });
 
+describe("metricsAt base ticket price", () => {
+  const withSegments = (segments: { name: string; grossPrice: number }[]) =>
+    ({ a: { ...exit, segments }, result: { equity: 100, rows: Array.from({ length: 3 }, (_, i) => ({ year: i + 1, ebitda: 10, passengers: 1, closingDebt: 0, retainedCash: 0, equityInjection: 0, distribution: 0 })) } }) as unknown as AvgEntry;
+
+  it("reads the adult round-trip gross fare from the scenario assumptions", () => {
+    const e = withSegments([
+      { name: "Round trip child", grossPrice: 120 },
+      { name: "Round trip adult", grossPrice: 240 },
+      { name: "Cruise", grossPrice: 200 },
+    ]);
+    expect(metricsAt(e as never, "operating", 3).baseTicket).toBe(240);
+  });
+  it("is null when the scenario has no adult round-trip segment", () => {
+    expect(metricsAt(withSegments([{ name: "Cruise", grossPrice: 200 }]) as never, "operating", 3).baseTicket).toBeNull();
+  });
+});
+
 describe("irrAtYear", () => {
   const y8 = () => mk({ ebitda: 100, passengers: 200 }, { ebitda: 20, closingDebt: 50, retainedCash: 10 });
   const y8rate = Math.pow(1.6, 1 / 8) - 1; // 100 equity in, (20 × 10 − 50 + 10) = 160 out at Year 8.

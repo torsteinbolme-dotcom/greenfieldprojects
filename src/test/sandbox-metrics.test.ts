@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { metrics } from "@/components/comparison/sandbox";
+import { delta, metrics, value } from "@/components/comparison/sandbox";
 import { MOIC_YEAR } from "@/lib/portfolio";
 import type { SandboxCase } from "@/lib/sandbox";
 
@@ -49,5 +49,24 @@ describe("sandbox metric list", () => {
     const short = { assumptions: exit, result: { equity: 100, rows: [{ year: 1, ebitda: 5, revenue: 6 }] } } as unknown as SandboxCase;
     expect(get("MOIC Y8", short)).toBeNull();
     expect(get("IRR Y8", short)).toBeNull();
+  });
+});
+
+describe("sandbox summary formatting", () => {
+  it("renders EBITDA and Revenue Y3 as whole NOK", () => {
+    expect(value(149965081.73, "money")).toBe("149 965 082");
+    expect(value(227249117.2, "money")).toBe("227 249 117");
+  });
+
+  it("shows the difference in whole NOK with the relative change kept", () => {
+    const d = delta(149965081.73, 158556553.66, "money");
+    expect(d.text).toBe("+8 591 472");
+    expect(d.relative).toBe("+5,73%");
+  });
+
+  it("keeps decimals for returns and the average ticket price", () => {
+    expect(value(1.6, "mult")).toBe("1,60x");
+    expect(value(0.0832, "pct")).toBe("8,32%");
+    expect(value(504.9)).toBe("504,9");
   });
 });

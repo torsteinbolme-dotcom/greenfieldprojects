@@ -8,19 +8,19 @@ import { irrAtYear, moicAtYear } from '@/lib/portfolio';
 import { forecastOpex } from '@/lib/forecast-opex';
 import { deltaClass, formatNumber, mult, nokM, pct, signedNum, signedPct } from '@/lib/format';
 
-type Metric = { label: string; format?: 'pct' | 'mult' | 'count'; get: (c: SandboxCase) => number | null | undefined };
+type Metric = { label: string; format?: 'pct' | 'mult' | 'count' | 'money'; get: (c: SandboxCase) => number | null | undefined };
 const row = (c: SandboxCase) => c.result.rows[2];
 export const metrics: Metric[] = [
   { label: 'MOIC Y8', format: 'mult', get: c => moicAtYear(c.assumptions, c.result) },
   { label: 'IRR Y8', format: 'pct', get: c => irrAtYear(c.assumptions, c.result) },
-  { label: 'EBITDA Y3 (NOK)', get: c => row(c)?.ebitda },
-  { label: 'Revenue Y3 (NOK)', get: c => row(c)?.revenue },
+  { label: 'EBITDA Y3 (NOK)', format: 'money', get: c => row(c)?.ebitda },
+  { label: 'Revenue Y3 (NOK)', format: 'money', get: c => row(c)?.revenue },
 ];
-const value = (v: number | null | undefined, f?: Metric['format']) => v == null || !Number.isFinite(v) ? 'N/A' : f === 'pct' ? pct(v, 2) : f === 'mult' ? mult(v) : formatNumber(v, 0, f === 'count' ? 0 : 2);
-const delta = (a: number | null | undefined, b: number | null | undefined, f?: Metric['format']) => {
+export const value = (v: number | null | undefined, f?: Metric['format']) => v == null || !Number.isFinite(v) ? 'N/A' : f === 'pct' ? pct(v, 2) : f === 'mult' ? mult(v) : formatNumber(v, 0, f === 'count' || f === 'money' ? 0 : 2);
+export const delta = (a: number | null | undefined, b: number | null | undefined, f?: Metric['format']) => {
   if (a == null || b == null) return { text: 'N/A', relative: '' };
   const d = b - a;
-  return { text: f === 'pct' ? `${signedNum(d * 100, 2)} pp` : f === 'mult' ? `${signedNum(d, 2)}x` : signedNum(d, f === 'count' ? 0 : 2), relative: f !== 'pct' && a !== 0 ? signedPct(d / Math.abs(a), 2) : '' };
+  return { text: f === 'pct' ? `${signedNum(d * 100, 2)} pp` : f === 'mult' ? `${signedNum(d, 2)}x` : signedNum(d, f === 'count' || f === 'money' ? 0 : 2), relative: f !== 'pct' && a !== 0 ? signedPct(d / Math.abs(a), 2) : '' };
 };
 
 function ProjectSimulation({ entry, targets, onChange, onReset }: { entry: Entry; targets?: SandboxTargets | undefined; onChange: (v: SandboxTargets) => void; onReset: () => void }) {

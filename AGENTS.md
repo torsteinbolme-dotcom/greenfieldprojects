@@ -32,7 +32,7 @@
 - `costIndex`/`merchOpexAt` read OPEX growth and merch shares; a set F&B OPEX growth list solely drives F&B OPEX after Year 1 (no passenger scaling). Missing F&B growth defaults to cost inflation; preserve history and benchmark flags. Why: no revenue/cost double growth.
 - Photos: private `project-covers`, path `<org>/<project>.<ext>` in `projects.cover_image_url`; UI signs URLs. Defaults only without a saved path; uploads wait neutrally. Why: privacy and no default flash.
 - Capacity validation is nonfinancial; scenario-keyed distribution drafts require valid explicit Save. Profile imports are org-scoped and atomic; averages count each normalized year once, attribution is frozen. Why: isolation and provenance.
-- Seasonal JSON uses `seasonal-pricing.ts` for linked fares and allocation weights; retain flat F&B growth (v4-seasonal). The scenario-keyed ticket tab reads Year 1 (row 0). Why: base-year pricing and isolated navigation.
+- Seasonal JSON uses `seasonal-pricing.ts` for linked fares and allocation weights; retain flat F&B growth (v4-seasonal). The scenario-keyed ticket tab owns the base fare and reads Year 1 (row 0). Why: base-year pricing and isolated navigation.
 - Project delete is soft; RLS hides deleted projects/scenarios. Why: recoverable.
 
 - Optional methods preserve legacy/inactive inputs and frozen scenario snapshots. Cable OPEX snapshots set fixed cost, zero variable cost, restore manual on deselection. Why: isolation and no double costs.

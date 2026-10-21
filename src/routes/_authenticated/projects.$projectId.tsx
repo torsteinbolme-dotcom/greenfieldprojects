@@ -23,6 +23,7 @@ import type { BenchmarkConfig } from "@/lib/project-benchmarks";
 import { useAutosave } from "@/hooks/use-autosave";
 import { useBenchmarks } from "@/lib/benchmarks";
 import { withFbBenchmark, type AssumptionsWithFb } from "@/lib/fb-benchmark";
+import { withCableOpexBenchmark } from "@/lib/cable-opex-benchmark";
 import { EbitdaBridge } from "@/components/editor/ebitda-bridge";
 import { InvestmentSummary } from "@/components/editor/investment-summary";
 import { BreakEvenPanel } from "@/components/editor/break-even";
@@ -116,7 +117,7 @@ function EditorPage() {
       const field = next && previous ? Object.keys(next).find((key) => next[key as keyof typeof next] !== previous[key as keyof typeof previous]) : "rows";
       action += `:${index}:${field}`;
     }
-    controller?.edit(withLinkedTicketPrices({ ...draft, ...patch }), action);
+    controller?.edit(withCableOpexBenchmark(withLinkedTicketPrices({ ...draft, ...patch })), action);
   };
   const bench = useBenchmarks();
   // Benchmark-based F&B inputs follow project passengers; unavailable sources keep their last value.

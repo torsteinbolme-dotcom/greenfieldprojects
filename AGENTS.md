@@ -35,4 +35,4 @@
 - Seasonal JSON uses `seasonal-pricing.ts` for linked fares and allocation weights; retain flat F&B growth (v4-seasonal). The scenario-keyed ticket tab reads Year 1 (row 0). Why: base-year pricing and isolated navigation.
 - Project delete is soft; RLS hides deleted projects/scenarios. Why: recoverable.
 
-- Optional methods and cable OPEX selections use frozen scenario JSON. Cable benchmarks set annual fixed OPEX, zero variable cost, and restore manual inputs on deselection. Why: isolation and no double costs.
+- Optional methods preserve legacy/inactive inputs and frozen scenario snapshots. Cable OPEX snapshots set fixed cost, zero variable cost, restore manual on deselection. Why: isolation and no double costs.

@@ -1,5 +1,5 @@
 # Tasks
-- [ ] Add cable car OPEX benchmark selection with passenger adjustment, frozen source/confirmed refresh, restored manual costs and scenario autosave; test and verify saved UI flow.
+- [x] Add cable car OPEX benchmark selection with passenger adjustment, frozen source/confirmed refresh and restored manual costs; 343 tests pass, build OK, temporary scenario selection/save/reload/toggle/refresh/Manual verified and removed.
 - [x] Change Ticket pricing & revenue to Year 1 passengers, net prices and monthly/annual revenue without changing saved assumptions or forecast formulas.
 - [x] Add isolated Sandbox Mode, project/scenario selection, Investment Summary entry, synchronized commercial inputs, normalization, resets and full comparisons.
 - [x] Validate sandbox: 320 tests pass, automatic build OK, 12 fixture configurations and all 7 accessible saved scenarios reconcile without mismatches; signed-in normalization/reset/Standard isolation and zero writes verified. Report: Sandbox-Mode-Validation.md; published workflows await publication approval.

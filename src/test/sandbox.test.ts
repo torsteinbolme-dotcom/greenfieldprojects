@@ -6,6 +6,7 @@ import { baselineTargets, financialSnapshot, reconcileSandbox, simulateSandbox }
 import { safeCalculate } from '@/lib/model';
 import { initializeSeasonalPricing, seasonalRevenueTable } from '@/lib/seasonal-pricing';
 import { forecastOpex } from '@/lib/forecast-opex';
+import type { AssumptionsWithFb } from '@/lib/fb-benchmark';
 
 const writes = vi.fn(() => { throw Error('Sandbox must never write'); });
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: writes, rpc: writes } }));
@@ -20,11 +21,17 @@ function seasonal(): Assumptions {
   a.seasonalPricing.prices = a.seasonalPricing.prices.map(p => ({ ...p, high: p.high * 1.4 }));
   return a;
 }
+function benchmarkFixture(): AssumptionsWithFb {
+  const a = base();
+  const source = { assetId: 'frozen', year: 2025, adjust: true, snapshot: { assetId: 'frozen', name: 'Frozen restaurant', year: 2025, historicalAmount: 1000000, cableCarId: 'cable', cableCarName: 'Frozen cable', cableCarPassengers: 100000, costInflation: 0.03, priceGrowth: [0.02], ancillaryGrowth: [0.03], adjust: true, manualAdjustment: 0 } };
+  return { ...a, fbBenchmark: { adjust: true, revenue: structuredClone(source), opex: structuredClone(source) }, volumeMethods: { fb: { revenue: { method: 'benchmark' }, opex: { method: 'benchmark' } } }, opexGrowth: { fb: [0.03] } };
+}
 
 describe('Sandbox complete zero-adjustment reconciliation', () => {
   const variants: [string, Assumptions][] = [
     ...Object.entries(references).map(([name, a]) => [name, a as Assumptions] as [string, Assumptions]),
     ['example', base()], ['seasonal', seasonal()],
+    ['frozen benchmarks', benchmarkFixture()],
     ['all volume methods', { ...base(), volumeMethods: { fb: { revenue: { method: 'perPassenger', perPassenger: 100 }, opex: { method: 'fixedVariable', fixedAmount: 100000, variablePerPassenger: 48 } }, merch: { revenue: { method: 'annual', annualAmount: 200000 }, opex: { method: 'revenuePercent', revenuePercent: 0.4 } }, other: { revenue: { method: 'perPassenger', perPassenger: 20 }, opex: { method: 'perPassenger', perPassenger: 10 } } } }],
     ['no debt, early exit', { ...base(), debtShare: 0, exitYear: 3, openingYear: 2040 }],
     ['high debt, distributions, short depreciation', { ...seasonal(), debtShare: 0.95, distributeCashAnnually: true, depreciationYears: 5, loanYears: 4, exitYear: 12 }],
@@ -101,6 +108,24 @@ describe('Sandbox commercial overrides and isolation', () => {
     expect(simulateSandbox(a, { passengers: t.passengers * 0.5, ticketPrice: t.ticketPrice * 1.1 }).result).not.toEqual(r);
     expect(simulateSandbox(a).result).toEqual(r);
     expect(result(a)).toEqual(r);
+  });
+  it('frozen benchmark revenue responds to passengers without snapshot refresh; F&B growth is sole benchmark OPEX driver', () => {
+    const a = benchmarkFixture(), before = structuredClone(a), t = targets(a), b = result(a);
+    const s = simulateSandbox(a, { ...t, passengers: t.passengers * 2 });
+    expect(s.result.rows[2]?.fbRevenue).toBeCloseTo((b.rows[2]?.fbRevenue ?? 0) * 2, 6);
+    // Benchmark amount uses its frozen passenger basis; no additional annual passenger growth.
+    expect(s.result.rows[2]?.fbOpex).toBeCloseTo(1000000 * s.assumptions.initialPassengers / 100000 * 1.03 ** 2, 6);
+    expect(s.assumptions.fbBenchmark).toEqual(a.fbBenchmark);
+    expect(a).toEqual(before);
+  });
+  it('all equity injections and distributions are included through actual exit', () => {
+    const a = { ...base(), cableFixedOpex: 500000000, distributeCashAnnually: true, exitYear: 5 }, t = targets(a);
+    const s = simulateSandbox(a, { ...t, passengers: t.passengers * 0.5 });
+    const held = s.result.rows.slice(0, 5);
+    expect(s.result.additionalEquity).toBeGreaterThan(0);
+    expect(s.result.totalEquityInvested).toBe(s.result.equity + held.reduce((sum, r) => sum + r.equityInjection, 0));
+    held.forEach((r, i) => expect(s.result.cashflows[i + 1]).toBe(r.distribution - r.equityInjection + (i === 4 ? s.result.exitEquityValue : 0)));
+    expect(s.result.cashflows).toHaveLength(6);
   });
   it('normalization independently reaches common targets with different opening and exit years', () => {
     const a = base(), b = { ...base(), initialPassengers: 50000, openingYear: 2040, exitYear: 4, cableFixedOpex: 2000000 };

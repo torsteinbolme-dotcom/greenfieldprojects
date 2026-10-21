@@ -36,3 +36,4 @@
 - Project delete is soft; RLS hides deleted projects/scenarios. Why: recoverable.
 
 - Optional methods preserve legacy/inactive inputs and frozen scenario snapshots. Cable OPEX snapshots set fixed cost, zero variable cost, restore manual on deselection. Why: isolation and no double costs.
+- Advanced Calculations: per-scenario module flags/inputs live in assumptions JSON `advanced`; `resolveAssumptions` in `src/lib/advanced.ts` (called by `safeCalculate`) replaces only each module's mapped standard fields on a clone, and only for implemented modules. Why: one engine, no double counting, standard inputs preserved.

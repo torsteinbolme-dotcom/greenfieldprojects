@@ -9,14 +9,14 @@ import { useLatestAssumptions, useProjects, useScenarios } from "@/lib/data";
 import { MOIC_YEAR, buildEntries, metricsAt, portfolioAverages, sortByMetric } from "@/lib/portfolio";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import type { YearMode } from "@/lib/model";
-import { int, mult, nokM, pct } from "@/lib/format";
+import { formatNumber, int, mult, nokM, pct } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/portfolio")({
   head: () => ({ meta: [{ title: "Portfolio — Cable Car Portfolio" }, { name: "description", content: "Portfolio overview of all cable car projects on a common year basis." }, { property: "og:title", content: "Portfolio — Cable Car Portfolio" }, { property: "og:description", content: "Compare cable car projects." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: PortfolioPage,
 });
 
-type SortKey = "project" | "scenario" | "capex" | "passengers" | "revenue" | "ebitda" | "margin" | "moic" | "irr" | "exitEquity";
+type SortKey = "project" | "scenario" | "capex" | "passengers" | "revenue" | "ebitda" | "margin" | "moic" | "irr" | "ticket" | "exitEquity";
 
 function PortfolioPage() {
   const navigate = useNavigate();
@@ -80,13 +80,13 @@ function PortfolioPage() {
         <table className="fin-table">
           <thead>
             <tr>
-              <th /><Th k="project" right={false}>Project</Th><Th k="scenario" right={false}>Scenario</Th><Th k="moic">MOIC Y{MOIC_YEAR}</Th><Th k="irr">IRR Y{MOIC_YEAR}</Th><Th k="capex">CAPEX (NOK m)</Th><Th k="passengers">Passengers {label}</Th>
-              <Th k="revenue">Revenue {label}</Th><Th k="ebitda">EBITDA {label}</Th><Th k="margin">Margin</Th>
+              <th /><Th k="project" right={false}>Project</Th><Th k="scenario" right={false}>Scenario</Th><Th k="moic">MOIC Y{MOIC_YEAR}</Th><Th k="irr">IRR Y{MOIC_YEAR}</Th><Th k="ticket">Base ticket price</Th><Th k="passengers">Passengers {label}</Th>
+              <Th k="revenue">Revenue {label}</Th><Th k="ebitda">EBITDA {label}</Th><Th k="margin">Margin</Th><Th k="capex">CAPEX (NOK m)</Th>
               <Th k="exitEquity">Exit equity (NOK m)</Th>
             </tr>
           </thead>
           <tbody>
-            {rows.length === 0 && <tr><td colSpan={11} className="text-muted-foreground">No active projects.</td></tr>}
+            {rows.length === 0 && <tr><td colSpan={12} className="text-muted-foreground">No active projects.</td></tr>}
             {rows.map(({ e, m }) => (
               <tr key={e.project.id}>
                 <td><Checkbox checked={selected.includes(e.project.id)} onCheckedChange={(c) => setSelected((s) => (c ? [...s, e.project.id] : s.filter((x) => x !== e.project.id)))} /></td>
@@ -95,9 +95,10 @@ function PortfolioPage() {
                   {!e.error && !m.row && <div className="text-xs text-muted-foreground">Not operating in {label}</div>}</td>
                 <td>{e.scenario.name}</td>
                 <td className="num text-right">{mult(m.moic)}</td><td className="num text-right">{pct(m.irr)}</td>
-                <td className="num text-right">{nokM(m.capex)}</td><td className="num text-right">{int(m.passengers)}</td>
+                <td className="num text-right">{formatNumber(m.baseTicket, 2, 2)}</td><td className="num text-right">{int(m.passengers)}</td>
                 <td className="num text-right">{nokM(m.revenue)}</td><td className="num text-right">{nokM(m.ebitda)}</td>
-                <td className="num text-right">{pct(m.margin)}</td><td className="num text-right">{nokM(m.exitEquity)}</td>
+                <td className="num text-right">{pct(m.margin)}</td><td className="num text-right">{nokM(m.capex)}</td>
+                <td className="num text-right">{nokM(m.exitEquity)}</td>
               </tr>
             ))}
           </tbody>

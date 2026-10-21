@@ -65,7 +65,6 @@ const METRICS: Metric[] = [
   { key: "revPax", label: "Revenue / passenger (NOK)", group: "operations", fmt: "nok", get: (r) => r.y3?.revenuePerPax ?? null },
   { key: "opexPax", label: "OPEX / passenger (NOK)", group: "operations", fmt: "nok", get: (r) => economicsAtYear(r.a, r.result.rows, 3)?.opexPerPassenger ?? null },
   { key: "ebitdaPax", label: "EBITDA / passenger (NOK)", group: "operations", fmt: "nok", get: (r) => r.y3?.ebitdaPerPax ?? null },
-  { key: "payback", label: "Payback period", group: "returns", fmt: "years", get: (r) => r.ret.payback },
   { key: "exitYear", label: "Exit year", group: "returns", fmt: "year", get: (r) => r.a.exitYear },
   { key: "exitEbitda", label: "Exit EBITDA (NOK m)", group: "returns", fmt: "nokM", get: (r) => r.result.rows[r.a.exitYear - 1]?.ebitda ?? null },
   { key: "exitMultiple", label: "Exit multiple", group: "returns", fmt: "mult", get: (r) => r.a.exitMultiple },
@@ -166,7 +165,7 @@ function ProjectVsProject() {
               ))}</tbody>
             </table>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">Year 3 = third full operating year after opening. Payback uses unlevered free cash flow (EBITDA minus tax on operating profit, losses carried forward) against total CAPEX and ignores the exit value.</p>
+          <p className="mt-3 text-xs text-muted-foreground">Year 3 = third full operating year after opening.</p>
         </Card>
 
         <section className="space-y-3" aria-label={`Year ${economicsYear} unit economics comparison`}>

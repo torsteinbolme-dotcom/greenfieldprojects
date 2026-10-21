@@ -1,0 +1,35 @@
+{
+  "environment": "PostgreSQL 18.6 (PGlite 0.5.10) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.5 (1db513782be24469589d7cb8a1f1834e9a33f271), 32-bit",
+  "isolation": "In-memory PGlite PostgreSQL; no network or production data; auth/storage stubs; privileged schema owner",
+  "baseline_ref": "5ca84c7042dabb18276c920d31cf193e5480e257",
+  "passed": 17,
+  "checks": [
+    "Read-only seed/dependency inspection SQL executes locally",
+    "Repository seed matches migration guard",
+    "Original save-time defect reproduced",
+    "Unknown seed body rejected before trigger removal",
+    "Missing seed function fails closed",
+    "Apply preserves historical rows exactly",
+    "Function OID, owner, ACL, security definer, search path and signature preserved",
+    "Only intended default trigger removed; auth and tenant guards retained",
+    "RLS policies and constraints unchanged",
+    "Six exact JSON/full financial-output round trips on Phase 1 and main reference engines",
+    "Historical financial outputs unchanged within each engine",
+    "Full-schema signup succeeds with unchanged seed assumptions and outputs",
+    "Raw migration reapplication fails closed (runner must use ledger)",
+    "Rollback preserves every historical and newly saved row exactly",
+    "Rollback restores seed metadata, trigger definitions, policies and constraints exactly",
+    "Rollback restores original save transformation and signup defaults",
+    "Apply after rollback succeeds with original guard restored"
+  ],
+  "historical_rows": 8,
+  "historical_snapshot_sha256": "20f520841cbe0753264e10c4d85b880943a85411399050af418d3ef10f8e6955",
+  "before_rollback_rows": 15,
+  "original_seed_body_md5": "9bc90882dbbe580fe2f2a21b9bc46ba1",
+  "updated_seed_body_md5": "8bccc675f3dc982b131ebbb72d0055c1",
+  "caveats": [
+    "Production seed definition/hash not supplied; ledger matching is indirect evidence only",
+    "Published application artifact SHA not supplied; main reference is a proxy",
+    "No managed auth/storage service or production role/permission parity; not a production restore rehearsal"
+  ]
+}

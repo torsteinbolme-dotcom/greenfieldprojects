@@ -2,7 +2,7 @@
 
 ## Recommendation
 
-**NO-GO for merge/release until the remaining operational gates below are resolved.** The validation compatibility blocker is resolved in this PR update. This is not permission to merge, deploy or execute a migration.
+**Conditional technical readiness: isolated rehearsal and all 494 tests pass. NO-GO for production execution until the deployed seed-function evidence is verified and the release is explicitly approved.** Lovable synchronization and backup availability are now user-confirmed; they are no longer unresolved blockers. The published artifact identity remains unverified, so application compatibility is demonstrated against the main-branch reference, not a live build.
 
 ## Production migration ledger comparison
 
@@ -55,16 +55,50 @@ The inspection detected no candidate scenarios under the supplied heuristic. Thi
 
 The requested aggregate inspection is now complete; it is no longer an outstanding evidence-collection task. There is no identified candidate justifying a historical repair or backfill. Preserve all historical assumptions. Further provenance work, if needed, must remain read-only unless separately authorized. The enabled trigger still justifies a prospective future-save correction.
 
-## Remaining blockers and prerequisites
+## Release checks completed — 21 October 2026
 
-1. **Historical-data decision:** retain all historical assumptions. The aggregate inspection is complete (306 total, 108 legacy, 1 pattern match, 0 candidates); it does not establish universal historical integrity. No historical repair is part of this release.
-2. **Migration execution on GitHub sync:** establish the actual Lovable workspace behaviour, synced branch, migration permissions, runner and external deployment integrations. Repository inspection alone cannot guarantee that merging main will not execute backend SQL. An unpublished frontend is not a database isolation boundary. Keep this PR in draft until that boundary is confirmed.
-3. **Deployed seed definition and migration history:** capture the current seed function/hash and applied migration ledger. The prepared migration refuses an unrecognized seed body. Confirm 0012 is the only intended pending migration and ensure transactional execution through the approved runner.
-4. **Isolated staging release rehearsal:** use a genuinely separate backend to test signup, save/reload, benchmark fallbacks and the migration/rollback sequence. A Lovable code branch or draft must not be assumed to provide a separate database.
-5. **Explicit release authorization:** review the updated PR and establish the desired approval gate on main. No merge, migration, deployment, rollback or production-record change is authorized by this report.
+### Operational confirmations supplied by the user
 
-Relevant vendor documentation, checked in the preceding assessment: [Lovable GitHub sync](https://docs.lovable.dev/integrations/github), [Lovable database and migrations](https://docs.lovable.dev/features/database), [Lovable publishing](https://docs.lovable.dev/features/publish), [Drizzle migrations](https://orm.drizzle.team/docs/drizzle-kit-migrate). Documentation describes product capabilities; workspace-specific settings still need confirmation.
+- Lovable Cloud production backups are available: latest visible backup **21 October 2026, 04:58:08 UTC**, plus backups on 20, 19 and 18 October. Availability is confirmed; restoration was not rehearsed. A recovery-point decision is still needed because the visible backup precedes later writes.
+- Lovable confirmed GitHub synchronization **does not automatically execute Drizzle migrations** and frontend publishing is a separate action. This supersedes earlier uncertainty about migration-on-sync. No Cloud action was performed to test the confirmation.
+- The exported ledger matches exact SQL hashes/timestamps for 0000–0011; 0012 alone is pending among the journal entries reviewed.
 
-## Safest release procedure and current investigation
+### Seed implementation, dependencies and guards
 
-See [phase1-sync-release-plan.md](phase1-sync-release-plan.md) for the evidence matrix, exact remaining owner confirmations and the gated release sequence. Public documentation and source inspection establish the product mechanisms, but not this workspace's treatment of an externally synchronized migration. A read-only Chrome settings inspection could not proceed because computer-use access was not approved. No settings, synced branches or Cloud permissions were changed. This report-only update does not rerun or change financial calculations; the latest code verification remains 494 passing tests.
+Migration 0000 defines the seed function; migrations 0001–0011 do not replace it. Its body MD5 is `9bc90882dbbe580fe2f2a21b9bc46ba1`, exactly the 0012 guard. The guard runs before trigger removal. An absent or changed function aborts; raw reapplication after success also aborts because the body has changed. Use a runner that respects its ledger rather than replaying raw SQL.
+
+The isolated rehearsal replayed all 12 exact original SQL files, including relationship guards, constraints, RLS policies and the auth signup trigger. With the repository implementation, CREATE OR REPLACE preserves the seed function OID, owner, ACL, trigger return signature, security-definer setting and `search_path=public`. Existing auth/tenant triggers keep the same definitions and references. Only the F&B default insert trigger is removed; its function is retained for rollback. Runtime inserts into organizations, organization_members, projects, scenarios and scenario_assumptions succeed, and the signup example remains identical because its formerly injected defaults become explicit.
+
+**Production-specific compatibility is not yet fully verified.** The deployed seed body/hash, ownership/settings and dependent triggers were not supplied. Matching migration hashes are strong historical correspondence, not proof against subsequent manual edits. The fail-closed guard prevents a blind replacement but is not a substitute for preflight review. Prepared read-only catalog inspection: `scripts/phase1-seed-compatibility-inspection.sql` (locally executed and checked, never run against production by Codex). PL/pgSQL runtime references are not all represented by pg_depend, so review the function definition as well as catalog dependencies. The updated repository body MD5 is `8bccc675f3dc982b131ebbb72d0055c1`.
+
+### Isolated application and rollback rehearsal
+
+Evidence: `docs/phase1-release-rehearsal-results.json`; reproducible harness: `scripts/rehearse-phase1-release.mjs`. **17 checks passed** in in-memory PostgreSQL 18.6 / PGlite 0.5.10. No network database connection, production records or credentials were used. Auth/storage were minimal local stubs; tests ran as privileged schema owner. This is PostgreSQL SQL/PLpgSQL execution, not a managed Supabase authentication or production-permission rehearsal.
+
+- Apply preserved all **8** existing fixture rows exactly, including IDs, assumptions, metadata and timestamps. Historical financial outputs stayed identical within each engine.
+- Six missing/empty/explicit/passenger-linked/benchmark F&B cases preserved exact JSON and complete financial outputs across insert/reload on both the Phase 1 engine and the main-branch reference engine.
+- Signup produced identical example assumptions and engine outputs. RLS policy and constraint definitions were unchanged; non-target triggers were unchanged.
+- Unknown and missing seed implementations failed closed before the target trigger could be removed.
+- Rollback preserved all **15** rows present at that point, restored the original seed/catalog definitions, signup defaults and original trigger behaviour. Apply-after-rollback succeeded.
+- The original defect was reproduced: a legacy Year 2 F&B OPEX of 112.75 became 102.50 after saving; after migration it remains 112.75.
+- Full financial suite rerun: **494/494 tests passed, 0 failures, 0 skipped**. No financial source code, assumptions, SQL migration, dependency manifests or lockfiles were changed for this release assessment. Initial rehearsal-harness runs failed on virtual TypeScript loading/relative imports; the harness was corrected and the full rehearsal then passed. These were harness/environment failures, not migration failures.
+
+### Compatibility with the published application
+
+No database schema/API incompatibility was found against main reference `5ca84c7042dabb18276c920d31cf193e5480e257`: tables, columns, constraints and policies remain intact. `src/lib/data.ts` already appends versions using submitted assumptions; creation defaults remain in `src/lib/model.ts`. The older engine correctly understands missing/empty F&B growth and retains existing saved explicit lists. Thus applying the migration before frontend publication is compatible with the tested reference and fixes future save/reload behaviour immediately.
+
+The exact published build SHA has not been supplied and no live application was accessed. Therefore this is source/reference compatibility evidence, not verification of the deployed artifact or a full browser/auth/RLS smoke test. The changed legacy save behaviour is the intended defect correction. Historical injected growth lists remain untouched. Cached clients based on this reference remain compatible. If the live build differs, verify its persistence/default logic and smoke-test it against a separate backend before proceeding.
+
+## Proposed controlled deployment sequence — requires separate approval
+
+1. Obtain/review the deployed seed hash/definition, owner/settings and auth/default-trigger definitions with the prepared read-only inspection. Expected original body hash: `9bc90882dbbe580fe2f2a21b9bc46ba1`. Confirm the published build corresponds to the tested reference or complete the isolated compatibility check for its actual revision. Stop on any mismatch.
+2. Designate the authorized operator, migration runner and frontend release owner. Confirm only 0012 is pending immediately before release; freeze the reviewed SQL hash and application revision. Record rollback SQL, previous frontend artifact and a recovery plan. Select an acceptable backup recovery point; confirm restore access rather than assuming backup availability proves restorability.
+3. With explicit merge approval, merge PR #1. Based on Lovable's supplied confirmation, synchronization alone neither applies this SQL nor publishes the frontend. Review the synchronized revision before the separately approved operations below.
+4. In an agreed write-pause window, record a read-only before snapshot/fingerprint and count of existing assumptions. With separate migration approval, execute the reviewed 0012 through the established Drizzle transaction/ledger workflow. If Lovable uses manual SQL instead, first agree how the journal/ledger will be recorded: applying SQL alone must not leave a misleading pending migration or cause a guard failure on a later runner. Never delete/repair ledger entries ad hoc.
+5. Before publishing, verify only the intended trigger is removed, the seed body/settings and ledger are correct, signup and save/reload work, and all pre-existing assumption rows are unchanged. Use authorized disposable release scenarios only; do not rewrite historical assumptions.
+6. With separate publish approval, publish the reviewed frontend and run the agreed smoke tests for legacy/explicit F&B, comparisons and financial reference outputs. Resume writes after acceptance; monitor save failures and signup behaviour.
+7. If rollback is needed, keep writes paused and review the runner history and actual catalog first. The supplied rollback restores the known save-time defect and does not reverse saved scenario versions. It is not idempotent (CREATE TRIGGER fails if already present) and has no drift guard: execute only against the verified post-0012 state with separate approval. Restore the reviewed prior frontend if required; verify rows and catalog afterwards. Plan any subsequent forward reapplication explicitly because the applied ledger entry remains. Full backup restore is an operator decision with potential loss of later writes, not an automatic rollback step.
+
+## Remaining decision
+
+The local code and migration candidate pass technical checks. The user-confirmed sync/publish separation and available backups remove earlier operational unknowns. **Final production GO remains conditional on the deployed seed preflight and published-build identification/compatibility confirmation.** No production access, record change, merge, publication or Cloud migration has occurred. This assessment does not authorize those actions.

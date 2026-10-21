@@ -2,7 +2,11 @@
 
 Assessment date: 21 October 2026. Read-only investigation and release planning only; no merge, deployment, migration or historical-data changes authorized.
 
-## What is established
+## Superseding update
+
+The user has now supplied Lovable confirmation that GitHub synchronization does not execute Drizzle migrations and frontend publishing is separate. Backups are available (latest visible 21 October 2026, 04:58:08 UTC). Exact ledger comparison confirms 0000–0011 recorded applied and 0012 pending. The isolated full-schema apply/rollback rehearsal passes 17 checks; full tests pass 494/494. Earlier unknowns and questions below are retained as investigation history, not current blockers. Current blockers are deployed seed preflight and exact published-build compatibility confirmation; see [current assessment and deployment sequence](phase1-release-readiness.md). No production action is authorized.
+
+## What was established before these confirmations
 
 | Question | Evidence | Conclusion |
 |---|---|---|

@@ -2,6 +2,10 @@
 
 Status: review only. Codex has executed no production query, migration or data update. On 21 October 2026 the user reported a read-only Lovable Cloud inspection confirming the default_fb_opex_growth trigger/function is deployed and enabled (O) on public.scenario_assumptions. The authorized aggregate inspection subsequently reported 306 assumption versions, 108 legacy versions, 1 trigger-pattern match and 0 candidate scenarios. This is indicative, not conclusive proof of historical integrity. The user reports Lovable confirmed synchronization does not execute migrations and frontend publishing is separate; preserve all historical assumptions. See phase1-release-readiness.md.
 
+## Runner gate — 22 October 2026
+
+The [runner sequencing assessment](phase1-migration-runner-sequencing.md) supersedes execution assumptions below. Operational NO-GO until one concrete route is confirmed: managed pending-only runner, exact reviewed generated-canonical identity, or approved supported harmless companion. Do not submit correction SQL to the generating tool when original 0012 is already pending. No production ledger editing is proposed. The user reports expected seed/triggers, 12 ledger records and backup 2026-10-22 05:00:18 UTC; generated artifacts/byte identity are still unavailable.
+
 ## Investigation before calculation changes
 
 Migration `0007_default_independent_fb_opex_growth` is tracked in the repository migration journal. Its BEFORE INSERT trigger injects a nonempty `opexGrowth.fb` list into any new assumptions version with a missing or empty list. The engine interprets a nonempty list differently from legacy revenue/passenger-linked costs. Source presence is not evidence of production deployment.

@@ -1,6 +1,10 @@
 # Final Phase 1 backward-compatibility assessment — 22 October 2026
 
-## Recommendation
+## New operational gate — migration-runner sequencing
+
+Lovable reports its tool generates a new migration from SQL text before applying pending migrations. The [runner sequencing assessment](phase1-migration-runner-sequencing.md) makes execution operationally **NO-GO until a canonical artifact/runner route is confirmed**. The historical compatibility GO below is unchanged; it does not approve duplicate generation or unresolved ledger/Git reconciliation. No SQL was executed in that later assessment.
+
+## Technical recommendation
 
 **GO for a controlled, migration-first release of the reviewed candidate, subject to operational preflight and explicit release approvals.** No migration-induced incompatibility was found across the relevant available main-branch history. The missing exact published commit is no longer a technical blocker for this bounded database-interface assessment: the assessment covers all discovered save/onboarding families rather than only 5ca84c7.
 

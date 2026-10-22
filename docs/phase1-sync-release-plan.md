@@ -2,7 +2,11 @@
 
 Assessment date: 21 October 2026. Read-only investigation and release planning only; no merge, deployment, migration or historical-data changes authorized.
 
-## Superseding update
+## Latest execution gate — 22 October 2026
+
+[Migration-runner sequencing](phase1-migration-runner-sequencing.md) now governs execution. Historical compatibility is technically GO, but production execution is NO-GO until exact generation/review/apply/reconciliation behavior is confirmed. The tool creates a migration rather than applying an existing file directly. Duplicate SQL hashes are not deduplicated by the installed runner. Keep PR #1 draft. No SQL, production change, merge or publication was executed for the runner investigation.
+
+## Earlier superseding update
 
 The user has now supplied Lovable confirmation that GitHub synchronization does not execute Drizzle migrations and frontend publishing is separate. Backups are available (latest visible 21 October 2026, 04:58:08 UTC). Exact ledger comparison confirms 0000–0011 recorded applied and 0012 pending. The revised candidate passes 30 production-body and 26 repository-body checks; full tests pass 494/494. Earlier unknowns and questions below are retained as investigation history, not current blockers. The exported seed is reviewed and preserved by revised 0012. The 22 October historical assessment now supports controlled migration-first GO within the reviewed client families despite unidentified live SHA; operational preflight and approvals remain required; see [current assessment and deployment sequence](phase1-release-readiness.md). No production action is authorized.
 

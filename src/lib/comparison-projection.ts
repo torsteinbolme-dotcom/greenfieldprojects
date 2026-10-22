@@ -1,5 +1,5 @@
 import type { Assumptions } from "@/financialEngine";
-import { forecastOpex } from "./forecast-opex";
+import { forecastExpenseBreakdown } from "./forecast-opex";
 import { safeCalculate, type ModelResult } from "./model";
 import { irrAtYear, moicAtYear } from "./portfolio";
 import { isAdultRoundTrip } from "./ticket-pricing";
@@ -52,16 +52,17 @@ export type ComparisonProjection = {
 
 /** Presentation only. The only hypothetical override is isolated from the saved JSON. */
 export function projectComparison(a: Assumptions, result: ModelResult): ComparisonProjection {
+  const external = !!result.rows[0]?.externalOperatingCosts;
   const y3 = result.rows[2];
   const economics = y3 ? unitEconomics(a, y3) : null;
   const hypothetical = result.rows[7]
-    ? a.exitYear === COMPARISON_EXIT_YEAR
+    ? external || a.exitYear === COMPARISON_EXIT_YEAR
       ? { result, error: null }
       : safeCalculate({ ...structuredClone(a), exitYear: COMPARISON_EXIT_YEAR })
     : { result: null, error: "Year 8 is outside the saved forecast horizon." };
   const y8 = hypothetical.result;
   return {
-    grossAdultFare: grossAdultFareOf(a),
+    grossAdultFare: external ? null : grossAdultFareOf(a),
     year8Error: hypothetical.error,
     summary: {
       capex: result.capex,
@@ -72,13 +73,13 @@ export function projectComparison(a: Assumptions, result: ModelResult): Comparis
       revenuePerPassenger: economics?.revenuePerPassenger ?? null,
       ebitdaPerPassenger: economics?.ebitdaPerPassenger ?? null,
       ticketNetPrice: y3?.ticketNetPrice ?? null,
-      irr: y8 ? irrAtYear(a, y8) : null,
-      moic: y8 ? moicAtYear(a, y8) : null,
+      irr: y8 ? (external ? y8.equityIrr : irrAtYear(a, y8)) : null,
+      moic: y8 ? (external ? y8.equityMultiple : moicAtYear(a, y8)) : null,
       enterpriseValue: y8?.enterpriseValue ?? null,
       exitEquityValue: y8?.exitEquityValue ?? null,
     },
     annual: result.rows.map((row) => {
-      const costs = forecastOpex(a, row);
+      const costs = forecastExpenseBreakdown(a, row);
       return {
         year: row.year,
         calendarYear: row.calendarYear,
@@ -89,7 +90,7 @@ export function projectComparison(a: Assumptions, result: ModelResult): Comparis
           ebitda: row.ebitda,
           fbRevenue: row.fbRevenue,
           fbOpex: costs.fb,
-          cableOpex: costs.cableFixed + costs.cableVariable,
+          cableOpex: costs.cableTotal,
         },
       };
     }),

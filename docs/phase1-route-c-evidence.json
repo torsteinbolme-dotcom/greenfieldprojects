@@ -1,0 +1,47 @@
+{
+  "assessment_date": "2026-10-22",
+  "method": "Read-only source and file invariant checks; no SQL, generator, check or database invocation",
+  "reviewed_sql_sha256": "0880280944d60caed0b5cca5c588aa6ba40d1bf71d0c1f56023fcdbdc3690c7d",
+  "reviewed_when": 1792585200000,
+  "prior_journal_entries_unchanged": true,
+  "journal_entries": 13,
+  "existing_snapshot_names": [
+    "0000_snapshot.json",
+    "0001_snapshot.json",
+    "0002_snapshot.json",
+    "0003_snapshot.json",
+    "0004_snapshot.json",
+    "0005_snapshot.json",
+    "0006_snapshot.json",
+    "0007_snapshot.json",
+    "0008_snapshot.json",
+    "0009_snapshot.json",
+    "0010_snapshot.json",
+    "0011_snapshot.json"
+  ],
+  "existing_0012_snapshot": false,
+  "lockfile_orm": "0.45.4",
+  "lockfile_kit": "0.31.11",
+  "companion_contract": {
+    "tool": "lov_database--migration",
+    "name": "apply_pending_0012",
+    "sql_text": "SELECT 1;",
+    "expected_tag": "0013_apply_pending_0012",
+    "expected_idx": 13,
+    "when_requirement": "strictly greater than 1792585200000",
+    "generated_hash": "not yet available; record actual on-disk hash, not presumed input hash"
+  },
+  "user_confirmed_tool_supports_route_c": true,
+  "source_proven_batch_atomicity": "Installed pinned ORM places both migrations and ledger inserts in one transaction; filesystem/Git outside",
+  "managed_runtime_transaction_boundary_independently_observed": false,
+  "backup_user_reported_utc": "2026-10-22 05:00:18 UTC",
+  "existing_tests_not_rerun": {
+    "financial_suite_passed": 494,
+    "exported_seed_checks": 30,
+    "original_seed_checks": 26,
+    "historical_save_dependency_combinations": 24,
+    "historical_engines": 20
+  },
+  "production_access": false,
+  "sql_executed": false
+}

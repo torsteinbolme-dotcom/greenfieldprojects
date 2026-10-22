@@ -1,6 +1,10 @@
 # Phase 1 migration-runner sequencing — 22 October 2026
 
-## Decision and scope
+## Superseding Route C confirmation
+
+Lovable now confirms the harmless-companion capability. The [final Route C assessment/checklist](phase1-route-c-release-checklist.md) supports a controlled design GO: approved merge, preserved 0012 as sole pending migration, one approved SELECT 1 companion call, expected 14 matched ledger rows, backend/Git verification, separately approved publication. This supersedes the earlier Route C capability NO-GO below. Source-proven batch transaction behavior still needs confirmation for the managed runtime before migration approval. No production action or SQL was executed.
+
+## Earlier decision and scope
 
 **NO-GO for the proposed “apply first, merge second, reconcile later” procedure as currently specified.** The SQL and historical-client compatibility remain technically validated. The open blocker is execution/artifact sequencing: no actual Lovable-generated SQL/journal/snapshot artifact, byte-preservation guarantee, pre-execution review boundary or managed runner version has been supplied.
 

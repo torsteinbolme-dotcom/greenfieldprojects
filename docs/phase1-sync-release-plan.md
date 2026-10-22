@@ -2,9 +2,9 @@
 
 Assessment date: 21 October 2026. Read-only investigation and release planning only; no merge, deployment, migration or historical-data changes authorized.
 
-## Latest execution gate — 22 October 2026
+## Final Route C execution design — 22 October 2026
 
-[Migration-runner sequencing](phase1-migration-runner-sequencing.md) now governs execution. Historical compatibility is technically GO, but production execution is NO-GO until exact generation/review/apply/reconciliation behavior is confirmed. The tool creates a migration rather than applying an existing file directly. Duplicate SQL hashes are not deduplicated by the installed runner. Keep PR #1 draft. No SQL, production change, merge or publication was executed for the runner investigation.
+Lovable's new confirmation resolves Route C capability: see [final checklist and recovery](phase1-route-c-release-checklist.md). Controlled design GO remains subject to managed SQL/ledger transaction preflight, one known pending correction, main synchronization and separate merge/migration/publication approvals. Expected final ledger is 14 entries, not 13. SQL commit and generated Git synchronization are separate failure domains; never re-execute SQL solely to repair synchronization. No SQL, production change, merge or publication was performed; PR #1 remains draft.
 
 ## Earlier superseding update
 

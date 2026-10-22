@@ -1,8 +1,8 @@
 # Final Phase 1 backward-compatibility assessment — 22 October 2026
 
-## New operational gate — migration-runner sequencing
+## Route C execution plan now confirmed
 
-Lovable reports its tool generates a new migration from SQL text before applying pending migrations. The [runner sequencing assessment](phase1-migration-runner-sequencing.md) makes execution operationally **NO-GO until a canonical artifact/runner route is confirmed**. The historical compatibility GO below is unchanged; it does not approve duplicate generation or unresolved ledger/Git reconciliation. No SQL was executed in that later assessment.
+The [final Route C operator checklist](phase1-route-c-release-checklist.md) now supports controlled release design GO, resolving the earlier unconfirmed runner capability. Historical compatibility below is unchanged. Exact managed transaction/pending-set preflight and separate merge, migration and publication approvals remain necessary. No SQL or production release action occurred; PR #1 stays draft.
 
 ## Technical recommendation
 

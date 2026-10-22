@@ -2,9 +2,9 @@
 
 Status: review only. Codex has executed no production query, migration or data update. On 21 October 2026 the user reported a read-only Lovable Cloud inspection confirming the default_fb_opex_growth trigger/function is deployed and enabled (O) on public.scenario_assumptions. The authorized aggregate inspection subsequently reported 306 assumption versions, 108 legacy versions, 1 trigger-pattern match and 0 candidate scenarios. This is indicative, not conclusive proof of historical integrity. The user reports Lovable confirmed synchronization does not execute migrations and frontend publishing is separate; preserve all historical assumptions. See phase1-release-readiness.md.
 
-## Runner gate — 22 October 2026
+## Final Route C plan — 22 October 2026
 
-The [runner sequencing assessment](phase1-migration-runner-sequencing.md) supersedes execution assumptions below. Operational NO-GO until one concrete route is confirmed: managed pending-only runner, exact reviewed generated-canonical identity, or approved supported harmless companion. Do not submit correction SQL to the generating tool when original 0012 is already pending. No production ledger editing is proposed. The user reports expected seed/triggers, 12 ledger records and backup 2026-10-22 05:00:18 UTC; generated artifacts/byte identity are still unavailable.
+The [final Route C checklist](phase1-route-c-release-checklist.md) supersedes earlier execution uncertainty. Lovable confirms preserved 0012 can run via a generated harmless companion. Design GO is subject to managed transaction/pending-set/permissions preflight and separate approvals: merge, execute one SELECT 1 companion operation, verify 14 matched ledger rows and unchanged historical records, then separately approve publication. No ledger edits or duplicate financial SQL are needed. Preserve actual existing snapshots 0000–0011 (there is no 0012 snapshot) plus generated 0013 artifacts. No production or SQL action was performed by Codex.
 
 ## Investigation before calculation changes
 

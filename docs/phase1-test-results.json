@@ -128,5 +128,22 @@
     "evidence": "phase1-runner-sequencing-evidence.json",
     "report": "phase1-migration-runner-sequencing.md",
     "fresh_backup_user_reported_utc": "2026-10-22 05:00:18 UTC"
+  },
+  "final_route_c_assessment": {
+    "date": "2026-10-22",
+    "recommendation": "GO for specified design; managed transaction preflight and separate release approvals remain required",
+    "tool_support_confirmed_by_user": true,
+    "expected_ledger_rows": 14,
+    "operation_name": "apply_pending_0012",
+    "submitted_sql": "SELECT 1;",
+    "existing_0012_snapshot": false,
+    "managed_transaction_boundary_observed": false,
+    "sql_executed": false,
+    "tests_rerun": false,
+    "production_access": false,
+    "merged": false,
+    "published": false,
+    "report": "phase1-route-c-release-checklist.md",
+    "evidence": "phase1-route-c-evidence.json"
   }
 }

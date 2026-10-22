@@ -175,3 +175,39 @@ node node_modules/vite/bin/vite.js build
 ```
 
 These are local verification results, not GitHub CI or authenticated staging acceptance. No isolated staging environment was available. No permission beyond the approved development branch and draft PR was used.
+
+## Acceptance-blocker corrections
+
+The independent review of `dd15aacc9937651eadcdd17d95e410a473a4fddc` found two runtime-validation gaps despite its passing 612-test suite. The following corrections are confined to external inheritance validation and directly related regression tests. The earlier verification record above remains the historical evidence for that reviewed commit.
+
+### Required merchandise basis
+
+The engine uses `merchRevenueYear1` both as legacy revenue and as the denominator/branch selector for legacy merchandise OPEX without a revenue-share override. Previously, an omitted basis could select fixed costs instead of the intended revenue ratio. Validation now checks that basis before calculation when the active methods need it:
+
+| Active merchandise revenue | Active merchandise OPEX | Legacy revenue basis required? |
+| --- | --- | --- |
+| Legacy/absent selector | Any | Yes: revenue itself consumes it. |
+| Explicit method | Legacy/absent selector, no `merchOpexRate` | Yes: preserve the explicit ratio-versus-fixed basis. |
+| Explicit method | Legacy with a valid `merchOpexRate`, including zero | No: costs use the corresponding actual revenue share. |
+| Explicit method | Explicit annual/per-passenger/fixed-variable/revenue-percent method | No: the legacy basis is inactive. |
+
+A required basis must be explicitly finite and nonnegative. Missing, null, string and nonfinite values are rejected. An explicitly supplied zero remains valid and retains the existing fixed-cost fallback. No zero is substituted, no source assumption is rewritten and no financial calculation method changes.
+
+Independent reference: external CAPEX 1,000; standard reference financing; merchandise annual revenue 40; legacy merchandise OPEX 10; legacy revenue basis 20. The complete snapshot retains Year 3 revenue 340, merchandise OPEX 20, EBITDA 220, Year 8 exit equity 1,658.4 and MOIC 4.146. Removing the basis previously produced OPEX 10, EBITDA 230, exit equity 1,772.4 and MOIC 4.431; that incomplete input now throws before returning any results. Explicitly choosing a zero basis still legitimately produces those fixed-cost results.
+
+### Strict inherited selectors
+
+Only an absent selector or explicit `"legacy"` selects legacy behavior. An explicitly empty string no longer follows the falsy-value legacy branch. Empty/unknown/whitespace strings, null, booleans, numbers, arrays and objects are rejected on every inherited merchandise/other revenue/OPEX side. Supported explicit methods and parameters retain their existing rules. Standard scenario validation is unchanged.
+
+### Corrective verification
+
+- New regression tests reproduced both acceptance failures before the guard changes.
+- Complete pinned Node **24.19.0** suite: **636/636 passed**, no failed or skipped tests, 54 test files: original 536 + original Stage 1 76 + 24 corrective cases.
+- All 59 pre-existing test/fixture files from main remain byte-identical; all original 536 cases are present and passing. The original Stage 1 tests remain unchanged; corrective cases are appended. No golden fixture or tolerance was changed.
+- Repeated **110** standard-engine and comparison-projection cases against main: exact object and serialized numerical equality.
+- Compared **51** valid external-budget outputs against the reviewed PR commit: exact equality, including the complete merchandise-ratio example.
+- Explicit probes confirm the missing required basis and empty selector both throw. Zero basis, absent/legacy selectors and methods with an unused basis remain accepted.
+- TypeScript, default lint on both changed TypeScript files and the local Vite production build passed. The historical engine/style lint limitations are unchanged; no lint configuration was modified.
+- Incremental files: `src/lib/external-budget-contract.ts`, `src/test/external-budget.test.ts`, and this document only. Financial engine formulas, standard validation, funding defaults, input/output type definitions, persistence contracts, migration files, UI and dependencies are unchanged.
+
+Recommendation after these corrections: **GO for a reviewed Stage 1 calculation-only merge**, subject to final review of the new commit. This is not authorization to merge or release. Accounting classifications still require human review, other-revenue per-passenger series remains blocked, and no authenticated staging, persistence or RLS acceptance is claimed. PR #4 remains draft; no production, migration, publication or deployment operation was performed.

@@ -164,7 +164,7 @@ export function validateInheritanceShape(snapshot: InheritanceSnapshot): void {
       const method = line.method;
       if (method !== undefined && typeof method !== "string")
         throw Error("Unsupported inherited method type.");
-      if (!method || method === "legacy") {
+      if (method === undefined || method === "legacy") {
         keys(line, ["method"], "Legacy method");
         continue;
       }
@@ -194,4 +194,12 @@ export function validateInheritanceShape(snapshot: InheritanceSnapshot): void {
       }
     }
   }
+  // A missing basis must never select the legacy fixed-cost fallback by accident.
+  // An explicit zero selects that fallback legitimately; revenue-share/explicit
+  // OPEX methods do not consume the legacy basis unless revenue itself is legacy.
+  const merch = snapshot.volumeMethods.merch;
+  const legacy = (line: DeepReadonly<VolumeLine> | undefined) =>
+    line?.method === undefined || line.method === "legacy";
+  if (legacy(merch?.revenue) || (legacy(merch?.opex) && snapshot.merchOpexRate == null))
+    nonnegative(snapshot.merchRevenueYear1, "Merchandise legacy revenue basis");
 }

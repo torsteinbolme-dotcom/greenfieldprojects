@@ -708,3 +708,128 @@ describe("External input validation and isolation", () => {
     expect(a).toEqual(before);
   });
 });
+
+describe("Stage 1 acceptance-blocker regressions", () => {
+  function ratioBudget() {
+    return budget(
+      phase1Case({
+        merchRevenueYear1: 20,
+        merchOpexYear1: 10,
+        volumeMethods: { merch: { revenue: { method: "annual", annualAmount: 40 } } },
+      }),
+    );
+  }
+
+  it("retains complete legacy-ratio results and rejects the missing basis instead of inflating returns", () => {
+    const input = ratioBudget();
+    const before = structuredClone(input);
+    const out = calculateExternalBudget(input);
+    expect(out.result.rows[2]!.revenue).toBe(340);
+    expect(out.result.rows[2]!.merchOpex).toBe(20);
+    expect(out.result.rows[2]!.ebitda).toBe(220);
+    expect(out.result.exitEquityValue).toBeCloseTo(1658.4, 10);
+    expect(out.result.equityMultiple).toBeCloseTo(4.146, 12);
+    expect(out.result.equityIrr).toBeCloseTo(4.146 ** (1 / 8) - 1, 9);
+    // The old malformed path produced EBITDA 230, exit equity 1772.4 and MOIC 4.431.
+    // Reject before any of those financial outputs can be returned.
+    expect(() =>
+      calculateExternalBudget(
+        altered(input, (value) => {
+          delete value.inheritance["merchRevenueYear1"];
+        }),
+      ),
+    ).toThrow(/Merchandise legacy revenue basis/);
+    expect(calculateExternalBudget(input)).toEqual(out);
+    expect(input).toEqual(before);
+  });
+
+  it.each([undefined, null, NaN, Infinity, "20"])(
+    "rejects malformed required merchandise basis %s",
+    (basis) => {
+      expect(() =>
+        calculateExternalBudget(
+          altered(ratioBudget(), (value) => {
+            value.inheritance["merchRevenueYear1"] = basis;
+          }),
+        ),
+      ).toThrow(/Merchandise legacy revenue basis/);
+    },
+  );
+
+  it("preserves an explicit zero basis and its documented fixed-cost behavior", () => {
+    const input = altered(ratioBudget(), (value) => {
+      value.inheritance["merchRevenueYear1"] = 0;
+    });
+    const out = calculateExternalBudget(input);
+    expect(out.result.rows[2]!.merchOpex).toBe(10);
+    expect(out.result.rows[2]!.ebitda).toBe(230);
+    expect(out.result.exitEquityValue).toBeCloseTo(1772.4, 10);
+    expect(out.result.equityMultiple).toBeCloseTo(4.431, 12);
+    expect(input.inheritance.merchRevenueYear1).toBe(0);
+  });
+
+  it.each([
+    { method: "annual", annualAmount: 12.5 },
+    { method: "perPassenger", perPassenger: 0.125 },
+    { method: "fixedVariable", fixedAmount: 2.5, variablePerPassenger: 0.1 },
+    { method: "revenuePercent", revenuePercent: 0.3125 },
+  ])("does not require an unused legacy basis with explicit OPEX $method", (opex) => {
+    const input = altered(ratioBudget(), (value) => {
+      delete value.inheritance["merchRevenueYear1"];
+      value.inheritance.volumeMethods["merch"] = {
+        revenue: { method: "annual", annualAmount: 40 },
+        opex,
+      };
+    });
+    expect(calculateExternalBudget(input).result.rows[2]!.merchOpex).toBe(12.5);
+  });
+
+  it.each([0, 0.25])("allows a missing unused basis with legacy revenue-share OPEX %s", (rate) => {
+    const input = altered(ratioBudget(), (value) => {
+      delete value.inheritance["merchRevenueYear1"];
+      value.inheritance["merchOpexRate"] = rate;
+    });
+    expect(calculateExternalBudget(input).result.rows[2]!.merchOpex).toBe(40 * rate);
+  });
+
+  it("still requires the basis when legacy revenue itself uses it, even with explicit OPEX", () => {
+    expect(() =>
+      calculateExternalBudget(
+        altered(ratioBudget(), (value) => {
+          delete value.inheritance["merchRevenueYear1"];
+          value.inheritance.volumeMethods["merch"] = {
+            opex: { method: "annual", annualAmount: 7 },
+          };
+        }),
+      ),
+    ).toThrow(/Merchandise legacy revenue basis/);
+  });
+
+  it.each([undefined, "legacy"])(
+    "accepts documented legacy selector %s on every inherited side",
+    (method) => {
+      const input = altered(budget(), (value) => {
+        const line = method === undefined ? {} : { method };
+        value.inheritance.volumeMethods["merch"] = { revenue: line, opex: line };
+        value.inheritance.volumeMethods["other"] = { revenue: line, opex: line };
+      });
+      expect(calculateExternalBudget(input).result.rows[2]!.ebitda).toBe(200);
+    },
+  );
+
+  it.each(["", "unknown", " legacy ", null, false, 0, [], {}])(
+    "rejects invalid inherited selector %j on every inherited side",
+    (method) => {
+      for (const kind of ["merch", "other"])
+        for (const side of ["revenue", "opex"]) {
+          expect(() =>
+            calculateExternalBudget(
+              altered(budget(), (value) => {
+                value.inheritance.volumeMethods[kind] = { [side]: { method } };
+              }),
+            ),
+          ).toThrow(/Unsupported inherited/);
+        }
+    },
+  );
+});

@@ -1,0 +1,57 @@
+{
+  "type": "Static source/file/selection analysis; no SQL or database execution",
+  "reviewed_sha256": "0880280944d60caed0b5cca5c588aa6ba40d1bf71d0c1f56023fcdbdc3690c7d",
+  "installed_orm": "0.45.4",
+  "installed_kit": "0.31.11",
+  "production_last_reviewed_journal_when": 1792417990011,
+  "pr_when": 1792585200000,
+  "hypothetical_generated_when": 1792671600000,
+  "git_journal_merge_status": 1,
+  "same_bytes_different_journal_tags_reader_entries": 2,
+  "hashes": {
+    "reviewed": "0880280944d60caed0b5cca5c588aa6ba40d1bf71d0c1f56023fcdbdc3690c7d",
+    "with_prepended_comment": "9d2efd987a942c35dfae855be37a577ab81775d3d7187eb08da2c006c4dff9f3",
+    "with_crlf": "9a6a5fd4570b6e86431890668ef82305dfc17b350bcbd7d9e2feeeeed1ac91f3"
+  },
+  "cases": [
+    {
+      "name": "Merge first; tool appends correction again",
+      "selected": [
+        "0012_preserve_saved_fb_opex_growth",
+        "0013_lovable_generated"
+      ],
+      "result": "Two correction attempts predicted; second guard rejects; installed standard runner transaction would roll back pending batch"
+    },
+    {
+      "name": "Generated correction applied first; keep both journal entries with P older",
+      "selected": [],
+      "result": "No further attempt on this database, but duplicate local history remains; fresh replay would select both"
+    },
+    {
+      "name": "Generated correction applied first; PR timestamp later than generated",
+      "result": "PR correction selected again and guard would reject"
+    },
+    {
+      "name": "Conditional companion no-op fallback",
+      "selected": [
+        "0012_preserve_saved_fb_opex_growth",
+        "0013_explicit_runner_companion"
+      ],
+      "result": "One correction plus separately approved genuine no-op; expected two natural ledger additions"
+    },
+    {
+      "name": "Single generated canonical identity retained",
+      "result": "One selected correction before application; none selected afterwards; original PR candidate must be removed before final merge"
+    }
+  ],
+  "actual_lovable_generated_artifact_available": false,
+  "actual_managed_runner_version_known": false,
+  "user_reported_preflight": {
+    "seed_hash": "dba5cac31a644e281737569429904ec6",
+    "auth_trigger": "enabled",
+    "fb_trigger": "enabled",
+    "ledger_records": 12,
+    "backup_utc": "2026-10-22 05:00:18 UTC",
+    "source": "User report; no production access by Codex"
+  }
+}

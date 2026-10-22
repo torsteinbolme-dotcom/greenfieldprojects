@@ -1,0 +1,149 @@
+{
+  "base_commit": "5ca84c7042dabb18276c920d31cf193e5480e257",
+  "environment": {
+    "node": "24.19.0",
+    "bun": "1.4.3",
+    "vitest": "4.1.11",
+    "dependencies": "clean frozen bun.lock installation; scripts disabled"
+  },
+  "runs": {
+    "baseline": {
+      "files": 47,
+      "total": 416,
+      "passed": 416,
+      "failed": 0,
+      "pending": 0
+    },
+    "reproductions_before_fix": {
+      "files": 2,
+      "total": 33,
+      "passed": 6,
+      "failed": 27,
+      "pending": 0
+    },
+    "after_fix": {
+      "files": 49,
+      "total": 449,
+      "passed": 449,
+      "failed": 0,
+      "pending": 0
+    },
+    "compatibility_baseline": {
+      "files": 49,
+      "total": 449,
+      "passed": 449,
+      "failed": 0,
+      "pending": 0
+    },
+    "compatibility_initial_reproductions": {
+      "files": 1,
+      "total": 39,
+      "passed": 21,
+      "failed": 18,
+      "pending": 0
+    },
+    "compatibility_after_fix": {
+      "files": 50,
+      "total": 494,
+      "passed": 494,
+      "failed": 0,
+      "pending": 0
+    }
+  },
+  "other_checks": {
+    "typescript": "passed",
+    "build": "passed; chunk-size and inlineDynamicImports warnings",
+    "new_typescript_files_lint": "passed",
+    "disposable_database": "six exact JSON and engine-result round trips; historical rows unchanged; new-user defaults preserved; rollback passed; unknown seed function rejected"
+  },
+  "compatibility_update": {
+    "database_migrations_executed": false,
+    "production_data_accessed": false,
+    "trigger_deployment": "User-confirmed via Lovable Cloud SQL Editor: default_fb_opex_growth enabled (O) on public.scenario_assumptions",
+    "production_scenario_impact": "Aggregate inspection complete: 0 heuristic candidates; historical integrity not conclusively established; preserve all assumptions",
+    "migration_execution_on_sync": "unverified",
+    "financial_fixture_fingerprints_preserved": 10,
+    "release_recommendation": "NO-GO until operational prerequisites in phase1-release-readiness.md are resolved"
+  },
+  "authorized_production_inspection": {
+    "source": "User-reported read-only Lovable Cloud SQL Editor inspection",
+    "date": "2026-10-21",
+    "trigger": "default_fb_opex_growth",
+    "enabled_status": "O",
+    "total_assumption_versions": 306,
+    "legacy_versions": 108,
+    "versions_matching_trigger_pattern": 1,
+    "candidate_scenarios": 0,
+    "interpretation": "Indicative only; no candidate scenarios detected by the supplied heuristic; not conclusive proof of historical integrity",
+    "historical_assumptions_modified": false
+  },
+  "release_rehearsal": {
+    "repository_seed_checks_passed": 26,
+    "exported_production_seed_checks_passed": 30,
+    "environment": "PostgreSQL 18.6 / PGlite 0.5.10 in-memory; auth/storage and invitation dependency stubs",
+    "full_suite_rerun": {
+      "passed": 494,
+      "failed": 0,
+      "skipped": 0
+    },
+    "details": [
+      "phase1-release-rehearsal-results.json",
+      "phase1-production-seed-rehearsal-results.json"
+    ],
+    "production_seed_body_verified_from_export": true,
+    "published_build_identity_verified": false,
+    "production_access": false
+  },
+  "backward_compatibility": {
+    "date": "2026-10-22",
+    "main_ancestry_commits": 678,
+    "save_dependency_combinations": 24,
+    "distinct_save_implementations": 5,
+    "save_round_trips": 120,
+    "engine_snapshots": 20,
+    "engine_round_trips": 100,
+    "template_snapshots_and_round_trips": 14,
+    "auth_source_snapshots_reviewed": 16,
+    "growth_ui_patterns_reviewed": 6,
+    "incompatible_reviewed_revisions": [],
+    "full_suite": {
+      "passed": 494,
+      "failed": 0,
+      "skipped": 0
+    },
+    "published_artifact_identified": false,
+    "recommendation": "Controlled migration-first GO within covered history; operational preflight and separate approvals required",
+    "production_access": false
+  },
+  "runner_sequencing_assessment": {
+    "date": "2026-10-22",
+    "method": "Read-only source inspection; temporary Git journal conflict and static selection/hash simulations",
+    "sql_executed": false,
+    "migration_check_or_generation_executed": false,
+    "installed_orm": "0.45.4",
+    "installed_kit": "0.31.11",
+    "actual_generated_artifact_available": false,
+    "managed_runner_version_confirmed": false,
+    "status": "Operational NO-GO until a canonical runner/artifact sequence is confirmed; technical compatibility unchanged",
+    "evidence": "phase1-runner-sequencing-evidence.json",
+    "report": "phase1-migration-runner-sequencing.md",
+    "fresh_backup_user_reported_utc": "2026-10-22 05:00:18 UTC"
+  },
+  "final_route_c_assessment": {
+    "date": "2026-10-22",
+    "recommendation": "GO for specified design; managed transaction preflight and separate release approvals remain required",
+    "tool_support_confirmed_by_user": true,
+    "expected_ledger_rows": 14,
+    "operation_name": "apply_pending_0012",
+    "submitted_sql": "SELECT 1;",
+    "existing_0012_snapshot": false,
+    "managed_transaction_boundary_observed": false,
+    "sql_executed": false,
+    "tests_rerun": false,
+    "production_access": false,
+    "merged": false,
+    "published": false,
+    "report": "phase1-route-c-release-checklist.md",
+    "evidence": "phase1-route-c-evidence.json"
+  }
+}

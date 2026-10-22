@@ -1,0 +1,144 @@
+{
+  "source": "Locally reviewed migration SQL files; not production ledger contents",
+  "hash_algorithm": "SHA-256 of exact SQL file bytes, matching the installed Drizzle readMigrationFiles implementation",
+  "created_at_caution": "Drizzle folderMillis/journal timestamp is not proof of actual execution time",
+  "expected_original_seed_body_md5": "9bc90882dbbe580fe2f2a21b9bc46ba1",
+  "migrations": [
+    {
+      "file": "drizzle/migrations/0000_portfolio_schema.sql",
+      "journal_when": 1792322658045,
+      "sha256": "1bb79b70ccb1b10feeea21e76817e1e3e1835b21f03af25ab671ee97eeeecf8f",
+      "state": "Recorded applied",
+      "export_ledger_ids": [
+        "1"
+      ]
+    },
+    {
+      "file": "drizzle/migrations/0001_latest_assumptions_view.sql",
+      "journal_when": 1792322692747,
+      "sha256": "baa997e274c9834bde23accc7f1bcea844dc40aa2df6c8a66cef46b2ae04a971",
+      "state": "Recorded applied",
+      "export_ledger_ids": [
+        "2"
+      ]
+    },
+    {
+      "file": "drizzle/migrations/0002_benchmarks.sql",
+      "journal_when": 1792329640688,
+      "sha256": "9c0a44c3759062b4c430eab1eec44dcd4be8520461a3791d0b1ba93794fa7d9a",
+      "state": "Recorded applied",
+      "export_ledger_ids": [
+        "3"
+      ]
+    },
+    {
+      "file": "drizzle/migrations/0003_project_benchmark_config.sql",
+      "journal_when": 1792329912349,
+      "sha256": "811301ecf85b0fc8ffbba7a2f41440bfd03a300e5f44ee6cb32ca8f914a72fa0",
+      "state": "Recorded applied",
+      "export_ledger_ids": [
+        "4"
+      ]
+    },
+    {
+      "file": "drizzle/migrations/0004_benchmark_forecast_status.sql",
+      "journal_when": 1792330223794,
+      "sha256": "cc6411caccdffffeb0bec6720f63651ac9c76a5617a1fdbef4df21be1fadc11b",
+      "state": "Recorded applied",
+      "export_ledger_ids": [
+        "5"
+      ]
+    },
+    {
+      "file": "drizzle/migrations/0005_project_cover_image.sql",
+      "journal_when": 1792348839224,
+      "sha256": "2d3169974f82ca5e7683369f780fd6c38a76bfd26c4c95c1f577736ccd3a26cc",
+      "state": "Recorded applied",
+      "export_ledger_ids": [
+        "6"
+      ]
+    },
+    {
+      "file": "drizzle/migrations/0006_project_cover_url_comment.sql",
+      "journal_when": 1792348894487,
+      "sha256": "4500e141534d3095e803498e86e0704482d210fc3adf8ce46d65bbcf623473ff",
+      "state": "Recorded applied",
+      "export_ledger_ids": [
+        "7"
+      ]
+    },
+    {
+      "file": "drizzle/migrations/0007_default_independent_fb_opex_growth.sql",
+      "journal_when": 1792358321063,
+      "sha256": "27fcded1f5e335eca208b46a053e5e4ee3e246f7959ee67977c0f6c9c4135e03",
+      "state": "Recorded applied",
+      "export_ledger_ids": [
+        "8"
+      ]
+    },
+    {
+      "file": "drizzle/migrations/0008_create_seasonality_profiles.sql",
+      "journal_when": 1792406839041,
+      "sha256": "c184801ef9063147e126d9e131b4b3bb644876a725f00d2e423fb9511d154ca2",
+      "state": "Recorded applied",
+      "export_ledger_ids": [
+        "9"
+      ]
+    },
+    {
+      "file": "drizzle/migrations/0009_atomic_seasonality_import.sql",
+      "journal_when": 1792409543619,
+      "sha256": "90610c622987c014498bd44621648a1e0aefbc22cfb92f1897d481f8f34af5eb",
+      "state": "Recorded applied",
+      "export_ledger_ids": [
+        "10"
+      ]
+    },
+    {
+      "file": "drizzle/migrations/0010_audit_tenant_relationship_guards.sql",
+      "journal_when": 1792410369609,
+      "sha256": "d8f3939fb2add0a5328296a234f9236371b25b9795b46c00e298733b7ff50c79",
+      "state": "Recorded applied",
+      "export_ledger_ids": [
+        "11"
+      ]
+    },
+    {
+      "file": "drizzle/migrations/0011_migration.sql",
+      "journal_when": 1792417990011,
+      "sha256": "7506f1a9a525e37d359d935af300ec7e5f1c41c68e283d755a441fa05df3be0a",
+      "state": "Recorded applied",
+      "export_ledger_ids": [
+        "12"
+      ]
+    },
+    {
+      "file": "drizzle/migrations/0012_preserve_saved_fb_opex_growth.sql",
+      "journal_when": 1792585200000,
+      "sha256": "0880280944d60caed0b5cca5c588aa6ba40d1bf71d0c1f56023fcdbdc3690c7d",
+      "state": "Revised unapplied candidate; pending in supplied ledger",
+      "export_ledger_ids": []
+    }
+  ],
+  "production_export_comparison": {
+    "export_filename": "query-results-export-2026-10-21_22-46-34.csv",
+    "export_sha256": "b1bfdee4f515dc9e8ceb14d99bd85a0fec03ee8d794a137fad1181acec283673",
+    "rows": 12,
+    "matched_hashes": 12,
+    "timestamp_mismatches": 0,
+    "unknown_hashes": 0,
+    "source": "User-supplied read-only export; no production access by Codex"
+  },
+  "reviewed_original_seed_body_md5s": [
+    "9bc90882dbbe580fe2f2a21b9bc46ba1",
+    "dba5cac31a644e281737569429904ec6"
+  ],
+  "production_seed_export": {
+    "filename": "query-results-export-2026-10-21_23-04-24 (2).csv",
+    "file_sha256": "9389db89fe02da0d8138a9e0bb303f8e819cbbd7ec713e76522ccc16d91e1231",
+    "body_md5": "dba5cac31a644e281737569429904ec6",
+    "full_definition_md5": "b959a14314626e9a06da94947f57ff18",
+    "source": "User-supplied read-only export; no production connection"
+  },
+  "expected_deployed_seed_body_md5": "dba5cac31a644e281737569429904ec6"
+}

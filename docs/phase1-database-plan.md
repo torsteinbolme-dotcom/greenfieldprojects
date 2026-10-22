@@ -1,3 +1,5 @@
+> **Historical Phase 1 evidence / planning document.** Status statements below describe the assessment at that time. Phase 1 is subsequently reported released. See the [release record](financial-engine-v1/phase1-release-record.md) for current evidence and limitations. This document is retained unchanged below this banner; it is not authorization to execute SQL or release actions.
+
 # Phase 1 database migration and rollback plan
 
 Status: review only. Codex has executed no production query, migration or data update. On 21 October 2026 the user reported a read-only Lovable Cloud inspection confirming the default_fb_opex_growth trigger/function is deployed and enabled (O) on public.scenario_assumptions. The authorized aggregate inspection subsequently reported 306 assumption versions, 108 legacy versions, 1 trigger-pattern match and 0 candidate scenarios. This is indicative, not conclusive proof of historical integrity. The user reports Lovable confirmed synchronization does not execute migrations and frontend publishing is separate; preserve all historical assumptions. See phase1-release-readiness.md.

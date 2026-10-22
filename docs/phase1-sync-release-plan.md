@@ -1,3 +1,5 @@
+> **Historical Phase 1 evidence / planning document.** Status statements below describe the assessment at that time. Phase 1 is subsequently reported released. See the [release record](financial-engine-v1/phase1-release-record.md) for current evidence and limitations. This document is retained unchanged below this banner; it is not authorization to execute SQL or release actions.
+
 # Phase 1 — GitHub sync, migration execution and safest release
 
 Assessment date: 21 October 2026. Read-only investigation and release planning only; no merge, deployment, migration or historical-data changes authorized.

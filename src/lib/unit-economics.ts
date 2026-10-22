@@ -1,11 +1,11 @@
 import type { Assumptions, YearResult } from '@/financialEngine';
-import { forecastOpex } from './forecast-opex';
+import { forecastExpenseBreakdown } from './forecast-opex';
 
 export const DEFAULT_COMPARISON_ECONOMICS_YEAR = 1;
 
 /** Read-only economics from actual engine components; negative costs are a display convention. */
 export function unitEconomics(a: Assumptions, row: YearResult) {
-  const costs = forecastOpex(a, row);
+  const costs = forecastExpenseBreakdown(a, row);
   const perPax = (value: number) => row.passengers > 0 ? value / row.passengers : null;
   const items = [
     { key: 'ticket', label: 'Net ticket revenue', annual: row.ticketRevenue },
@@ -13,7 +13,7 @@ export function unitEconomics(a: Assumptions, row: YearResult) {
     { key: 'merchRevenue', label: 'Merchandise revenue', annual: row.merchRevenue },
     { key: 'otherRevenue', label: 'Other revenue', annual: row.otherRevenue ?? 0 },
     { key: 'revenue', label: 'Total revenue', annual: row.revenue, total: true },
-    { key: 'cableOpex', label: 'Cable car OPEX', annual: -(costs.cableFixed + costs.cableVariable), cost: true },
+    { key: 'cableOpex', label: 'Cable car OPEX', annual: -costs.cableTotal, cost: true },
     { key: 'fbOpex', label: 'F&B OPEX', annual: -costs.fb, cost: true },
     { key: 'merchOpex', label: 'Merchandise OPEX', annual: -costs.merchandise, cost: true },
     { key: 'otherOpex', label: 'Other OPEX', annual: -costs.other, cost: true },

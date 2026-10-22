@@ -2,7 +2,11 @@ import type { Assumptions } from "@/financialEngine";
 import { benchmarkAmount, type VolumeLine } from "./volume-methods";
 
 /** Validate resolved financial inputs only; never clamp, default or mutate saved assumptions. */
-export function validateFinancialInputs(a: Assumptions): void {
+export function validateFinancialInputs(
+  a: Assumptions,
+  mode: "standard" | "externalBudget" = "standard",
+): void {
+  const external = mode === "externalBudget";
   const finite = (v: number, label: string) => {
     if (!Number.isFinite(v)) throw Error(`${label} must be finite.`);
   };
@@ -32,14 +36,16 @@ export function validateFinancialInputs(a: Assumptions): void {
   fraction(a.debtShare, "Debt share");
   fraction(a.taxRate, "Tax rate");
   fraction(a.exitTransactionCostRate, "Exit transaction cost rate");
-  nonnegative(a.initialPassengers, "initialPassengers");
-  nonnegative(a.contingencyRate, "contingencyRate");
+  if (!external) {
+    nonnegative(a.initialPassengers, "initialPassengers");
+    nonnegative(a.contingencyRate, "contingencyRate");
+  }
   nonnegative(a.exitMultiple, "exitMultiple");
   if (a.maintenanceCapexPct !== undefined) nonnegative(a.maintenanceCapexPct, "Maintenance CAPEX");
 
   // Advanced modules are resolved before this function. Their preserved manual inputs
   // are not controlling values; checking them would reject otherwise valid scenarios.
-  if (!a.operationsOpex) {
+  if (!external && !a.operationsOpex) {
     nonnegative(a.cableFixedOpex, "cableFixedOpex");
     if (a.cableVariableCostPerPassenger !== undefined)
       nonnegative(a.cableVariableCostPerPassenger, "Variable cable OPEX");
@@ -48,12 +54,12 @@ export function validateFinancialInputs(a: Assumptions): void {
   const fb = a.volumeMethods?.fb,
     merch = a.volumeMethods?.merch,
     other = a.volumeMethods?.other;
-  if (legacy(fb?.revenue)) nonnegative(a.fbRevenueYear1, "fbRevenueYear1");
-  else if (fb?.revenue?.method === "benchmark")
+  if (!external && legacy(fb?.revenue)) nonnegative(a.fbRevenueYear1, "fbRevenueYear1");
+  else if (!external && fb?.revenue?.method === "benchmark")
     nonnegative(benchmarkAmount(a, "revenue"), "F&B benchmark revenue");
   if (legacy(merch?.revenue)) nonnegative(a.merchRevenueYear1, "merchRevenueYear1");
 
-  if (legacy(fb?.opex)) {
+  if (!external && legacy(fb?.opex)) {
     nonnegative(a.fbOpexYear1, "fbOpexYear1");
     // An explicit revenue method does not always make its old Year 1 amount inert:
     // legacy OPEX can still use a positive amount as its revenue-ratio denominator.
@@ -64,7 +70,7 @@ export function validateFinancialInputs(a: Assumptions): void {
       a.fbRevenueYear1 > 0
     )
       nonnegative(a.fbRevenueYear1, "F&B legacy OPEX revenue basis");
-  } else if (fb?.opex?.method === "benchmark")
+  } else if (!external && fb?.opex?.method === "benchmark")
     nonnegative(benchmarkAmount(a, "opex"), "F&B benchmark OPEX");
   if (legacy(merch?.opex)) {
     if (a.merchOpexRate != null) nonnegative(a.merchOpexRate, "Merchandise OPEX share");
@@ -79,8 +85,10 @@ export function validateFinancialInputs(a: Assumptions): void {
     if (!Array.isArray(values)) throw Error(`${label} must be a growth list.`);
     values.forEach((v) => growth(v, label));
   };
-  growthList(a.passengerGrowth, "passengerGrowth");
-  growthList(a.priceGrowth, "priceGrowth");
+  if (!external) {
+    growthList(a.passengerGrowth, "passengerGrowth");
+    growthList(a.priceGrowth, "priceGrowth");
+  }
   const fbRevenueLinked = a.fbBenchmark?.revenue
     ? (a.fbBenchmark.revenue.adjust ?? a.fbBenchmark.adjust)
     : a.fbFollowsPassengers;
@@ -95,7 +103,7 @@ export function validateFinancialInputs(a: Assumptions): void {
         line?.method === "perPassenger" ||
         (line?.method === "benchmark" && !benchmarkLinked);
   if (
-    usesAncillary(fb?.revenue, !fbRevenueLinked, !!fbRevenueLinked) ||
+    (!external && usesAncillary(fb?.revenue, !fbRevenueLinked, !!fbRevenueLinked)) ||
     usesAncillary(merch?.revenue, true) ||
     usesAncillary(other?.revenue, false)
   )
@@ -109,26 +117,30 @@ export function validateFinancialInputs(a: Assumptions): void {
     if (list?.length) growthList(list, `${kind} OPEX growth`);
     else needsCostInflation = true;
   };
-  if (!a.operationsOpex || a.operationsOpex.inflation == null || (a.maintenanceCapexPct ?? 0) > 0)
+  if (
+    (!external && (!a.operationsOpex || a.operationsOpex.inflation == null)) ||
+    (a.maintenanceCapexPct ?? 0) > 0
+  )
     costGrowth("cable");
-  if (fb?.opex?.method !== "revenuePercent") costGrowth("fb");
+  if (!external && fb?.opex?.method !== "revenuePercent") costGrowth("fb");
   if (merch?.opex?.method !== "revenuePercent" && !(legacy(merch?.opex) && a.merchOpexRate != null))
     costGrowth("merch");
   if (["annual", "perPassenger", "fixedVariable"].includes(other?.opex?.method ?? ""))
     needsCostInflation = true;
   if (needsCostInflation) growth(a.costInflation, "Cost inflation");
-  for (const s of a.segments) {
+  for (const s of external ? [] : a.segments) {
     fraction(s.share, `${s.name} passenger share`);
     nonnegative(s.grossPrice, `${s.name} gross price`);
     nonnegative(s.vatRate, `${s.name} VAT rate`);
     fraction(s.commission, `${s.name} commission`);
   }
-  for (const c of a.capexItems) {
+  for (const c of external ? [] : a.capexItems) {
     finite(c.quantity, `${c.name} CAPEX quantity`);
     finite(c.unitCost, `${c.name} CAPEX unit cost`);
   }
   // Credits may use a signed quantity or unit cost. Validate the net investment,
   // preserving each entered adjustment line and the engine's original summation order.
+  if (external) return;
   const baseCapex = a.capexItems.reduce((sum, c) => sum + c.quantity * c.unitCost, 0);
   nonnegative(baseCapex, "Net CAPEX");
   nonnegative(baseCapex * (1 + a.contingencyRate), "Total investment");

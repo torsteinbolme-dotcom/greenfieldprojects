@@ -93,5 +93,26 @@
     "production_seed_body_verified_from_export": true,
     "published_build_identity_verified": false,
     "production_access": false
+  },
+  "backward_compatibility": {
+    "date": "2026-10-22",
+    "main_ancestry_commits": 678,
+    "save_dependency_combinations": 24,
+    "distinct_save_implementations": 5,
+    "save_round_trips": 120,
+    "engine_snapshots": 20,
+    "engine_round_trips": 100,
+    "template_snapshots_and_round_trips": 14,
+    "auth_source_snapshots_reviewed": 16,
+    "growth_ui_patterns_reviewed": 6,
+    "incompatible_reviewed_revisions": [],
+    "full_suite": {
+      "passed": 494,
+      "failed": 0,
+      "skipped": 0
+    },
+    "published_artifact_identified": false,
+    "recommendation": "Controlled migration-first GO within covered history; operational preflight and separate approvals required",
+    "production_access": false
   }
 }

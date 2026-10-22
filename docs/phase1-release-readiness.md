@@ -1,8 +1,10 @@
 # Phase 1 release-readiness update — 21 October 2026
 
-## Recommendation
+## Recommendation — superseded 22 October 2026
 
-**The revised migration candidate passes isolated technical checks. NO-GO for the complete production release until published-build compatibility is confirmed.** Seed-body incompatibility is resolved using the supplied export; approvals for merge, migration and publication remain separate.
+**GO for a controlled migration-first release within the reviewed repository client history, subject to operational preflight and separate approvals.** Historical compatibility checks resolve the earlier exact-published-commit blocker: 24 save/dependency combinations (five save implementations, tags v1–v5), 20 engine snapshots, 14 templates and 16 auth source snapshots show no migration-induced incompatibility. Unknown/untracked clients remain outside this conclusion. No merge, migration or publication is authorized by the assessment.
+
+See [final backward-compatibility assessment](phase1-backward-compatibility.md) and [historical test evidence](phase1-historical-client-results.json) for the scope, expected missing-F&B-list save correction, limitations and controlled sequence. The prior NO-GO text below records earlier evidence stages and is superseded by this final assessment.
 
 ## Production migration ledger comparison
 
@@ -61,7 +63,7 @@ The new user-supplied function export resolves the seed-body evidence gap. Produ
 
 The earlier 0012 was incompatible and failed closed. Revised 0012 preserves the actual reviewed body and adds only explicit F&B seed defaults; guarded rollback restores its matching original. **30 production-body rehearsal checks and 26 repository-body checks pass**, including invitations before/apply/rollback, unchanged existing rows/entities, signup, fail-closed guards and reapplication. Full financial tests pass **494/494**. Current production expected post-migration body MD5: `16f91e1d10c86c988cf9713e8fba778e`.
 
-**NO-GO for the complete production release until the published application revision is identified or its actual compatibility is verified.** The reviewed migration candidate is technically validated; exact live artifact parity remains unverified. No production action is authorized. Fresh preflight/runner/backup checks and explicit merge/migration/publish approvals remain required release steps.
+The exact live artifact remains unidentified; the later historical compatibility assessment establishes a bounded controlled GO without requiring an exact SHA. No production action is authorized. Fresh preflight/runner/backup checks and explicit merge/migration/publish approvals remain required release steps.
 
 The user confirms backups (latest visible 21 October 2026 04:58:08 UTC), no automatic Drizzle execution on GitHub sync, and separate frontend publishing. These are no longer unknown blockers. No restoration was rehearsed. The supplied ledger remains consistent for 0000–0011; only unapplied 0012 was revised.
 

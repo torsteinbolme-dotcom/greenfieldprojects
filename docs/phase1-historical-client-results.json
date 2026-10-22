@@ -1,0 +1,638 @@
+{
+  "baseline_ref": "5ca84c7042dabb18276c920d31cf193e5480e257",
+  "main_ancestry_commits": 678,
+  "shallow": false,
+  "environment": "PostgreSQL 18.6 (PGlite 0.5.10) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.5 (1db513782be24469589d7cb8a1f1834e9a33f271), 32-bit",
+  "isolation": "In-memory PGlite; minimal auth/storage/invitation schema; historical save API adapter executes PostgreSQL under authenticated role; no production access",
+  "savers": [
+    {
+      "commit": "ad2f4e9b280416b26c63d95e85141855c62a0655",
+      "source_sha256": "135d23c1974c63efaceedc269a45fd3636e57285da5469faf016f3a969260844",
+      "dependency_sha256": "bac19c347c9e67c5cad6e3cf280df5b8b1e794aa9abd90c5687700935ad37279",
+      "save_function_sha256": "fe7ee83d26b1a95fd69442a92570f7de8b3660c03581aa6c5c00da6ae9c2d9d5",
+      "calculation_version": "mountain-v1",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "758323995c436b171dbc1d762bec9181679590dd",
+      "source_sha256": "4da4f422a767dfb9d8193bb4238420224c2081e7e2c16e742528f2e1a5de4ea1",
+      "dependency_sha256": "c4b5bba80e6e1d33d089fa90bb756994fabd6428961b24ed6b837d049086d90f",
+      "save_function_sha256": "b05e2b96455c34a8374cd6fe148610ede77c78fae718721cffb131ce725000f8",
+      "calculation_version": "mountain-v1",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "0ba27e0561762e7e20916b64f1b24dcf49074c46",
+      "source_sha256": "e9cf1d7057037aac8e6f7e29ea09de0be71bf9384c04c1572a910aed67ea2d4d",
+      "dependency_sha256": "ddf06f364cf8d6142fb2109265afe897c7f99875d9dfeb53157688bb647464e9",
+      "save_function_sha256": "b05e2b96455c34a8374cd6fe148610ede77c78fae718721cffb131ce725000f8",
+      "calculation_version": "mountain-v1",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "ff8ef68b9fa88f4399a97331121bd2f47191dba7",
+      "source_sha256": "a805f1be8047e3004ffddc521f6ae590fb94cbf27922690ad7b8178776068476",
+      "dependency_sha256": "f5506e4a4bee87bbb2cf111922f03c73131a92d865b36737ef788f2dcf9e5b69",
+      "save_function_sha256": "b3df5f1d88913be415537875e4c67085b66ab0d85fa7d9b4d1e8af674d376bed",
+      "calculation_version": "mountain-v1",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "7768a3fcf40c0fc952ef778450f0e0fa773ce050",
+      "source_sha256": "f2dc12aa3e4a5f631b0ecf369749f599186197b0e67509f5f75ddb0f57720818",
+      "dependency_sha256": "9e887454263af5e2f6891e72e635fe1589e96cd15e9c9079a423cd811907740e",
+      "save_function_sha256": "1b0210d19334ab0ec460ce4ba0e5bbee24303eb001254462d501245d9b84c845",
+      "calculation_version": "mountain-v1",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "e2be75534a87790e577521009a01df00c4a24f0c",
+      "source_sha256": "dbc471a254d580dbd5a1ca23e5c39f2ce884c262a488b458fa35f8bd8608e278",
+      "dependency_sha256": "a89c5a020d803d88bbf2ed7102b098b94e001e048eedddb149a35e85c3530c32",
+      "save_function_sha256": "1b0210d19334ab0ec460ce4ba0e5bbee24303eb001254462d501245d9b84c845",
+      "calculation_version": "mountain-v2",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "a4ac7fae86601d92da7db5696070acc631ebb3cc",
+      "source_sha256": "d029c72be2c3bd66b10d84d04bf16ba375f5754b3f520b51e4605839290d3811",
+      "dependency_sha256": "ead5a4da1c6dac00e8d06494113df9b08218964669f3bdb5351d1edc9165208e",
+      "save_function_sha256": "1b0210d19334ab0ec460ce4ba0e5bbee24303eb001254462d501245d9b84c845",
+      "calculation_version": "mountain-v2",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "ddb2e5a7b149df37afa26da9fb8afc50a5630c0e",
+      "source_sha256": "4197be1e823e5b559c788ba8560fa5b512e338e3b9442feab8efe08c9b7de416",
+      "dependency_sha256": "d6c3c3f22e281565274c563d0aa70c35a721773a89165f5fec1d2ef54ab48acf",
+      "save_function_sha256": "1b0210d19334ab0ec460ce4ba0e5bbee24303eb001254462d501245d9b84c845",
+      "calculation_version": "mountain-v2",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "687b6dacaf753012477a7d6dbfb694cee9ecd011",
+      "source_sha256": "1af76ae26affca2a1d5b3f4021e5252432832520926881b558e44198996be9f8",
+      "dependency_sha256": "2dc876ec9c61e78767a54fabd947b583009ca6d01d6a9aed049b78b29625daae",
+      "save_function_sha256": "1b0210d19334ab0ec460ce4ba0e5bbee24303eb001254462d501245d9b84c845",
+      "calculation_version": "mountain-v2",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "11f251dce04d8259da4b697fd56e0e5f0a07efb4",
+      "source_sha256": "883a33ae2cc5c6b736e2dbe114354d7a2d3ddf5ce1bfd30c505d552c66503f5c",
+      "dependency_sha256": "2e050df8ea3a7189e377db892f4ba02133d11b5f7411b6adf6cb9bd53245f996",
+      "save_function_sha256": "1b0210d19334ab0ec460ce4ba0e5bbee24303eb001254462d501245d9b84c845",
+      "calculation_version": "mountain-v3",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "a15ba07ae16b2f3a09def88e37efb2204bcc9302",
+      "source_sha256": "9c6624a7944591bf7764d6a6611b0ba9a331eeee00a204ecba77f6e544f596da",
+      "dependency_sha256": "d71414f3a2bcbf29929bcce24ca4c0e7d90b923feaf4457c31818aec12fd0caa",
+      "save_function_sha256": "d9aa4446ae6105090a9162bbd03295e70b93922274a58c96dfa90e16b6d07cbd",
+      "calculation_version": "mountain-v3",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "97380839fed70f95808d786936ea53acef962e64",
+      "source_sha256": "de16c1754ba86e1bf5c72034f62afced1704a8c706cc9231fc49c9f55654e95f",
+      "dependency_sha256": "e71736862ea19599c96d4fca063c755050a8b8437fa54ed2a8555cd6d87f9805",
+      "save_function_sha256": "d9aa4446ae6105090a9162bbd03295e70b93922274a58c96dfa90e16b6d07cbd",
+      "calculation_version": "mountain-v3",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "5ca84c7042dabb18276c920d31cf193e5480e257",
+      "source_sha256": "de16c1754ba86e1bf5c72034f62afced1704a8c706cc9231fc49c9f55654e95f",
+      "dependency_sha256": "b3a2af6f9e526a0c8c950a51365ed2393c3b520ccfa8401cce7cb91887540815",
+      "save_function_sha256": "d9aa4446ae6105090a9162bbd03295e70b93922274a58c96dfa90e16b6d07cbd",
+      "calculation_version": "mountain-v5-volume",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "8d448dddb75f1354a6e8a0a67e04526bbd2dd3b2",
+      "source_sha256": "f2dc12aa3e4a5f631b0ecf369749f599186197b0e67509f5f75ddb0f57720818",
+      "dependency_sha256": "0685d0865fdf7c4436fe4877de83c052d7b629b78d398eb55a745caaebfa66aa",
+      "save_function_sha256": "1b0210d19334ab0ec460ce4ba0e5bbee24303eb001254462d501245d9b84c845",
+      "calculation_version": "mountain-v2",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "ae00e984518f2e748918521a8fdadf5c422a27ea",
+      "source_sha256": "f2dc12aa3e4a5f631b0ecf369749f599186197b0e67509f5f75ddb0f57720818",
+      "dependency_sha256": "3a42b9ab65d951385d6efc0faae6cff9fa5b61103da2d8caa4d6fe2e48bb8ff2",
+      "save_function_sha256": "1b0210d19334ab0ec460ce4ba0e5bbee24303eb001254462d501245d9b84c845",
+      "calculation_version": "mountain-v2",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "7ecc1199503f5f3ae3923015f739c576f24adc0d",
+      "source_sha256": "f2dc12aa3e4a5f631b0ecf369749f599186197b0e67509f5f75ddb0f57720818",
+      "dependency_sha256": "419580fd4ccb42bcb5b3c2d9698d125b7c0ec948aac43808584e9f2d17430279",
+      "save_function_sha256": "1b0210d19334ab0ec460ce4ba0e5bbee24303eb001254462d501245d9b84c845",
+      "calculation_version": "mountain-v2",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "945f7d85c747d3f9c3428c6919450eb2d30694a7",
+      "source_sha256": "1af76ae26affca2a1d5b3f4021e5252432832520926881b558e44198996be9f8",
+      "dependency_sha256": "ce7611458fd1702ebb31c82f1c28f058ceec7411b2473038cad5aa8db2da078f",
+      "save_function_sha256": "1b0210d19334ab0ec460ce4ba0e5bbee24303eb001254462d501245d9b84c845",
+      "calculation_version": "mountain-v3",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "ea96eafa6618cdf55adbb402876ef9593873bf89",
+      "source_sha256": "883a33ae2cc5c6b736e2dbe114354d7a2d3ddf5ce1bfd30c505d552c66503f5c",
+      "dependency_sha256": "967a0cd2a4e2bcaa3c12cb1950c7c1b0bc0e8af0206adbbc62e7bc6d4fc3b5a0",
+      "save_function_sha256": "1b0210d19334ab0ec460ce4ba0e5bbee24303eb001254462d501245d9b84c845",
+      "calculation_version": "mountain-v3",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "7c166911e0238a7a11a54a15182cb5127a18d642",
+      "source_sha256": "883a33ae2cc5c6b736e2dbe114354d7a2d3ddf5ce1bfd30c505d552c66503f5c",
+      "dependency_sha256": "6382172045daf045d2a453e5bf24367c01b3a845938fc69a895f4956826e8823",
+      "save_function_sha256": "1b0210d19334ab0ec460ce4ba0e5bbee24303eb001254462d501245d9b84c845",
+      "calculation_version": "mountain-v3",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "5319213c06abe297e175672671e6d2b6350a97ad",
+      "source_sha256": "883a33ae2cc5c6b736e2dbe114354d7a2d3ddf5ce1bfd30c505d552c66503f5c",
+      "dependency_sha256": "19d8945dd30eb25526d40f772df8fa84cdd13261fa80d99cc4989ec4c394f795",
+      "save_function_sha256": "1b0210d19334ab0ec460ce4ba0e5bbee24303eb001254462d501245d9b84c845",
+      "calculation_version": "mountain-v3",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "7985c1c6eeca796f141530a8dd4fa4b237121c15",
+      "source_sha256": "883a33ae2cc5c6b736e2dbe114354d7a2d3ddf5ce1bfd30c505d552c66503f5c",
+      "dependency_sha256": "09b194ebf49c42fa7f56ec437faeae6773a30f9f051541d8e925743102fd41c4",
+      "save_function_sha256": "1b0210d19334ab0ec460ce4ba0e5bbee24303eb001254462d501245d9b84c845",
+      "calculation_version": "mountain-v3",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "6f4b4722ef511b16aee608dfb684263122dd4fe6",
+      "source_sha256": "de16c1754ba86e1bf5c72034f62afced1704a8c706cc9231fc49c9f55654e95f",
+      "dependency_sha256": "ff0f9f283a49717e0f99b4f728bce788856b11a0e9e70d17b0e1ed9a76a0bcf9",
+      "save_function_sha256": "d9aa4446ae6105090a9162bbd03295e70b93922274a58c96dfa90e16b6d07cbd",
+      "calculation_version": "mountain-v4-seasonal",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "55c4bdc947c84da70f4b57b937e53c945456ee76",
+      "source_sha256": "de16c1754ba86e1bf5c72034f62afced1704a8c706cc9231fc49c9f55654e95f",
+      "dependency_sha256": "b38f33db70fa19b12f859070276755e89dc797b1506890402c62dda87197ca67",
+      "save_function_sha256": "d9aa4446ae6105090a9162bbd03295e70b93922274a58c96dfa90e16b6d07cbd",
+      "calculation_version": "mountain-v5-volume",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    },
+    {
+      "commit": "5cfd817135965114f0eb060117a3a19dd4e1b57a",
+      "source_sha256": "f2dc12aa3e4a5f631b0ecf369749f599186197b0e67509f5f75ddb0f57720818",
+      "dependency_sha256": "4da7c542dd2584598b377456111a3158ef7b9460a4ca2da5956a3677373549b2",
+      "save_function_sha256": "1b0210d19334ab0ec460ce4ba0e5bbee24303eb001254462d501245d9b84c845",
+      "calculation_version": "mountain-v1",
+      "round_trips": 5,
+      "create_scenario": true,
+      "create_project": true
+    }
+  ],
+  "engines": [
+    {
+      "commit": "0cb964bc08840e99ac16c9c9bc0717fb853ff5c9",
+      "source_sha256": "aa607e28d6d72fa8d848c88ba97c6bcb0bbb429f13a3375980f106e89ca2e959",
+      "round_trips": 5
+    },
+    {
+      "commit": "758323995c436b171dbc1d762bec9181679590dd",
+      "source_sha256": "35dcf9ca7396022bfdd3e09d1dbb00484ea48c5e5c6bc000967655f4f1651e2b",
+      "round_trips": 5
+    },
+    {
+      "commit": "b213f3ab8857c3eff49239c9ca9097ffe33f95f4",
+      "source_sha256": "1a449072067be586d475101fee96186581d6bff413fc960e7ff1b862471c0627",
+      "round_trips": 5
+    },
+    {
+      "commit": "a426e6cef37aa053a1edc3132b27803da51cdf68",
+      "source_sha256": "86656523b136c7d276b86505f55a6c55b28cd40cb9b61dc3c4d59b8e296398d7",
+      "round_trips": 5
+    },
+    {
+      "commit": "9d65fff0c92e9fbdc0cb93f513364e3de018267e",
+      "source_sha256": "b5020c53c05fd6a1c9f8b9494516f18d395c1816a3c8116f16ca4a3c9cf84ac6",
+      "round_trips": 5
+    },
+    {
+      "commit": "8d27a89d9d7146ec3a7bd52fe6a21bf246d1d04c",
+      "source_sha256": "aa35e534a1cd181202011daf1fc30a57c18fedb5f8d5bd916a167777195a1b7c",
+      "round_trips": 5
+    },
+    {
+      "commit": "fadc91cf021f5dcdfe4499721221cb975025618d",
+      "source_sha256": "356734241af0905b338813275ebf082236633323d926eb44f3083762ca6f0a2a",
+      "round_trips": 5
+    },
+    {
+      "commit": "d482ab4b4d1f27b3a72e78a123032ffee46f03be",
+      "source_sha256": "0af1626b0f1bb0e5995260dd9bd94dd20248eb3b97b4083b31b09480896f6240",
+      "round_trips": 5
+    },
+    {
+      "commit": "9284c2d26f41b73d563e4e071fd2be95e70b34e6",
+      "source_sha256": "e962f356cbaec933bb4639d0ec6edac1fb3127aeaed30335bfa5889e31c6bc35",
+      "round_trips": 5
+    },
+    {
+      "commit": "945f7d85c747d3f9c3428c6919450eb2d30694a7",
+      "source_sha256": "25e0c8ca2621a71b2f2b9e17ddb82795deddfdb94a966605b073568a67125e3b",
+      "round_trips": 5
+    },
+    {
+      "commit": "11f251dce04d8259da4b697fd56e0e5f0a07efb4",
+      "source_sha256": "48fb497afaf1da41aeb2bcd83f97585d0a3d40a06b1ae735185a5779d1d3a8cb",
+      "round_trips": 5
+    },
+    {
+      "commit": "6adc8c1e555b8717e3aa518949a2e51fa883ab54",
+      "source_sha256": "91bfe9fee929a5cc6dd42e2fccb469e37cdd9b0eeafb352f8f22599221e0add3",
+      "round_trips": 5
+    },
+    {
+      "commit": "e0087ee67f1bd468cc795013cec32aaf275e13cc",
+      "source_sha256": "6eccf476fcd4dfb1e9a58349d82022ed08e576432734f50b14f064a16c43db50",
+      "round_trips": 5
+    },
+    {
+      "commit": "6f4b4722ef511b16aee608dfb684263122dd4fe6",
+      "source_sha256": "0bfde23cb6f71b2bf848bab295b2a0b0079c56d27ff883d9b4da6902c1feed5c",
+      "round_trips": 5
+    },
+    {
+      "commit": "55c4bdc947c84da70f4b57b937e53c945456ee76",
+      "source_sha256": "e17b4605877d0699be8197a5e8e3f56264dd3eedc810b49bb4e5b4614bdf5e60",
+      "round_trips": 5
+    },
+    {
+      "commit": "278dbe74e826f0e8c9b5dbd168fa1f92093697cc",
+      "source_sha256": "7dc06e0be07f8cdee713d70c977af0544b5ac4bdc9dc64d46042cd92a0a636b4",
+      "round_trips": 5
+    },
+    {
+      "commit": "ca7465e4c72d50f2570b5f6bdd2821096e1417fd",
+      "source_sha256": "0c022a145841f864d94d28d5685b4cfeb00f98ddc6e5afa173c3157a054bde12",
+      "round_trips": 5
+    },
+    {
+      "commit": "7c90babc57a995e70ea6da15f8928c08607730b0",
+      "source_sha256": "9cb3dbecb00148b6b7166defe91b51ea85ff97a93be1ce05a3fb52fc174a6fd9",
+      "round_trips": 5
+    },
+    {
+      "commit": "5445712ccda9d02e347df11bda79e379c161d18c",
+      "source_sha256": "3b344dfe252b6c430dfd9604fddc43850eeaf837ad90cbb8925a5d1426c0e5b5",
+      "round_trips": 5
+    },
+    {
+      "commit": "6994a6f88b46d62318ac3dcd52e2912e165288da",
+      "source_sha256": "fa2700f6f4aea888d6704b4801a95d6e6b7bdc4e27f61213350be5c4e027a074",
+      "round_trips": 5
+    }
+  ],
+  "auth": [
+    {
+      "path": "src/routes/auth.tsx",
+      "commit": "d4fd1d11b12fe6fec180ec3ca8764c17706c6da2",
+      "source_sha256": "792e4db4a0a782db8ecdb69e308bf71cc85c25c9cf2a080bbcce7bee926f5508",
+      "invite_metadata": false,
+      "accept_invite_rpc": false,
+      "signup": true,
+      "password_update": false
+    },
+    {
+      "path": "src/routes/auth.tsx",
+      "commit": "683eac7de800b924aac17a65837cc317bc25902f",
+      "source_sha256": "fda61152ec83403a3dfbb17a35fcd510713ad5db144293ca7b7b9e0df5245c4c",
+      "invite_metadata": false,
+      "accept_invite_rpc": false,
+      "signup": true,
+      "password_update": false
+    },
+    {
+      "path": "src/routes/auth.tsx",
+      "commit": "0ba27e0561762e7e20916b64f1b24dcf49074c46",
+      "source_sha256": "f8d6b6e9150c777a83b55ac7ae333ceaa60daf899004450d1087d1e72edcbe15",
+      "invite_metadata": false,
+      "accept_invite_rpc": false,
+      "signup": true,
+      "password_update": false
+    },
+    {
+      "path": "src/routes/auth.tsx",
+      "commit": "0179e0f8c1f8b422d5265dd5be69fa86135854aa",
+      "source_sha256": "3557a1d72f1c2142d94d5400d49054bf49bb6e010f312a63d80a7be5bc6c1e1a",
+      "invite_metadata": false,
+      "accept_invite_rpc": false,
+      "signup": true,
+      "password_update": false
+    },
+    {
+      "path": "src/routes/auth.tsx",
+      "commit": "35e32901de350a634dd26a42c0296626f856986a",
+      "source_sha256": "90827165f8ce209463e780fd5638875951459cbdc98e99f39b923f69fc87d722",
+      "invite_metadata": true,
+      "accept_invite_rpc": true,
+      "signup": true,
+      "password_update": false
+    },
+    {
+      "path": "src/routes/auth.tsx",
+      "commit": "f48e6406173d0b41c19e3b3ec09e9ac4bd1a3237",
+      "source_sha256": "fc1e8beaf99501c332f587075da44ab0c792085d6496c22ff516e78cf46fb5f6",
+      "invite_metadata": true,
+      "accept_invite_rpc": true,
+      "signup": true,
+      "password_update": false
+    },
+    {
+      "path": "src/routes/auth.tsx",
+      "commit": "5dd7020d4fdcd4d4d53ce59e3f484d76db8db8af",
+      "source_sha256": "5cd11f569417a45d7d3cbb7f476741be31d3ace5f2ef46fa95c47caa9aefa240",
+      "invite_metadata": true,
+      "accept_invite_rpc": true,
+      "signup": true,
+      "password_update": false
+    },
+    {
+      "path": "src/routes/auth.tsx",
+      "commit": "c01b2de99b9786e83aabb9bab66b5bcdcb3516b4",
+      "source_sha256": "f5abee9ceef082c8abfd221bf0f10d989ed7df4d85c543ec89956fd9b61f9171",
+      "invite_metadata": true,
+      "accept_invite_rpc": true,
+      "signup": true,
+      "password_update": false
+    },
+    {
+      "path": "src/routes/auth.tsx",
+      "commit": "abc04e169ff3f8f16014401e3888dc22996ad669",
+      "source_sha256": "cbb8bfe68f0eba17c03e98150b632f7340de0b38f9e992e5b8f134dd3b2d828b",
+      "invite_metadata": true,
+      "accept_invite_rpc": true,
+      "signup": true,
+      "password_update": false
+    },
+    {
+      "path": "src/routes/auth.tsx",
+      "commit": "b9e347d0a39b84defe382b39feb54eda0faa3c67",
+      "source_sha256": "bde692f861ec6e72e0e3f7177457780f899464f90e4a28926e82876cb9722818",
+      "invite_metadata": true,
+      "accept_invite_rpc": true,
+      "signup": true,
+      "password_update": false
+    },
+    {
+      "path": "src/routes/auth.tsx",
+      "commit": "f89c5d69dfb60652aab169ddd7dba916b8239819",
+      "source_sha256": "03d9573142f5610679a57825fa92e13d95927a24bfba6add78be28574ae8af8e",
+      "invite_metadata": true,
+      "accept_invite_rpc": true,
+      "signup": true,
+      "password_update": false
+    },
+    {
+      "path": "src/routes/reset-password.tsx",
+      "commit": "abc04e169ff3f8f16014401e3888dc22996ad669",
+      "source_sha256": "21906d60011386a6806fa7bbab209f1a415fe921dcf14b90f0d0393e5cc78de2",
+      "invite_metadata": false,
+      "accept_invite_rpc": false,
+      "signup": false,
+      "password_update": true
+    },
+    {
+      "path": "src/routes/reset-password.tsx",
+      "commit": "1ef72650bd1e3efc6b4b14b97c5b34f5cc2d1c69",
+      "source_sha256": "27b58950c30edd94702260ca8d96132a5e42e2eb2d5228b779e2e81a4bd638c4",
+      "invite_metadata": false,
+      "accept_invite_rpc": false,
+      "signup": false,
+      "password_update": true
+    },
+    {
+      "path": "src/routes/reset-password.tsx",
+      "commit": "665470ac5c85ecdb2aa082fc7d8cd1bc2b495e47",
+      "source_sha256": "5aabf04633e9d3a56e86ff7182a5ac684a6abd14056cf0112b5c012770a101c8",
+      "invite_metadata": true,
+      "accept_invite_rpc": true,
+      "signup": false,
+      "password_update": true
+    },
+    {
+      "path": "src/routes/reset-password.tsx",
+      "commit": "34803265e743dbec7fcb91c32dc60ebe727a17ad",
+      "source_sha256": "90f0f49f62ca22222f579bd7b7acf5c9a141f80eee01f0fd25e0557da1f654f2",
+      "invite_metadata": true,
+      "accept_invite_rpc": true,
+      "signup": false,
+      "password_update": true
+    },
+    {
+      "path": "src/lib/invites.functions.ts",
+      "commit": "ce06575ba435ce5b7d90bf9ec8e1405d74452b63",
+      "source_sha256": "3fda419b2e6fe40e0e50ba9f4935ca3c42a5f8410123beb3199b2ea6e382e31d",
+      "invite_metadata": true,
+      "accept_invite_rpc": false,
+      "signup": false,
+      "password_update": false
+    }
+  ],
+  "models": [
+    {
+      "commit": "b2c818158f469ad19f535bfb60468ddbd39ce7f8",
+      "source_sha256": "9c67caa4c6708ee663305f5c637b2ef34e8925a08e6bc8068317d7ad00113b2c",
+      "fb_growth_entries": 0
+    },
+    {
+      "commit": "7768a3fcf40c0fc952ef778450f0e0fa773ce050",
+      "source_sha256": "3297579f2db5190bd40823d487d8f72d83c9d969d4dd2c46e51bb9f8718a2784",
+      "fb_growth_entries": 0
+    },
+    {
+      "commit": "8d448dddb75f1354a6e8a0a67e04526bbd2dd3b2",
+      "source_sha256": "8226ca9eef91323314740d18db3d5761d9a7380f79ec32593b09f4af0fbbd7b3",
+      "fb_growth_entries": 0
+    },
+    {
+      "commit": "ae00e984518f2e748918521a8fdadf5c422a27ea",
+      "source_sha256": "9a198754d6f0b148bad82e0381f9ac6c99a2a0cc7fe79f0a93b1d15b77fa9c87",
+      "fb_growth_entries": 0
+    },
+    {
+      "commit": "7ecc1199503f5f3ae3923015f739c576f24adc0d",
+      "source_sha256": "87d77896d155d3ea834b7f647fee32d364d9e2f468733aaf4443b5059b8a8da4",
+      "fb_growth_entries": 0
+    },
+    {
+      "commit": "945f7d85c747d3f9c3428c6919450eb2d30694a7",
+      "source_sha256": "3bf9712607ad374aa2b8eb5858f95dceb553fb003f191b29bd82c4eb996d9dec",
+      "fb_growth_entries": 0
+    },
+    {
+      "commit": "11f251dce04d8259da4b697fd56e0e5f0a07efb4",
+      "source_sha256": "60bc6139e87a368392eb238c8e4d7e9cb464349720cdb6f9b9837f3f5b094b79",
+      "fb_growth_entries": 0
+    },
+    {
+      "commit": "ea96eafa6618cdf55adbb402876ef9593873bf89",
+      "source_sha256": "369f4a3bef54cde03470d6e3f210fd9263e57bf714a344b7c4a57c21558e43a5",
+      "fb_growth_entries": 0
+    },
+    {
+      "commit": "7c166911e0238a7a11a54a15182cb5127a18d642",
+      "source_sha256": "3304f1a1bc7494cf82ea884dc7b287471c885d361f2973006ce47f4c835e1cb0",
+      "fb_growth_entries": 0
+    },
+    {
+      "commit": "5319213c06abe297e175672671e6d2b6350a97ad",
+      "source_sha256": "40117b5c5d852edaf172b05919ba0bbf06c393a1598b05cd21663f817c4b7d18",
+      "fb_growth_entries": 3
+    },
+    {
+      "commit": "7985c1c6eeca796f141530a8dd4fa4b237121c15",
+      "source_sha256": "23f29440f3d5831ecd32a2c326b433a68f64263899b7ebafb47c5fb70790dcee",
+      "fb_growth_entries": 5
+    },
+    {
+      "commit": "6f4b4722ef511b16aee608dfb684263122dd4fe6",
+      "source_sha256": "e3c4d244f83f3fc7abc018d75a3551fb46bb16aaf068749ee10cecb06d88a4df",
+      "fb_growth_entries": 5
+    },
+    {
+      "commit": "55c4bdc947c84da70f4b57b937e53c945456ee76",
+      "source_sha256": "d47e21d60186b95923bbe5c59f95815b6b551088a41d7f2108d1f306b55465ee",
+      "fb_growth_entries": 5
+    },
+    {
+      "commit": "b5b7880658db410ffdb088a436439676e23bbe39",
+      "source_sha256": "8d8678f1dc2a3bf0290d6c573c65784a505174c73475df0467aaf2c9c53cc484",
+      "fb_growth_entries": 5
+    }
+  ],
+  "checks": [
+    "All public relation grants unchanged",
+    "Historical assumptions unchanged by apply",
+    "Authenticated historical save/create paths and viewer read/write boundary pass"
+  ],
+  "distinct_save_function_bodies": 5,
+  "growth_ui": [
+    {
+      "commit": "05bc636eeb168c68e0307e11379d2e09c7c2d3e4",
+      "source_sha256": "95142764c063fc2360667ba79b534ab02588fa2c27fa2d1c0619674535ae2601",
+      "growth_lines": [
+        "<Field label=\"Cable car OPEX growth\"><GrowthList values={a.opexGrowth?.cable ?? [a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, cable: v } })} /></Field>",
+        "<Field label=\"F&B OPEX growth\"><GrowthList values={a.opexGrowth?.fb ?? [a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, fb: v } })} /></Field>"
+      ]
+    },
+    {
+      "commit": "28f3b6ed46c91fa024832b05bc038ba1f18dbcf8",
+      "source_sha256": "576c0e1bcb087112808bf60d109824731f6dc14cbf92e972dfad21922e570943",
+      "growth_lines": [
+        "<Field label=\"Cable car OPEX growth\"><GrowthList values={a.opexGrowth?.cable ?? [a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, cable: v } })} /></Field>",
+        "<Field label=\"F&B OPEX growth\"><GrowthList values={a.opexGrowth?.fb ?? [a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, fb: v } })} /></Field>"
+      ]
+    },
+    {
+      "commit": "6adc8c1e555b8717e3aa518949a2e51fa883ab54",
+      "source_sha256": "a9f142c35d7609318169eb3125e4e415dc336d4421232bef01174f8c531032a5",
+      "growth_lines": [
+        "<Field label=\"F&B OPEX year 1 (NOK)\"><NumField value={a.fbOpexYear1} disabled={ro || !!fbSel?.opex} onChange={(v) => set({ fbOpexYear1: v, opexGrowth: { ...a.opexGrowth, fb: a.opexGrowth?.fb?.length ? a.opexGrowth.fb : [a.costInflation, a.costInflation, a.costInflation] } })} /></Field>",
+        "<Field label=\"Cable car OPEX growth\"><GrowthList values={a.opexGrowth?.cable ?? [a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, cable: v } })} /></Field>",
+        "<Field label=\"F&B OPEX growth\"><GrowthList values={a.opexGrowth?.fb ?? [a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, fb: v } })} /></Field>"
+      ]
+    },
+    {
+      "commit": "a10876f0aeff7b3a56e9e303e7be610a293742ab",
+      "source_sha256": "11e00cf3c596ee29cdb4b6daf92c1f984e339e0bdd7a84d2015a3c4a5b1491d4",
+      "growth_lines": [
+        "<Field label=\"F&B OPEX year 1 (NOK)\"><NumField value={a.fbOpexYear1} disabled={ro || !!fbSel?.opex} onChange={(v) => set({ fbOpexYear1: v, opexGrowth: { ...a.opexGrowth, fb: a.opexGrowth?.fb?.length ? a.opexGrowth.fb : [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation] } })} /></Field>",
+        "<Field label=\"Cable car OPEX growth\"><GrowthList values={a.opexGrowth?.cable ?? [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, cable: v } })} /></Field>",
+        "<Field label=\"F&B OPEX growth\"><GrowthList values={a.opexGrowth?.fb ?? [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, fb: v } })} /></Field>"
+      ]
+    },
+    {
+      "commit": "55c4bdc947c84da70f4b57b937e53c945456ee76",
+      "source_sha256": "defbb24d7e13caa52a51425a6fa2957712f49d595bba410b24873eddc91e7713",
+      "growth_lines": [
+        "{(!a.volumeMethods?.fb?.opex?.method || a.volumeMethods.fb.opex.method === \"legacy\") && <Field label=\"F&B OPEX year 1 (NOK)\"><NumField value={a.fbOpexYear1} disabled={ro || !!fbSel?.opex} onChange={(v) => set({ fbOpexYear1: v, opexGrowth: { ...a.opexGrowth, fb: a.opexGrowth?.fb?.length ? a.opexGrowth.fb : [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation] } })} /></Field>}",
+        "<Field label=\"Cable car OPEX growth\"><GrowthList values={a.opexGrowth?.cable ?? [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, cable: v } })} /></Field>",
+        "{a.volumeMethods?.merch?.opex?.method && ![\"legacy\", \"revenuePercent\"].includes(a.volumeMethods.merch.opex.method) && <Field label=\"Merchandise OPEX growth\"><GrowthList values={a.opexGrowth?.merch ?? [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={v => set({ opexGrowth: { ...a.opexGrowth, merch: v } })} /></Field>}",
+        "<Field label=\"F&B OPEX growth\"><GrowthList values={a.opexGrowth?.fb ?? [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, fb: v } })} /></Field>"
+      ]
+    },
+    {
+      "commit": "3146261b3642b03fe018f7d3a288931286b0ace1",
+      "source_sha256": "e414c58ed236b3042ccc1f5bf8e657889ffedc40d65fb7de75e73721b8ed9c7d",
+      "growth_lines": [
+        "{(!a.volumeMethods?.fb?.opex?.method || a.volumeMethods.fb.opex.method === \"legacy\") && <Field label=\"F&B OPEX year 1 (NOK)\"><NumField value={a.fbOpexYear1} disabled={ro || !!fbSel?.opex} onChange={(v) => set({ fbOpexYear1: v, opexGrowth: { ...a.opexGrowth, fb: a.opexGrowth?.fb?.length ? a.opexGrowth.fb : [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation] } })} /></Field>}",
+        "<Field label=\"F&B OPEX growth\"><GrowthList values={a.opexGrowth?.fb ?? [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, fb: v } })} /></Field>",
+        "<Field label=\"Cable car OPEX growth\"><GrowthList values={a.opexGrowth?.cable ?? [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={(v) => set({ opexGrowth: { ...a.opexGrowth, cable: v } })} /></Field>",
+        "{a.volumeMethods?.merch?.opex?.method && ![\"legacy\", \"revenuePercent\"].includes(a.volumeMethods.merch.opex.method) && <Field label=\"Merchandise OPEX growth\"><GrowthList values={a.opexGrowth?.merch ?? [a.costInflation, a.costInflation, a.costInflation, a.costInflation, a.costInflation]} disabled={ro} onChange={v => set({ opexGrowth: { ...a.opexGrowth, merch: v } })} /></Field>}"
+      ]
+    }
+  ],
+  "incompatible_reviewed_revisions": [],
+  "caveats": [
+    "History is bounded to available main ancestry; no published artifact was identified",
+    "Supabase transport and session provider are adapters, not managed auth or browser tests",
+    "Invitation and managed role schema are local models; real production RLS/auth behavior was not accessed",
+    "Old read-error, collision and autosave bugs are preserved; absence of a new migration incompatibility does not certify every historical bug fixed"
+  ]
+}

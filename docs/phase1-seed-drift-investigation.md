@@ -1,6 +1,10 @@
 # Phase 1 seed drift investigation and release decision — 21 October 2026
 
-## Decision
+## Superseding assessment — 22 October 2026
+
+The [final backward-compatibility assessment](phase1-backward-compatibility.md) covers historical client families and now supports a controlled migration-first GO within that scope, subject to operational preflight and explicit approvals. This supersedes the exact-published-SHA blocker in the earlier decision below; artifact identity remains unverified. Seed correction and rehearsal evidence below remain valid.
+
+## Earlier decision — 21 October 2026
 
 **The reviewed migration candidate passes isolated technical checks. NO-GO for the complete production release until the published application revision is identified or its actual persistence path is checked against the migrated backend.** The seed incompatibility is resolved in the revised candidate. Production execution, merge and publication still require separate approval; none occurred.
 

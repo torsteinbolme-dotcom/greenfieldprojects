@@ -26,6 +26,7 @@ const nav = [
 const comparisonNav = [
   { to: "/comparison/projects", label: "Project vs. Project" },
   { to: "/comparison/benchmarks", label: "Year 3 vs. Benchmarks" },
+  { to: "/comparison/external-budgets", label: "Project vs. External Budget" },
 ] as const;
 
 function ComparisonMenu() {

@@ -1,0 +1,17 @@
+// Synthetic localhost UI only. No app router, authentication, database, env loading or network backend.
+import { createServer } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const server = await createServer({
+  configFile: false,
+  envDir: false,
+  root: path.join(root, "scripts/fixtures/external-budget"),
+  plugins: [react(), tailwindcss()],
+  resolve: { alias: { "@": path.join(root, "src") } },
+  server: { host: "127.0.0.1", port: 4178, strictPort: true, fs: { allow: [root] } },
+});
+await server.listen();
+server.printUrls();

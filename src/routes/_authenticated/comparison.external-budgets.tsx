@@ -1,5 +1,5 @@
 import { createFileRoute, useBlocker } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ExternalBudgetWorkspace,
@@ -72,7 +72,12 @@ export function ExternalBudgetsPage() {
     enabled: !!project && !!budgetId,
     queryFn: () => externalBudgetReader().history(project!.id, budgetId),
   });
-  const internal = source.data?.find((s) => s.id === (sourceId || source.data?.[0]?.id));
+  // Resolve the initial default once. Refreshes may update the options, never the pin.
+  useEffect(() => {
+    if (scenario && !sourceId && source.isSuccess && source.data[0]) setSource(source.data[0].id);
+  }, [scenario, sourceId, source.isSuccess, source.data]);
+  const internal = source.data?.find((s) => s.id === sourceId);
+  const missingSource = !!scenario && !!sourceId && source.data !== undefined && !internal;
   const selectedVersion =
     versionId || budgets.data?.headers.find((h) => h.id === budgetId)?.current_version_id || "";
   const select = (action: () => void) => {
@@ -84,20 +89,25 @@ export function ExternalBudgetsPage() {
   const mutate = async (command: BudgetCommand) => {
     const { data, error } = await supabase.auth.getSession();
     if (error) throw error;
+    if (
+      (command.operation === "create" && scenario && !internal) ||
+      (command.operation === "refresh" && !internal)
+    )
+      throw Error(
+        "The pinned internal assumption version is unavailable. Select an available saved version before creating or refreshing inheritance.",
+      );
     if (!data.session) throw Error("Sign in again before saving.");
     return externalBudgetMutation({
       data: command,
       headers: { Authorization: `Bearer ${data.session.access_token}` },
     });
   };
-  const errors = [
-    membership.error,
-    projects.error,
-    scenarios.error,
-    source.error,
-    budgets.error,
-    history.error,
-  ].filter(Boolean);
+  const errors = [membership.error, projects.error, scenarios.error].filter(Boolean);
+  const requestErrors = [
+    { label: "Internal versions", query: source },
+    { label: "External budget list", query: budgets },
+    { label: "External budget history", query: history },
+  ].filter(({ query }) => query.error);
   return (
     <div className="min-w-0 space-y-6">
       <header>
@@ -168,10 +178,17 @@ export function ExternalBudgetsPage() {
             aria-label="Internal saved version"
             className={selectClass}
             disabled={!scenario || source.isFetching || busy}
-            value={internal?.id ?? ""}
+            value={sourceId}
             onChange={(e) => select(() => setSource(e.target.value))}
           >
-            <option value="">Select version</option>
+            <option value="" disabled>
+              Select version
+            </option>
+            {missingSource && (
+              <option value={sourceId} disabled>
+                Unavailable pinned version · {sourceId}
+              </option>
+            )}
             {source.data?.map((s) => (
               <option value={s.id} key={s.id}>
                 Version {s.version} · {s.id}
@@ -182,10 +199,37 @@ export function ExternalBudgetsPage() {
       </section>
       {errors.map((e, i) => (
         <p role="alert" className="break-words text-destructive" key={i}>
-          {(e as { message?: string }).message ?? String(e)}. Budget storage requires the separately
-          approved Stage 2 migration; this page does not run migrations.
+          {(e as { message?: string }).message ?? String(e)}
         </p>
       ))}
+      {requestErrors.map(({ label, query }) => (
+        <div role="alert" className="space-y-2 break-words text-destructive" key={label}>
+          <p>
+            {label}:{" "}
+            {query.data !== undefined
+              ? "Background refresh failed. Unsaved edits and selected versions have been kept."
+              : "Initial loading failed."}{" "}
+            {query.error?.message ?? String(query.error)}
+            {query.data === undefined && label !== "Internal versions"
+              ? " Budget storage requires the separately approved Stage 2 migration; this page does not run migrations."
+              : ""}
+          </p>
+          <button
+            type="button"
+            className="rounded border px-3 py-1 text-sm"
+            disabled={query.isFetching}
+            onClick={() => void query.refetch()}
+          >
+            Retry {label.toLowerCase()}
+          </button>
+        </div>
+      ))}
+      {missingSource && (
+        <p role="alert" className="break-words text-destructive">
+          Pinned internal assumption version {sourceId} is unavailable. Select another saved version
+          explicitly. No replacement has been selected.
+        </p>
+      )}
       {source.isFetching || budgets.isFetching || history.isFetching ? (
         <p role="status">Loading saved versions…</p>
       ) : null}
@@ -195,62 +239,59 @@ export function ExternalBudgetsPage() {
           {internal.calculation_version}
         </p>
       )}
-      {project &&
-        !budgets.isPending &&
-        !budgets.error &&
-        (!budgetId || (!history.isPending && !history.error)) && (
-          <ExternalBudgetWorkspace
-            key={`${actor}:${projectId}:${budgetId}:${selectedVersion}:${generation}`}
-            projectId={project.id}
-            projectName={project.name}
-            internal={internal}
-            scenarioName={scenario?.name}
-            canEdit={membership.data?.role === "admin" || membership.data?.role === "editor"}
-            headers={budgets.data?.headers ?? []}
-            budgetNames={budgets.data?.names ?? {}}
-            history={history.data ?? []}
-            selectedBudget={budgetId}
-            selectedVersion={selectedVersion}
-            onDirtyChange={setDirty}
-            onBusyChange={setBusy}
-            onBudget={(id) => {
-              setBudget(id);
-              setVersion(budgets.data?.headers.find((h) => h.id === id)?.current_version_id ?? "");
-              setDirty(false);
-            }}
-            onVersion={(id) => {
-              setVersion(id);
-              setDirty(false);
-            }}
-            mutate={mutate}
-            onSaved={(result) => {
-              cache.setQueryData(
-                ["external-budget-history", actor, org, project.id, result.budget.id],
-                (old: typeof history.data) => [
-                  result.version,
-                  ...(old ?? []).filter((v) => v.id !== result.version.id),
-                ],
-              );
-              setBudget(result.budget.id);
-              setVersion(result.version.id);
-              setDirty(false);
-              void cache.invalidateQueries({
-                queryKey: ["external-budget-list", actor, org, project.id],
-              });
-            }}
-            onReload={() => {
-              setVersion("");
-              setGeneration((n) => n + 1);
-              setDirty(false);
-              void cache.invalidateQueries({
-                queryKey: ["external-budget-list", actor, org, project.id],
-              });
-              void cache.invalidateQueries({
-                queryKey: ["external-budget-history", actor, org, project.id, budgetId],
-              });
-            }}
-          />
-        )}
+      {project && budgets.data !== undefined && (!budgetId || history.data !== undefined) && (
+        <ExternalBudgetWorkspace
+          key={`${actor}:${projectId}:${budgetId}:${selectedVersion}:${generation}`}
+          projectId={project.id}
+          projectName={project.name}
+          internal={internal}
+          scenarioName={scenario?.name}
+          canEdit={membership.data?.role === "admin" || membership.data?.role === "editor"}
+          headers={budgets.data?.headers ?? []}
+          budgetNames={budgets.data?.names ?? {}}
+          history={history.data ?? []}
+          selectedBudget={budgetId}
+          selectedVersion={selectedVersion}
+          onDirtyChange={setDirty}
+          onBusyChange={setBusy}
+          onBudget={(id) => {
+            setBudget(id);
+            setVersion(budgets.data?.headers.find((h) => h.id === id)?.current_version_id ?? "");
+            setDirty(false);
+          }}
+          onVersion={(id) => {
+            setVersion(id);
+            setDirty(false);
+          }}
+          mutate={mutate}
+          onSaved={(result) => {
+            cache.setQueryData(
+              ["external-budget-history", actor, org, project.id, result.budget.id],
+              (old: typeof history.data) => [
+                result.version,
+                ...(old ?? []).filter((v) => v.id !== result.version.id),
+              ],
+            );
+            setBudget(result.budget.id);
+            setVersion(result.version.id);
+            setDirty(false);
+            void cache.invalidateQueries({
+              queryKey: ["external-budget-list", actor, org, project.id],
+            });
+          }}
+          onReload={() => {
+            setVersion("");
+            setGeneration((n) => n + 1);
+            setDirty(false);
+            void cache.invalidateQueries({
+              queryKey: ["external-budget-list", actor, org, project.id],
+            });
+            void cache.invalidateQueries({
+              queryKey: ["external-budget-history", actor, org, project.id, budgetId],
+            });
+          }}
+        />
+      )}
     </div>
   );
 }

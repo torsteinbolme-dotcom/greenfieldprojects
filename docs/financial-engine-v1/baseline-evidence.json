@@ -1,0 +1,340 @@
+{
+  "recordedDate": "2026-10-22",
+  "sourceCommit": "c18d1444998c58619e76e9e7fcbf7cb5e7d6b90f",
+  "branch": "baseline/financial-engine-v1",
+  "platform": "darwin/arm64",
+  "dependencyInstallation": {
+    "packageManager": "Bun 1.4.4 (38afee6c8)",
+    "command": "bun install --frozen-lockfile",
+    "cleanInstall": true,
+    "bunLockSha256": "f4b42448e7ece2f1a5ea286a2ca0f9d126fe42198afbc079dfb933e2fb8ec786"
+  },
+  "scope": "Local source/test inspection only; no production access or SQL execution",
+  "tests": {
+    "node24": {
+      "runtime": {
+        "node": "24.19.0",
+        "v8": "13.6.233.17-node.51"
+      },
+      "files": 50,
+      "total": 494,
+      "passed": 494,
+      "failed": 0,
+      "pending": 0,
+      "success": true,
+      "failedTests": [],
+      "collectionErrors": []
+    },
+    "node22": {
+      "runtime": {
+        "node": "22.23.4",
+        "v8": "12.4.254.21-node.57"
+      },
+      "files": 50,
+      "total": 494,
+      "passed": 490,
+      "failed": 4,
+      "pending": 0,
+      "success": false,
+      "failedTests": [
+        {
+          "file": "phase1-compatibility.test.ts",
+          "test": "preserves all outputs, Year 3/8 metrics and equity flows for 'investment-A'"
+        },
+        {
+          "file": "phase1-compatibility.test.ts",
+          "test": "preserves all outputs, Year 3/8 metrics and equity flows for 'investment-B'"
+        },
+        {
+          "file": "phase1-compatibility.test.ts",
+          "test": "preserves all outputs, Year 3/8 metrics and equity flows for 'investment-C'"
+        },
+        {
+          "file": "phase1-compatibility.test.ts",
+          "test": "preserves all outputs, Year 3/8 metrics and equity flows for 'investment-zero_fb_revenue_fixed_cost'"
+        }
+      ],
+      "collectionErrors": []
+    },
+    "bun": {
+      "runtime": {
+        "node": "26.3.0",
+        "v8": "14.6.202.34-node.20",
+        "bun": "1.4.4",
+        "webkit": "d6375c72affe0f70222cdcb45012b10f0bf3a9d5"
+      },
+      "files": 50,
+      "total": 493,
+      "passed": 484,
+      "failed": 9,
+      "pending": 0,
+      "success": false,
+      "failedTests": [
+        {
+          "file": "phase1-compatibility.test.ts",
+          "test": "preserves all outputs, Year 3/8 metrics and equity flows for 'saved-0'"
+        },
+        {
+          "file": "phase1-compatibility.test.ts",
+          "test": "preserves all outputs, Year 3/8 metrics and equity flows for 'saved-1'"
+        },
+        {
+          "file": "phase1-compatibility.test.ts",
+          "test": "preserves all outputs, Year 3/8 metrics and equity flows for 'saved-2'"
+        },
+        {
+          "file": "phase1-compatibility.test.ts",
+          "test": "preserves all outputs, Year 3/8 metrics and equity flows for 'saved-4'"
+        },
+        {
+          "file": "phase1-compatibility.test.ts",
+          "test": "preserves all outputs, Year 3/8 metrics and equity flows for 'investment-A'"
+        },
+        {
+          "file": "phase1-compatibility.test.ts",
+          "test": "preserves all outputs, Year 3/8 metrics and equity flows for 'investment-B'"
+        },
+        {
+          "file": "phase1-compatibility.test.ts",
+          "test": "preserves all outputs, Year 3/8 metrics and equity flows for 'investment-C'"
+        },
+        {
+          "file": "phase1-compatibility.test.ts",
+          "test": "preserves all outputs, Year 3/8 metrics and equity flows for 'investment-depreciation_exhaustion'"
+        },
+        {
+          "file": "phase1-compatibility.test.ts",
+          "test": "preserves all outputs, Year 3/8 metrics and equity flows for 'investment-zero_fb_revenue_fixed_cost'"
+        }
+      ],
+      "collectionErrors": [
+        {
+          "file": "app-routing.test.tsx",
+          "message": "undefined is not an object (evaluating 'z.object')"
+        }
+      ]
+    }
+  },
+  "runtimeComparison": {
+    "node24": {
+      "cases": 10,
+      "identicalEngineHashes": 10,
+      "changedNumericLeaves": 0,
+      "maxAbsoluteDelta": 0,
+      "maxRelativeDelta": 0,
+      "maxPositiveValueUlpDistance": 0,
+      "powProbe": {
+        "x": 1.025,
+        "n": 14,
+        "value": 1.4129738209737657,
+        "bits": "3ff69b8a6ff2fbd5"
+      },
+      "engineHashes": {
+        "saved-0": "62f079e8c0883ee7a571ed9a8a52b7dee6458e909580cbec56db2f6b7096a84c",
+        "saved-1": "a8def6e503aa98e78a4c12f8701c33d0c68735c4102fce9cf9ce9e6f78eb0000",
+        "saved-2": "7755ed93632190d4b847aca4fc937f75f981496ec84ec4ae7a1c248cd486a099",
+        "saved-3": "d31630e7e6c19c1c8e84b95a3b3166e2d8347cd7d089ec1bb44f1e3078c71fe4",
+        "saved-4": "86de8e7cb157e22aa54899d9204fab2ff01465542e62fcc91e46017348e9f860",
+        "investment-A": "eee48456876d1f884ce5f77e65aa5cf16ffa3897f13fd9cd02f8a0411eb74b71",
+        "investment-B": "45dd940f94b71a68bb9671992545c9198bf3e670764ebc570984cab06ed613e2",
+        "investment-C": "26bb2d122a859bfaea806f5d5e8878c51ee08879655f84eadc1a408b86b181de",
+        "investment-depreciation_exhaustion": "8c89821d2b1cadd6240f61791403a5e079a9ae50a3b7b2f9548b787c34a4bd63",
+        "investment-zero_fb_revenue_fixed_cost": "b0481da8cfd04f8f47529128b8b41bd6a66d37d3a2a4bcd51fb17966cd822562"
+      }
+    },
+    "node22": {
+      "cases": 10,
+      "identicalEngineHashes": 6,
+      "changedNumericLeaves": 13,
+      "maxAbsoluteDelta": 2.9802322387695312e-8,
+      "maxRelativeDelta": 3.5106365209733863e-16,
+      "maxPositiveValueUlpDistance": 2,
+      "powProbe": {
+        "x": 1.025,
+        "n": 14,
+        "value": 1.4129738209737654,
+        "bits": "3ff69b8a6ff2fbd4"
+      },
+      "engineHashes": {
+        "saved-0": "62f079e8c0883ee7a571ed9a8a52b7dee6458e909580cbec56db2f6b7096a84c",
+        "saved-1": "a8def6e503aa98e78a4c12f8701c33d0c68735c4102fce9cf9ce9e6f78eb0000",
+        "saved-2": "7755ed93632190d4b847aca4fc937f75f981496ec84ec4ae7a1c248cd486a099",
+        "saved-3": "d31630e7e6c19c1c8e84b95a3b3166e2d8347cd7d089ec1bb44f1e3078c71fe4",
+        "saved-4": "86de8e7cb157e22aa54899d9204fab2ff01465542e62fcc91e46017348e9f860",
+        "investment-A": "c98536771061d2920be99f0a6892efa2ca5a296debdfc6f32fca663181d1c78b",
+        "investment-B": "1a38b3379a41c298bcf7a72487cb748bad0d24b2b464607acf6ef83023695b5b",
+        "investment-C": "a716c8b896e05f96a5151f1cebc7da39725a390236a7ae0f5fd755a1606dc55d",
+        "investment-depreciation_exhaustion": "8c89821d2b1cadd6240f61791403a5e079a9ae50a3b7b2f9548b787c34a4bd63",
+        "investment-zero_fb_revenue_fixed_cost": "3cb3101629057c811e378552c635fe5f30ac0e463e9ee4c205ee6bb8249bfda7"
+      }
+    },
+    "bun": {
+      "cases": 10,
+      "identicalEngineHashes": 1,
+      "changedNumericLeaves": 315,
+      "maxAbsoluteDelta": 9.5367431640625e-7,
+      "maxRelativeDelta": 1.667463947450218e-14,
+      "maxPositiveValueUlpDistance": 113,
+      "powProbe": {
+        "x": 1.025,
+        "n": 14,
+        "value": 1.4129738209737661,
+        "bits": "3ff69b8a6ff2fbd7"
+      },
+      "engineHashes": {
+        "saved-0": "37d2aa25e5466351c8000db875ff68ba8fd04d543b66451d30bdc22714e03312",
+        "saved-1": "82b866086fdb1a852d4693518b8b9a956429cfd8668764b3970420c20236ef90",
+        "saved-2": "f1ee99da7cb15eb78b4effd246b0d66fceeb7bc90fe9a9849247f038058c704b",
+        "saved-3": "d31630e7e6c19c1c8e84b95a3b3166e2d8347cd7d089ec1bb44f1e3078c71fe4",
+        "saved-4": "3a284ad4faadd45bf491369aaf679caaaa9f2f8cd775e64d893e2b94a352ba5f",
+        "investment-A": "2ce70092562f5379d389ac3ebc3d789160f95a41965f89f78b55992ebb3a24e7",
+        "investment-B": "590bfddc9b0feef84ebe33e47277dcbedbf541f8d88d1ad28634d2f5f7c04428",
+        "investment-C": "f2f43f8ae3b2b900c73221b88e9a992745180ff377de49bc204cc40185823145",
+        "investment-depreciation_exhaustion": "9bd71783f0dcc6c27be37b43a0378eb4786f1f65a11a4a2676f818cbd9097885",
+        "investment-zero_fb_revenue_fixed_cost": "b60aba779cdade33de8b3c8b86f95fbca43c5bbb5837306038fb59cd2451b77c"
+      }
+    }
+  },
+  "fixtureIdentities": {
+    "src/test/fixtures/phase1-compatibility-baseline.json": "2f634e90d6061fb498c780f8050a2bef17e2141b397009193b8597d0e8e814c0",
+    "src/test/fixtures/saved-scenarios-baseline.json": "ff07936ad0601be8d330606f90fbc6978ea4fd2c99bb00599e2f02676836252c",
+    "src/test/fixtures/production-investments.json": "6ba50946dd9104c01af6c8523fef5fc27bd9e3a725bf611d3d024a7340b94722",
+    "src/test/fixtures/phase1.ts": "03458150226f6f99318673824998babfbd9c2346e8786122a152d4ce8dc24447"
+  },
+  "sourceMigrationIdentities": {
+    "0012_preserve_saved_fb_opex_growth.sql": "0880280944d60caed0b5cca5c588aa6ba40d1bf71d0c1f56023fcdbdc3690c7d",
+    "0013_apply_pending_0012.sql": "17db4fd369edb9244b9f91d9aeed145c3d04ad8ba6e95d06247f07a63527d11a"
+  },
+  "productionReportedByUser": {
+    "deployment": "psr2.fed093c9-a422-49c9-81ea-98a8ce484239",
+    "publishedRevision": "c18d1444998c58619e76e9e7fcbf7cb5e7d6b90f",
+    "appliedMigrationCount": 14,
+    "independentlyInspected": false
+  },
+  "sourceJournalEntries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792322658045,
+      "tag": "0000_portfolio_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792322692747,
+      "tag": "0001_latest_assumptions_view",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792329640688,
+      "tag": "0002_benchmarks",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792329912349,
+      "tag": "0003_project_benchmark_config",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792330223794,
+      "tag": "0004_benchmark_forecast_status",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792348839224,
+      "tag": "0005_project_cover_image",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792348894487,
+      "tag": "0006_project_cover_url_comment",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792358321063,
+      "tag": "0007_default_independent_fb_opex_growth",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792406839041,
+      "tag": "0008_create_seasonality_profiles",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792409543619,
+      "tag": "0009_atomic_seasonality_import",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792410369609,
+      "tag": "0010_audit_tenant_relationship_guards",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792417990011,
+      "tag": "0011_migration",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792585200000,
+      "tag": "0012_preserve_saved_fb_opex_growth",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792691630717,
+      "tag": "0013_apply_pending_0012",
+      "breakpoints": true
+    }
+  ],
+  "snapshotInventory": [
+    "0000_snapshot.json",
+    "0001_snapshot.json",
+    "0002_snapshot.json",
+    "0003_snapshot.json",
+    "0004_snapshot.json",
+    "0005_snapshot.json",
+    "0006_snapshot.json",
+    "0007_snapshot.json",
+    "0008_snapshot.json",
+    "0009_snapshot.json",
+    "0010_snapshot.json",
+    "0011_snapshot.json",
+    "0013_snapshot.json"
+  ],
+  "finalGuardedRun": {
+    "command": "node scripts/test-financial-baseline.mjs --reporter=json --outputFile=<temporary-report>",
+    "passed": 494,
+    "total": 494,
+    "failed": 0,
+    "success": true
+  },
+  "runtimeGuardChecks": {
+    "node22": "Rejected with exit 1 as intended",
+    "bun": "Rejected with exit 1 as intended"
+  }
+}

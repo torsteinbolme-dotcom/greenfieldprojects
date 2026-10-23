@@ -30,6 +30,8 @@ export type Assumptions = {
   // Set only by the Advanced Operations resolver: replaces the cable car OPEX block (fixed + variable).
   operationsOpex?:OperationsModel;
   fbFollowsPassengers?:boolean;
+  // Annual escalation of benchmark-sourced OPEX (restaurant / cable car) from its reported year to openingYear; absent = 0.
+  benchmarkOpexInflation?:number;
   fbBenchmark?:{adjust:boolean;revenue?:{assetId:string;year:number;adjust?:boolean}|null;opex?:{assetId:string;year:number;adjust?:boolean}|null};
 };
 export type YearResult={externalOperatingCosts?:{cableTotal:number;fb:number;merchandise:number;other:number};year:number;calendarYear:number;passengers:number;ticketNetPrice:number;ticketRevenue:number;fbRevenue:number;merchRevenue:number;otherRevenue?:number;fbOpex?:number;merchOpex?:number;otherOpex?:number;revenue:number;opex:number;ebitda:number;depreciation:number;ebit:number;openingDebt:number;interest:number;principal:number;closingDebt:number;tax:number;maintenanceCapex:number;equityInjection:number;cashAfterDebt:number;distribution:number;retainedCash:number;dscr:number|null};

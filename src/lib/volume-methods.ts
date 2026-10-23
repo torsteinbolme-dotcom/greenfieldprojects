@@ -1,5 +1,6 @@
 import type { Assumptions } from '@/financialEngine';
 import type { FbSource } from './fb-benchmark';
+import { benchmarkOpexEscalation } from './benchmark-inflation';
 export type RevenueMethod = 'legacy' | 'annual' | 'benchmark' | 'perPassenger';
 /** Revenue-only method produced by Advanced Commercial: passengers × resolved revenue per passenger for each operating year (no extra escalation). */
 export type SeriesMethod = 'perPassengerSeries';
@@ -21,7 +22,7 @@ export function benchmarkAmount(a: Assumptions, kind: 'revenue' | 'opex'): numbe
   if (!saved) return fallback;
   const adjusted = source?.adjust ?? a.fbBenchmark?.adjust;
   if (adjusted && !(saved.cableCarPassengers && saved.cableCarPassengers > 0)) return fallback;
-  return saved.historicalAmount * (adjusted ? a.initialPassengers / (saved.cableCarPassengers ?? 1) : 1) * (1 + saved.manualAdjustment);
+  return saved.historicalAmount * (adjusted ? a.initialPassengers / (saved.cableCarPassengers ?? 1) : 1) * (1 + saved.manualAdjustment) * (kind === 'opex' ? benchmarkOpexEscalation(a, saved.year) : 1);
 }
 export function volumeRevenue(line: VolumeLine | undefined, passengers: number, index: number, legacy: number, benchmark: number, benchmarkIndex: number, year = 1): number {
   switch (line?.method) {

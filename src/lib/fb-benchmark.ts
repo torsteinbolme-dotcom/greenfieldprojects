@@ -1,5 +1,6 @@
 import { costIndex, type Assumptions } from "@/financialEngine";
 import type { BenchmarkAsset, BenchmarkRecord } from "./benchmarks";
+import { benchmarkOpexEscalation } from "./benchmark-inflation";
 
 /**
  * F&B inputs taken from a restaurant benchmark. Selections live in the scenario JSON, so each
@@ -62,8 +63,8 @@ const pick = (records: BenchmarkRecord[], assetId: string | null | undefined, ye
 export const latestYear = (records: BenchmarkRecord[], assetId: string) =>
   Math.max(...records.filter((r) => r.asset_id === assetId).map((r) => r.financial_year), -Infinity);
 
-/** Adjusted = benchmark × (project year-1 passengers / passengers of that restaurant's own cable car). */
-export function fbLine(kind: "revenue" | "opex", source: FbSource, adjust: boolean, projectYearPassengers: number, assets: BenchmarkAsset[], records: BenchmarkRecord[]): FbLine {
+/** Adjusted = benchmark × (project year-1 passengers / passengers of that restaurant's own cable car), escalated to the opening year for OPEX. */
+export function fbLine(kind: "revenue" | "opex", source: FbSource, adjust: boolean, projectYearPassengers: number, assets: BenchmarkAsset[], records: BenchmarkRecord[], escalation = 1): FbLine {
   const saved = source.snapshot;
   const asset = saved ? { id: saved.assetId, name: saved.name } as BenchmarkAsset : assets.find((x) => x.id === source.assetId) ?? null;
   const parent = saved ? (saved.cableCarId ? { id: saved.cableCarId, name: saved.cableCarName } as BenchmarkAsset : null) : asset ? assets.find((x) => x.id === asset.parent_asset_id) ?? null : null;
@@ -75,7 +76,7 @@ export function fbLine(kind: "revenue" | "opex", source: FbSource, adjust: boole
   else if (original == null) warning = `${asset.name} has no ${kind === "revenue" ? "revenue" : "OPEX"} figure for ${source.year}. The last applied value is kept.`;
   else if (adjust && !parent) warning = `${asset.name} is not linked to a cable car, so it can't be adjusted to passengers. The last applied value is kept.`;
   else if (adjust && !benchPassengers) warning = `${parent?.name} has no passenger figure for ${source.year}. The last applied value is kept.`;
-  const adjusted = warning ? null : (adjust ? (original as number) * (projectYearPassengers / (benchPassengers as number)) : (original as number)) * (1 + (saved?.manualAdjustment ?? 0));
+  const adjusted = warning ? null : (adjust ? (original as number) * (projectYearPassengers / (benchPassengers as number)) : (original as number)) * (1 + (saved?.manualAdjustment ?? 0)) * escalation;
   return { source, asset, parent, original, benchPassengers, adjusted, warning };
 }
 
@@ -106,7 +107,7 @@ export function withFbBenchmark<T extends AssumptionsWithFb>(a: T, assets: Bench
     const adjust = sourceAdjust(sel, source);
     const frozen = source.snapshot ? source : snapshotSource(a, kind, source, adjust, assets, records);
     next.fbBenchmark[kind] = frozen;
-    const l = fbLine(kind, frozen, adjust, a.initialPassengers, assets, records);
+    const l = fbLine(kind, frozen, adjust, a.initialPassengers, assets, records, kind === "opex" ? benchmarkOpexEscalation(a, frozen.year) : 1);
     if (l.adjusted != null) {
       if (kind === "revenue") next.fbRevenueYear1 = l.adjusted;
       else next.fbOpexYear1 = l.adjusted;

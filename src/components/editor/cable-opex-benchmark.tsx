@@ -9,6 +9,8 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { int, nok } from '@/lib/format';
+import { BenchmarkInflationField } from './benchmark-inflation';
+import { benchmarkOpexEscalation } from '@/lib/benchmark-inflation';
 
 export function CableOpexBenchmarkPanel({ a, set, ro }: { a: Assumptions; set: (patch: Partial<Assumptions>) => void; ro: boolean }) {
   const { data, refetch, isError } = useBenchmarks();
@@ -21,7 +23,8 @@ export function CableOpexBenchmarkPanel({ a, set, ro }: { a: Assumptions; set: (
     set({ cableOpexBenchmark: next.cableOpexBenchmark, cableFixedOpex: next.cableFixedOpex, cableVariableCostPerPassenger: next.cableVariableCostPerPassenger } as Partial<Assumptions>);
     setError(null);
   };
-  const amount = selection ? cableOpexAmount(selection.snapshot, selection.adjust, a.initialPassengers) : null;
+  const escalation = selection ? benchmarkOpexEscalation(a, selection.snapshot.year) : 1;
+  const amount = selection ? cableOpexAmount(selection.snapshot, selection.adjust, a.initialPassengers, escalation) : null;
   return <div className="mb-5 space-y-3 border-b pb-5">
     <Label>Cable car OPEX — Use Benchmark</Label>
     <Select value={selection?.snapshot.assetId ?? 'manual'} disabled={ro || !data} onValueChange={id => {
@@ -37,10 +40,11 @@ export function CableOpexBenchmarkPanel({ a, set, ro }: { a: Assumptions; set: (
     <div className="flex max-w-md items-center justify-between gap-3"><Label htmlFor="scale-cable-opex" className="text-xs">Adjust to Project Passenger Volume</Label>
       <Switch id="scale-cable-opex" aria-label="Adjust cable car OPEX to Project Passenger Volume" checked={selection?.adjust ?? false} disabled={ro || !selection} onCheckedChange={adjust => {
         if (!selection) return;
-        if (cableOpexAmount(selection.snapshot, adjust, a.initialPassengers) == null) { setError('A positive benchmark passenger figure is required for passenger adjustment.'); return; }
+        if (cableOpexAmount(selection.snapshot, adjust, a.initialPassengers, escalation) == null) { setError('A positive benchmark passenger figure is required for passenger adjustment.'); return; }
         apply(withCableOpexBenchmark({ ...aw, cableOpexBenchmark: { ...selection, adjust } }));
       }} />
     </div>
+    <BenchmarkInflationField a={a} set={set} ro={ro} benchmarkYear={selection?.snapshot.year ?? null} />
     {selection && <>
       <dl className="grid max-w-md grid-cols-2 gap-x-3 gap-y-1 text-xs">
         <dt className="text-muted-foreground">Saved benchmark</dt><dd className="text-right">{selection.snapshot.name}</dd>
@@ -64,8 +68,8 @@ export function CableOpexBenchmarkPanel({ a, set, ro }: { a: Assumptions; set: (
         <tr><td>Financial year</td><td>{selection.snapshot.year}</td><td>{refresh.year}</td></tr>
         <tr><td>Historical OPEX · NOK</td><td>{nok(selection.snapshot.opex)}</td><td>{nok(refresh.opex)}</td></tr>
         <tr><td>Cable car passengers</td><td>{int(selection.snapshot.passengers)}</td><td>{int(refresh.passengers)}</td></tr>
-        <tr><td>Year 1 OPEX · NOK</td><td>{nok(amount)}</td><td>{nok(cableOpexAmount(refresh, selection.adjust, a.initialPassengers))}</td></tr>
-      </tbody></table><DialogFooter><Button variant="outline" onClick={() => setRefresh(null)}>Cancel</Button><Button disabled={cableOpexAmount(refresh, selection.adjust, a.initialPassengers) == null} onClick={() => { apply(selectCableOpexBenchmark(aw, refresh, selection.adjust)); setRefresh(null); }}>Confirm refresh</Button></DialogFooter></>}
+        <tr><td>Year 1 OPEX · NOK</td><td>{nok(amount)}</td><td>{nok(cableOpexAmount(refresh, selection.adjust, a.initialPassengers, benchmarkOpexEscalation(a, refresh.year)))}</td></tr>
+      </tbody></table><DialogFooter><Button variant="outline" onClick={() => setRefresh(null)}>Cancel</Button><Button disabled={cableOpexAmount(refresh, selection.adjust, a.initialPassengers, benchmarkOpexEscalation(a, refresh.year)) == null} onClick={() => { apply(selectCableOpexBenchmark(aw, refresh, selection.adjust)); setRefresh(null); }}>Confirm refresh</Button></DialogFooter></>}
     </DialogContent></Dialog>
   </div>;
 }

@@ -1,5 +1,6 @@
 import type { Assumptions } from '@/financialEngine';
 import type { BenchmarkAsset, BenchmarkRecord } from './benchmarks';
+import { benchmarkOpexEscalation } from './benchmark-inflation';
 
 export type CableOpexSnapshot = { assetId: string; name: string; year: number; opex: number; passengers: number | null };
 export type CableOpexBenchmark = {
@@ -17,18 +18,18 @@ export function cableOpexSnapshot(assetId: string, assets: BenchmarkAsset[], rec
   return { assetId, name: asset.name, year: record.financial_year, opex: record.opex, passengers: record.passengers };
 }
 
-export function cableOpexAmount(snapshot: CableOpexSnapshot, adjust: boolean, passengers: number): number | null {
+export function cableOpexAmount(snapshot: CableOpexSnapshot, adjust: boolean, passengers: number, escalation = 1): number | null {
   if (!Number.isFinite(snapshot.opex) || snapshot.opex < 0) return null;
-  if (!adjust) return snapshot.opex;
+  if (!adjust) return snapshot.opex * escalation;
   if (snapshot.passengers == null || !Number.isFinite(snapshot.passengers) || snapshot.passengers <= 0 || !Number.isFinite(passengers) || passengers < 0) return null;
-  return snapshot.opex * passengers / snapshot.passengers;
+  return snapshot.opex * passengers / snapshot.passengers * escalation;
 }
 
 /** Apply total benchmark OPEX through existing annual inputs, never adding manual variable costs twice. */
 export function withCableOpexBenchmark<T extends AssumptionsWithCableBenchmark>(a: T): T {
   const selection = a.cableOpexBenchmark;
   if (!selection) return a;
-  const amount = cableOpexAmount(selection.snapshot, selection.adjust, a.initialPassengers);
+  const amount = cableOpexAmount(selection.snapshot, selection.adjust, a.initialPassengers, benchmarkOpexEscalation(a, selection.snapshot.year));
   if (amount == null) return a;
   return { ...a, cableFixedOpex: amount, cableVariableCostPerPassenger: 0 };
 }

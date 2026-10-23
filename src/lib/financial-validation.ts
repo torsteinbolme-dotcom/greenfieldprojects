@@ -42,6 +42,7 @@ export function validateFinancialInputs(
   }
   nonnegative(a.exitMultiple, "exitMultiple");
   if (a.maintenanceCapexPct !== undefined) nonnegative(a.maintenanceCapexPct, "Maintenance CAPEX");
+  if (a.benchmarkOpexInflation !== undefined) fraction(a.benchmarkOpexInflation, "Benchmark OPEX inflation");
 
   // Advanced modules are resolved before this function. Their preserved manual inputs
   // are not controlling values; checking them would reject otherwise valid scenarios.

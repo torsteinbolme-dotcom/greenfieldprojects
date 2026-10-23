@@ -166,6 +166,154 @@ export type Database = {
           },
         ]
       }
+      external_budget: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          created_by: string
+          current_version_id: string
+          id: string
+          organization_id: string
+          project_id: string
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          created_by: string
+          current_version_id: string
+          id?: string
+          organization_id: string
+          project_id: string
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string
+          current_version_id?: string
+          id?: string
+          organization_id?: string
+          project_id?: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_budget_current_version_fk"
+            columns: [
+              "current_version_id",
+              "id",
+              "organization_id",
+              "project_id",
+            ]
+            isOneToOne: false
+            referencedRelation: "external_budget_versions"
+            referencedColumns: [
+              "id",
+              "budget_id",
+              "organization_id",
+              "project_id",
+            ]
+          },
+          {
+            foreignKeyName: "external_budget_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_budget_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_budget_versions: {
+        Row: {
+          action: string
+          budget_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          duplicated_from_budget_id: string | null
+          duplicated_from_version_id: string | null
+          financial_contract_version: string
+          id: string
+          input: Json
+          name: string
+          organization_id: string
+          project_id: string
+          schema_version: string
+          source_assumption_id: string | null
+          source_assumption_version: number | null
+          source_assumptions: Json | null
+          source_calculation_version: string | null
+          source_info: Json
+          source_scenario_id: string | null
+          version: number
+        }
+        Insert: {
+          action: string
+          budget_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          duplicated_from_budget_id?: string | null
+          duplicated_from_version_id?: string | null
+          financial_contract_version: string
+          id?: string
+          input: Json
+          name: string
+          organization_id: string
+          project_id: string
+          schema_version: string
+          source_assumption_id?: string | null
+          source_assumption_version?: number | null
+          source_assumptions?: Json | null
+          source_calculation_version?: string | null
+          source_info?: Json
+          source_scenario_id?: string | null
+          version: number
+        }
+        Update: {
+          action?: string
+          budget_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          duplicated_from_budget_id?: string | null
+          duplicated_from_version_id?: string | null
+          financial_contract_version?: string
+          id?: string
+          input?: Json
+          name?: string
+          organization_id?: string
+          project_id?: string
+          schema_version?: string
+          source_assumption_id?: string | null
+          source_assumption_version?: number | null
+          source_assumptions?: Json | null
+          source_calculation_version?: string | null
+          source_info?: Json
+          source_scenario_id?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_budget_versions_budget_id_organization_id_project_fkey"
+            columns: ["budget_id", "organization_id", "project_id"]
+            isOneToOne: false
+            referencedRelation: "external_budget"
+            referencedColumns: ["id", "organization_id", "project_id"]
+          },
+        ]
+      }
       organization_invites: {
         Row: {
           accepted_at: string | null
@@ -544,6 +692,18 @@ export type Database = {
       is_org_admin: { Args: { _org: string; _user: string }; Returns: boolean }
       is_org_member: { Args: { _org: string; _user: string }; Returns: boolean }
       soft_delete_project: { Args: { _project: string }; Returns: undefined }
+      write_external_budget: {
+        Args: {
+          _actor: string
+          _budget: string
+          _capture?: Json
+          _expected: string
+          _operation: string
+          _payload: Json
+          _project: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       org_role: "admin" | "editor" | "viewer"

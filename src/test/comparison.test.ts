@@ -131,7 +131,7 @@ describe("metricsAt net average price", () => {
     expect(metricsAt(withYield(300, 500) as never, "operating", 3).netTicket).toBe(300);
   });
   it("is null when the scenario has no forecast", () => {
-    expect(metricsAt({ a: exit, result: null } as unknown as AvgEntry, "operating", 3).netTicket).toBeNull();
+    expect(metricsAt({ a: exit, result: null } as never, "operating", 3).netTicket).toBeNull();
   });
 });
 

@@ -67,8 +67,9 @@ export async function writeExternalBudget(
         _actor: write.actor,
         _operation: write.operation,
         _project: write.project,
-        _budget: write.budget,
-        _expected: write.expected,
+        // The SQL function accepts NULL for a new budget; generated types mark these non-null.
+        _budget: write.budget as string,
+        _expected: write.expected as string,
         _payload: write.payload as unknown as Json,
         _capture: write.capture as unknown as Json,
       });

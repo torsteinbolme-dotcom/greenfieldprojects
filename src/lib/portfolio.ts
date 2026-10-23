@@ -37,6 +37,8 @@ export function metricsAt(e: PortfolioEntry, mode: YearMode, year: number) {
     revenue: row?.revenue ?? null,
     ebitda: row?.ebitda ?? null,
     margin: row && row.revenue ? row.ebitda / row.revenue : null,
+    // Year 1 net average ticket price per passenger (after VAT and commissions), read from the engine row.
+    netTicket: e.result?.rows[0]?.ticketNetPrice ?? null,
     // The scenario's own adult round-trip base fare (gross), independent of the displayed year.
     baseTicket: e.a.segments?.find((s) => isAdultRoundTrip(s.name))?.grossPrice ?? null,
     // Both return columns read Year 8, whatever exit year the scenario saves (see irrAtYear/moicAtYear).

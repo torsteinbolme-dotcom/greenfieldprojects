@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_authenticated/portfolio")({
   component: PortfolioPage,
 });
 
-type SortKey = "project" | "scenario" | "capex" | "passengers" | "revenue" | "ebitda" | "margin" | "moic" | "irr" | "ticket" | "exitEquity";
+type SortKey = "project" | "scenario" | "capex" | "passengers" | "revenue" | "ebitda" | "margin" | "moic" | "irr" | "netTicket" | "ticket" | "exitEquity";
 
 function PortfolioPage() {
   const navigate = useNavigate();
@@ -80,13 +80,13 @@ function PortfolioPage() {
         <table className="fin-table">
           <thead>
             <tr>
-              <th /><Th k="project" right={false}>Project</Th><Th k="scenario" right={false}>Scenario</Th><Th k="moic">MOIC Y{MOIC_YEAR}</Th><Th k="irr">IRR Y{MOIC_YEAR}</Th><Th k="ticket">Base ticket price</Th><Th k="passengers">Passengers {label}</Th>
+              <th /><Th k="project" right={false}>Project</Th><Th k="scenario" right={false}>Scenario</Th><Th k="moic">MOIC Y{MOIC_YEAR}</Th><Th k="irr">IRR Y{MOIC_YEAR}</Th><Th k="netTicket">Net avg. price Y1</Th><Th k="ticket">Base ticket price</Th><Th k="passengers">Passengers {label}</Th>
               <Th k="revenue">Revenue {label}</Th><Th k="ebitda">EBITDA {label}</Th><Th k="margin">Margin</Th><Th k="capex">CAPEX (NOK m)</Th>
               <Th k="exitEquity">Exit equity (NOK m)</Th>
             </tr>
           </thead>
           <tbody>
-            {rows.length === 0 && <tr><td colSpan={12} className="text-muted-foreground">No active projects.</td></tr>}
+            {rows.length === 0 && <tr><td colSpan={13} className="text-muted-foreground">No active projects.</td></tr>}
             {rows.map(({ e, m }) => (
               <tr key={e.project.id}>
                 <td><Checkbox checked={selected.includes(e.project.id)} onCheckedChange={(c) => setSelected((s) => (c ? [...s, e.project.id] : s.filter((x) => x !== e.project.id)))} /></td>
@@ -95,7 +95,7 @@ function PortfolioPage() {
                   {!e.error && !m.row && <div className="text-xs text-muted-foreground">Not operating in {label}</div>}</td>
                 <td>{e.scenario.name}</td>
                 <td className="num text-right">{mult(m.moic)}</td><td className="num text-right">{pct(m.irr)}</td>
-                <td className="num text-right">{formatNumber(m.baseTicket, 0, 0)}</td><td className="num text-right">{int(m.passengers)}</td>
+                <td className="num text-right">{formatNumber(m.netTicket, 0, 0)}</td><td className="num text-right">{formatNumber(m.baseTicket, 0, 0)}</td><td className="num text-right">{int(m.passengers)}</td>
                 <td className="num text-right">{nokM(m.revenue)}</td><td className="num text-right">{nokM(m.ebitda)}</td>
                 <td className="num text-right">{pct(m.margin)}</td><td className="num text-right">{nokM(m.capex)}</td>
                 <td className="num text-right">{nokM(m.exitEquity)}</td>
@@ -106,7 +106,7 @@ function PortfolioPage() {
       </div>
       <div className="flex items-center gap-3">
         <Button disabled={selected.length < 2} onClick={() => navigate({ to: "/comparison/projects", search: { ids: selected.join(",") } })}>Compare selected ({selected.length})</Button>
-        <span className="text-xs text-muted-foreground">MOIC and IRR are the Year {MOIC_YEAR} figures for every project; exit equity uses each project's own exit year and multiple.</span>
+        <span className="text-xs text-muted-foreground">MOIC and IRR are the Year {MOIC_YEAR} figures for every project; exit equity uses each project's own exit year and multiple. Net avg. price is the Year 1 average ticket price per passenger, after VAT and commissions.</span>
       </div>
     </div>
   );

@@ -123,6 +123,18 @@ describe("metricsAt base ticket price", () => {
   });
 });
 
+describe("metricsAt net average price", () => {
+  const withYield = (y1: number, y3: number) =>
+    ({ a: exit, result: { equity: 100, rows: Array.from({ length: 3 }, (_, i) => ({ year: i + 1, ebitda: 10, passengers: 1, ticketNetPrice: i === 0 ? y1 : y3, closingDebt: 0, retainedCash: 0, equityInjection: 0, distribution: 0 })) } }) as unknown as AvgEntry;
+
+  it("reads the Year 1 net ticket price whatever year the table displays", () => {
+    expect(metricsAt(withYield(300, 500) as never, "operating", 3).netTicket).toBe(300);
+  });
+  it("is null when the scenario has no forecast", () => {
+    expect(metricsAt({ a: exit, result: null } as unknown as AvgEntry, "operating", 3).netTicket).toBeNull();
+  });
+});
+
 describe("irrAtYear", () => {
   const y8 = () => mk({ ebitda: 100, passengers: 200 }, { ebitda: 20, closingDebt: 50, retainedCash: 10 });
   const y8rate = Math.pow(1.6, 1 / 8) - 1; // 100 equity in, (20 × 10 − 50 + 10) = 160 out at Year 8.

@@ -303,21 +303,6 @@ export function ExternalBudgetWorkspace(p: WorkspaceProps) {
             </select>
           </label>
         </div>
-        {/* Financing terms are inherited, not entered: the debt/equity split, interest rate, loan
-            years, tax, depreciation, maintenance CAPEX %, exit multiple and sale cost all come from
-            the pinned source scenario (see INHERITED_FIELDS in src/lib/financial-input.ts) and stay
-            frozen at the values captured when the budget was created. They only change when the
-            user presses "Refresh inheritance explicitly", which pulls in the source's current
-            values and saves a new version. There is deliberately no field to override the split
-            here: internal and external must be compared on identical financing. */}
-        <p className="text-xs text-muted-foreground">
-          Financing is inherited from the pinned greenfield scenario, not entered here: debt / equity
-          split, interest rate, loan years, tax, depreciation, maintenance CAPEX, exit multiple and
-          sale cost are frozen at the values captured when this budget was created. They only change
-          when you press <strong>Refresh inheritance explicitly</strong>, which reads the source's
-          current values and saves a new version. There is no separate field for the split, so
-          internal and external are always compared on identical financing.
-        </p>
         {!p.canEdit && <p>Viewer access · read only.</p>}
         {historical && <p>Historical version · read only. Select the current version to edit.</p>}
         {archived && <p>Archived budget · restore before editing.</p>}
@@ -375,6 +360,23 @@ export function ExternalBudgetWorkspace(p: WorkspaceProps) {
                   {formatNumber(doc.input.initialCapex / 1e6, 2, 2)} MNOK
                 </span>
               )}
+              {/* Only the build cost is entered here. How it is financed — debt/equity split,
+                  interest rate, loan years, plus tax, depreciation, maintenance CAPEX %, exit
+                  multiple and sale cost — is inherited from the pinned source scenario (see
+                  inheritedKeys in src/lib/financial-input.ts), frozen at the values captured when
+                  the budget was created, and only changes via "Refresh inheritance explicitly".
+                  There is deliberately no override: internal and external must be compared on
+                  identical financing, so return differences reflect operations, not capital
+                  structure. */}
+              <p className="text-xs text-muted-foreground">
+                Only the build cost is entered here. How it is financed — debt / equity split,
+                interest rate and loan years, plus tax, depreciation, maintenance CAPEX, exit
+                multiple and sale cost — is inherited from the selected greenfield project and stays
+                as it was when this budget was created. Press{" "}
+                <strong>Refresh inheritance explicitly</strong> to pull in the project's current
+                values. There is no separate field for the split, so both sides are always compared
+                on identical financing.
+              </p>
             </label>
           </div>
           <label className="block">

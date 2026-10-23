@@ -129,3 +129,4 @@
 - [x] Advanced Calculations Stage 4: Advanced F&B / Merchandise conversion revenue (annual + seasonal), unit economics. Stage 5 awaits instruction.
 - [x] Stage 5: Advanced Operations
 - [x] Stage 6: Risk & Sensitivity
+- [ ] External budget: inheritance note was added to the selection panel, but the user marked the wrong element — relocate (or remove) it once they name the intended spot.

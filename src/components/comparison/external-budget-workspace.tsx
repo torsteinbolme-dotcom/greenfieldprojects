@@ -303,6 +303,21 @@ export function ExternalBudgetWorkspace(p: WorkspaceProps) {
             </select>
           </label>
         </div>
+        {/* Financing terms are inherited, not entered: the debt/equity split, interest rate, loan
+            years, tax, depreciation, maintenance CAPEX %, exit multiple and sale cost all come from
+            the pinned source scenario (see INHERITED_FIELDS in src/lib/financial-input.ts) and stay
+            frozen at the values captured when the budget was created. They only change when the
+            user presses "Refresh inheritance explicitly", which pulls in the source's current
+            values and saves a new version. There is deliberately no field to override the split
+            here: internal and external must be compared on identical financing. */}
+        <p className="text-xs text-muted-foreground">
+          Financing is inherited from the pinned greenfield scenario, not entered here: debt / equity
+          split, interest rate, loan years, tax, depreciation, maintenance CAPEX, exit multiple and
+          sale cost are frozen at the values captured when this budget was created. They only change
+          when you press <strong>Refresh inheritance explicitly</strong>, which reads the source's
+          current values and saves a new version. There is no separate field for the split, so
+          internal and external are always compared on identical financing.
+        </p>
         {!p.canEdit && <p>Viewer access · read only.</p>}
         {historical && <p>Historical version · read only. Select the current version to edit.</p>}
         {archived && <p>Archived budget · restore before editing.</p>}

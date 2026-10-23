@@ -11,6 +11,8 @@ import { fbLine, latestYear, sourceAdjust, snapshotSource, withFbBenchmark, type
 import { safeCalculate } from '@/lib/model';
 import { forecastOpex } from '@/lib/forecast-opex';
 import { formatNumber, nok, pct } from '@/lib/format';
+import { BenchmarkInflationField } from './benchmark-inflation';
+import { benchmarkOpexEscalation } from '@/lib/benchmark-inflation';
 export function FbBenchmarkPanel({ a, set, ro }: { a: Assumptions; set: (p: Partial<Assumptions>) => void; ro: boolean }) {
   const { data, refetch } = useBenchmarks();
   const [refresh, setRefresh] = useState<{ kind: 'revenue' | 'opex'; source: FbSource } | null>(null);
@@ -29,7 +31,7 @@ export function FbBenchmarkPanel({ a, set, ro }: { a: Assumptions; set: (p: Part
     <div className="grid gap-5 md:grid-cols-2">{(['revenue', 'opex'] as const).map(kind => {
       const source = sel[kind];
       const adjust = source ? sourceAdjust(sel, source) : true;
-      const line = source ? fbLine(kind, source, adjust, a.initialPassengers, data.assets, data.records) : null;
+      const line = source ? fbLine(kind, source, adjust, a.initialPassengers, data.assets, data.records, kind === 'opex' ? benchmarkOpexEscalation(a, source.year) : 1) : null;
       return <div className="space-y-3" key={kind}>
         <Label>F&B {kind === 'revenue' ? 'revenue' : 'OPEX'} — Use Benchmark</Label>
         <Select value={source?.assetId ?? 'manual'} disabled={ro} onValueChange={v => {
@@ -56,14 +58,15 @@ export function FbBenchmarkPanel({ a, set, ro }: { a: Assumptions; set: (p: Part
         }}><RefreshCw className="h-4 w-4" />Refresh Benchmark</Button>}
       </div>;
     })}</div>
+    <BenchmarkInflationField a={a} set={set} ro={ro} benchmarkYear={sel.opex?.year ?? null} />
     <p className="text-xs text-muted-foreground">Project passengers year 1: {formatNumber(a.initialPassengers, 0, 0)}</p>
     <div className="grid grid-cols-3 gap-3 border-t pt-3 text-sm">{[['F&B revenue year 1', fbRevenue], ['F&B OPEX year 1', fbOpex], ['F&B EBITDA year 1', fbRevenue - fbOpex]].map(([label, amount]) => <div key={label}><p className="text-xs text-muted-foreground">{label}</p><p className="num font-medium">{nok(Number(amount))}</p></div>)}</div>
     <p className="text-xs text-muted-foreground">EBITDA margin: {pct(fbRevenue ? (fbRevenue - fbOpex) / fbRevenue : null)}</p>
     <Dialog open={!!refresh} onOpenChange={open => { if (!open) setRefresh(null); }}><DialogContent><DialogHeader><DialogTitle>Refresh Benchmark — preview</DialogTitle></DialogHeader>
       {refresh && (() => {
         const old = sel[refresh.kind];
-        const oldLine = old ? fbLine(refresh.kind, old, sourceAdjust(sel, old), a.initialPassengers, data.assets, data.records) : null;
-        const newLine = fbLine(refresh.kind, refresh.source, sourceAdjust(sel, refresh.source), a.initialPassengers, data.assets, data.records);
+        const oldLine = old ? fbLine(refresh.kind, old, sourceAdjust(sel, old), a.initialPassengers, data.assets, data.records, refresh.kind === 'opex' ? benchmarkOpexEscalation(a, old.year) : 1) : null;
+        const newLine = fbLine(refresh.kind, refresh.source, sourceAdjust(sel, refresh.source), a.initialPassengers, data.assets, data.records, refresh.kind === 'opex' ? benchmarkOpexEscalation(a, refresh.source.year) : 1);
         return <><table className="fin-table"><thead><tr><th>Saved source</th><th>Current</th><th>New</th></tr></thead><tbody>
           <tr><td>Name</td><td>{oldLine?.asset?.name}</td><td>{newLine.asset?.name}</td></tr>
           <tr><td>Financial year</td><td>{old?.year}</td><td>{refresh.source.year}</td></tr>

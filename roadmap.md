@@ -130,3 +130,5 @@
 - [x] Stage 5: Advanced Operations
 - [x] Stage 6: Risk & Sensitivity
 - [x] External budget: inheritance explanation moved to the "All-in initial CAPEX" field (the panel-header note was removed); verified in the signed-in preview, build OK.
+- [x] Portfolio: add a "Net avg. price Y1" column immediately before "Base ticket price", reading the engine's Year 1 net ticket price per passenger; tests added, signed-in preview verified.
+- [ ] Benchmark inflation: annual inflation field for OPEX from selected benchmark years (e.g. 2025) up to the planned opening year (e.g. 2030), applied to restaurant/cable/F&B benchmark costs.

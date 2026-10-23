@@ -325,7 +325,7 @@ it("uses the same pinned UUID for explicit inheritance refresh despite a newer s
   await chooseSavedBudget();
   await chooseSource();
   await addSourceVersion(client);
-  fireEvent.click(screen.getByText("Refresh inheritance explicitly"));
+  fireEvent.click(screen.getByRole("button", { name: "Refresh inheritance explicitly" }));
   await waitFor(() => expect(state.mutation).toHaveBeenCalledTimes(1));
   expect(state.mutation.mock.calls[0]![0].data).toMatchObject({
     operation: "refresh",
@@ -386,7 +386,7 @@ it("allows a saved budget to retain pinned inheritance when the internal source 
   await waitFor(() =>
     expect(screen.getByRole("alert")).toHaveTextContent("Pinned internal assumption version"),
   );
-  expect(screen.getByText("Refresh inheritance explicitly")).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Refresh inheritance explicitly" })).toBeDisabled();
   state.mutation.mockRejectedValue(new Error("Synthetic server rejection"));
   fireEvent.click(screen.getByText("Save draft"));
   await waitFor(() => expect(state.mutation).toHaveBeenCalledTimes(1));

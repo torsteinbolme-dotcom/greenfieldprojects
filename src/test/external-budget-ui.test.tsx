@@ -290,7 +290,7 @@ it("discloses different pinned sources and blocks refreshing from another scenar
     },
   });
   expect(screen.getByText(/Different inheritance:/)).toBeTruthy();
-  expect(screen.getByText("Refresh inheritance explicitly")).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Refresh inheritance explicitly" })).toBeDisabled();
 });
 it("uses explicit same-scenario refresh rather than silently changing inheritance", async () => {
   vi.spyOn(window, "confirm").mockReturnValue(true);
@@ -303,7 +303,7 @@ it("uses explicit same-scenario refresh rather than silently changing inheritanc
       assumptions: phase1Case(),
     },
   });
-  fireEvent.click(screen.getByText("Refresh inheritance explicitly"));
+  fireEvent.click(screen.getByRole("button", { name: "Refresh inheritance explicitly" }));
   await waitFor(() => expect(p.mutate).toHaveBeenCalled());
   const c = vi.mocked(p.mutate).mock.calls[0]![0];
   if (c.operation !== "refresh") throw Error();
@@ -311,7 +311,7 @@ it("uses explicit same-scenario refresh rather than silently changing inheritanc
 });
 it("continues calculating from pinned inheritance after source deletion", () => {
   setup(version(true), { internal: undefined, scenarioName: undefined });
-  expect(screen.getByText("Refresh inheritance explicitly")).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Refresh inheritance explicitly" })).toBeDisabled();
   expect(screen.getByText(/Different inheritance:/)).toBeTruthy();
   expect(screen.getAllByText("3,58x").length).toBeGreaterThan(0);
 });

@@ -22,12 +22,13 @@ describe("site number formatting", () => {
     expect(formatNumberInput("1000000,00")).toBe("1 000 000,00");
     expect(formatNumberInput("1234,")).toBe("1 234,");
   });
-  it("writes stored amounts with at least two decimals and keeps extra precision", () => {
-    expect(formatNumberExact(1000)).toBe("1 000,00");
-    expect(formatNumberExact(0)).toBe("0,00");
-    expect(formatNumberExact(275000000)).toBe("275 000 000,00");
+  it("writes stored amounts without forced decimals and keeps extra precision", () => {
+    expect(formatNumberExact(1000)).toBe("1 000");
+    expect(formatNumberExact(0)).toBe("0");
+    expect(formatNumberExact(275000000)).toBe("275 000 000");
     expect(formatNumberExact(1234.56789)).toBe("1 234,56789");
-    expect(formatNumberExact(-1234.5)).toBe("-1 234,50");
+    expect(formatNumberExact(-1234.5)).toBe("-1 234,5");
+    expect(formatNumberExact(1000, 2)).toBe("1 000,00");
     expect(formatNumberExact(null)).toBe("");
   });
   it("groups thousands while typing without limiting the decimals", () => {

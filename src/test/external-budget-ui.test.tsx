@@ -113,10 +113,10 @@ it("preserves explicit zero, arbitrary supplied precision and missing numeric va
   for (const bad of ["-1", "NaN", "Infinity", "1e999", "3x"])
     expect(() => inputAmount(bad)).toThrow();
 });
-it("writes budget amounts with thousands spaces and decimal commas", () => {
+it("writes budget amounts with thousands spaces and no forced decimals", () => {
   setup();
-  expect(screen.getByLabelText("All-in initial CAPEX (NOK)")).toHaveValue("1 000,00");
-  expect(screen.getByLabelText("Year 1 Passengers")).toHaveValue("100,00");
+  expect(screen.getByLabelText("All-in initial CAPEX (NOK)")).toHaveValue("1 000");
+  expect(screen.getByLabelText("Year 1 Passengers")).toHaveValue("100");
   fireEvent.change(screen.getByLabelText("All-in initial CAPEX (NOK)"), {
     target: { value: "1000000" },
   });

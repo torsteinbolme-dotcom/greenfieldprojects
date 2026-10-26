@@ -35,3 +35,34 @@ export function parseNumberInput(text: string): number | null {
   const value = Number(formatted.replace(/\s/g, "").replace(",", "."));
   return Number.isFinite(value) ? value : null;
 }
+
+/** Insert thousands spaces into a digit string, leaving a leading minus sign in place. */
+function groupDigits(whole: string): string {
+  const sign = whole.startsWith("-") ? "-" : "";
+  return sign + (sign ? whole.slice(1) : whole).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
+/**
+ * Text for a stored number: thousands spaces, decimal comma and at least two decimals
+ * ("1 000,00"). Unlike formatNumber this never rounds, so a stored value keeps every decimal
+ * it has ("1 234,56789"). Empty for missing or non-finite values.
+ */
+export function formatNumberExact(v: number | null | undefined, minimumDecimals = 2): string {
+  if (v == null || !Number.isFinite(v)) return "";
+  let text = String(v);
+  if (/e/i.test(text)) text = v.toFixed(minimumDecimals);
+  const [whole, fraction = ""] = text.split(".");
+  const decimals = fraction.padEnd(minimumDecimals, "0");
+  return groupDigits(whole) + (decimals ? `,${decimals}` : "");
+}
+
+/**
+ * Group thousands while a number is being typed, accepting any number of decimals and keeping a
+ * trailing comma. Returns null for text that is not a number, so the caller can show an error.
+ */
+export function formatNumberTyped(text: string): string | null {
+  const compact = text.replace(/\s/g, "").replace(".", ",");
+  if (!/^-?\d*(,\d*)?$/.test(compact)) return null;
+  const [whole = "", fraction] = compact.split(",");
+  return groupDigits(whole) + (fraction === undefined ? "" : `,${fraction}`);
+}

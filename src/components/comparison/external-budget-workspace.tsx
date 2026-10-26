@@ -62,7 +62,9 @@ const control = "w-full rounded-md border bg-background p-2 text-sm";
 function display(n: number | null | undefined, unit: ComparisonUnit, delta = false) {
   if (n == null || !Number.isFinite(n)) return "N/A";
   const value = unit === "millions" ? n / 1e6 : unit === "percent" ? n * 100 : n;
-  return `${delta && value > 0 ? "+" : ""}${formatNumber(value, unit === "count" ? 0 : 2, unit === "count" ? 0 : 2)}${unit === "percent" ? (delta ? " pp" : "%") : unit === "multiple" ? "x" : ""}`;
+  // Only percentages and return multiples show decimals; money, MNOK and counts stay whole.
+  const d = unit === "percent" || unit === "multiple" ? 2 : 0;
+  return `${delta && value > 0 ? "+" : ""}${formatNumber(value, d, d)}${unit === "percent" ? (delta ? " pp" : "%") : unit === "multiple" ? "x" : ""}`;
 }
 function download(text: string, name: string) {
   const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
@@ -387,7 +389,7 @@ export function ExternalBudgetWorkspace(p: WorkspaceProps) {
               />
               {doc.input.initialCapex !== undefined && (
                 <span className="text-xs">
-                  {formatNumber(doc.input.initialCapex / 1e6, 2, 2)} MNOK
+                  {formatNumber(doc.input.initialCapex / 1e6, 0, 2)} MNOK
                 </span>
               )}
               {/* Only the build cost is entered here. How it is financed — debt/equity split,

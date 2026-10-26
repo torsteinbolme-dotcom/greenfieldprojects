@@ -43,11 +43,12 @@ function groupDigits(whole: string): string {
 }
 
 /**
- * Text for a stored number: thousands spaces, decimal comma and at least two decimals
- * ("1 000,00"). Unlike formatNumber this never rounds, so a stored value keeps every decimal
- * it has ("1 234,56789"). Empty for missing or non-finite values.
+ * Text for a stored number: thousands spaces and a decimal comma, with no forced decimals
+ * ("1 000"). Decimals appear only where the stored value already has them ("1 234,56789"), so
+ * display never rounds or rewrites a value. Pass minimumDecimals to pad, e.g. 2 for "1 000,00".
+ * Empty for missing or non-finite values.
  */
-export function formatNumberExact(v: number | null | undefined, minimumDecimals = 2): string {
+export function formatNumberExact(v: number | null | undefined, minimumDecimals = 0): string {
   if (v == null || !Number.isFinite(v)) return "";
   let text = String(v);
   if (/e/i.test(text)) text = v.toFixed(minimumDecimals);

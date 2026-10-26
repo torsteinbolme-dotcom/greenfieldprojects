@@ -46,7 +46,7 @@ function SortTable<T>({ rows, cols, initial, onEdit }: { rows: (T & { id: string
     return [...rows].sort((a, b) => sort.dir * (((c.get(a) as number) ?? -Infinity) - ((c.get(b) as number) ?? -Infinity)));
   }, [rows, cols, sort]);
   const head = (key: string, label: string, right = true) => (
-    <th className={right ? "text-right" : ""}>
+    <th key={key} className={right ? "text-right" : ""}>
       <button className="inline-flex items-center gap-1" onClick={() => setSort((s) => ({ key, dir: s.key === key ? -s.dir : key === "name" ? -1 : -1 }))}>
         {label} <span className="text-xs opacity-60">{sort.key === key ? (sort.dir < 0 ? "▼" : "▲") : "⇅"}</span>
       </button>
@@ -55,7 +55,7 @@ function SortTable<T>({ rows, cols, initial, onEdit }: { rows: (T & { id: string
   return (
     <div className="overflow-x-auto">
       <table className="fin-table fin-table-tight w-full">
-        <thead><tr>{head("name", "Asset", false)}{cols.map((c) => head(c.key, c.label))}{onEdit && <th />}</tr></thead>
+        <thead><tr>{head("name", "Asset", false)}{cols.map((c) => head(c.key, c.label))}{onEdit && <th key="edit" />}</tr></thead>
         <tbody>
           {sorted.map((r) => (
             <tr key={r.id} className={onEdit ? "cursor-pointer hover:bg-muted/50" : undefined} onClick={onEdit ? () => onEdit(r.id) : undefined} title={onEdit ? "Click to edit" : undefined}>
@@ -79,7 +79,7 @@ function BenchmarksPage() {
   const [yearSel, setYear] = useState<number | null>(null);
   const [status, setStatus] = useState<DataStatus | "all">("all");
   const year = yearSel ?? years[0] ?? new Date().getFullYear();
-  const [editing, setEditing] = useState<{ record?: BenchmarkRecord | undefined; asset?: BenchmarkAsset | undefined } | null>(null);
+  const [editing, setEditing] = useState<{ record?: BenchmarkRecord | undefined; asset?: BenchmarkAsset | undefined; type?: "cable_car" | "fnb" } | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [seasonalityOpen, setSeasonalityOpen] = useState(false);
   const [cableKpi, setCableKpi] = useState("ebitdaPerPax");
@@ -184,7 +184,7 @@ function BenchmarksPage() {
               </BarChart>
             </ResponsiveContainer></div>
           </Card>
-          <Card title="Cable cars"><SortTable rows={cableRows} cols={cableCols} initial="ebitdaPerPax" onEdit={canEdit ? openEdit : undefined} /></Card>
+          <Card title="Cable cars">{canEdit && <div className="mb-3 flex justify-end"><Button size="sm" onClick={() => setEditing({ type: "cable_car" })}><Plus className="mr-1 h-4 w-4" />Add record</Button></div>}<SortTable rows={cableRows} cols={cableCols} initial="ebitdaPerPax" onEdit={canEdit ? openEdit : undefined} /></Card>
           <Card title={`Historical ${kpi.label}`}>
             {allYears.length < 2
               ? <p className="text-sm text-muted-foreground">Only {allYears[0] ?? "no"} data so far. Add records for other years to see the trend — earlier years are kept, never overwritten.</p>
@@ -208,6 +208,7 @@ function BenchmarksPage() {
             </ResponsiveContainer></div>
           </Card>
           <Card title="Restaurants">
+            {canEdit && <div className="mb-3 flex justify-end"><Button size="sm" onClick={() => setEditing({ type: "fnb" })}><Plus className="mr-1 h-4 w-4" />Add record</Button></div>}
             <SortTable rows={restRows} cols={[{ key: "parent", label: "Cable car", get: (r) => r.parentName, fmt: (v) => String(v ?? "—") } as Col<(typeof restRows)[number]>, ...restCols]} initial="revenue" onEdit={canEdit ? openEdit : undefined} />
             <p className="mt-3 text-xs text-muted-foreground">Per-passenger figures divide by the linked cable car's passengers in the same year.</p>
           </Card>
@@ -306,11 +307,11 @@ function NumInput({ label, value, onChange }: { label: string; value: number | n
   return <div><Label className="text-xs">{label}</Label><Input inputMode="decimal" value={text} onChange={(e) => setText(e.target.value)} onBlur={() => { const v = parseNumberInput(text); onChange(v); setText(v == null ? "" : formatNumber(v)); }} /></div>;
 }
 
-function RecordDialog({ orgId, assets, init, onClose }: { orgId: string; assets: BenchmarkAsset[]; init: { record?: BenchmarkRecord | undefined; asset?: BenchmarkAsset | undefined }; onClose: () => void }) {
+function RecordDialog({ orgId, assets, init, onClose }: { orgId: string; assets: BenchmarkAsset[]; init: { record?: BenchmarkRecord | undefined; asset?: BenchmarkAsset | undefined; type?: "cable_car" | "fnb" }; onClose: () => void }) {
   const qc = useQueryClient();
   const r = init.record;
   const [f, setF] = useState({
-    name: init.asset?.name ?? "", type: init.asset?.business_type ?? "cable_car", parent: init.asset?.parent_asset_id ?? "none",
+    name: init.asset?.name ?? "", type: init.asset?.business_type ?? init.type ?? "cable_car", parent: init.asset?.parent_asset_id ?? "none",
     year: r?.financial_year ?? new Date().getFullYear(), status: r?.data_status ?? "actual",
     passengers: r?.passengers ?? null, revenue: r?.revenue ?? null, opex: r?.opex ?? null, ebitda: r?.ebitda ?? null,
     source: r?.source ?? "", notes: r?.comparability_notes ?? "",

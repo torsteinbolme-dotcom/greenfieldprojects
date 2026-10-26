@@ -51,7 +51,7 @@ export function formatNumberExact(v: number | null | undefined, minimumDecimals 
   if (v == null || !Number.isFinite(v)) return "";
   let text = String(v);
   if (/e/i.test(text)) text = v.toFixed(minimumDecimals);
-  const [whole, fraction = ""] = text.split(".");
+  const [whole = "", fraction = ""] = text.split(".");
   const decimals = fraction.padEnd(minimumDecimals, "0");
   return groupDigits(whole) + (decimals ? `,${decimals}` : "");
 }

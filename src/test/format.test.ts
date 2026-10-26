@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatNumber, formatNumberInput, parseNumberInput, nok, nokM, pct, mult, int } from "@/lib/format";
+import { formatNumber, formatNumberExact, formatNumberInput, formatNumberTyped, parseNumberInput, nok, nokM, pct, mult, int } from "@/lib/format";
 
 describe("site number formatting", () => {
   it("uses spaces for thousands and commas for decimals", () => {

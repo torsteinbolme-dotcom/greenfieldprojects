@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Assumptions } from "@/financialEngine";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatNumber } from "@/lib/format";
+import { formatNumber, formatNumberExact, formatNumberTyped } from "@/lib/format";
 import {
   ANNUAL_METRICS,
   SUMMARY_METRICS,

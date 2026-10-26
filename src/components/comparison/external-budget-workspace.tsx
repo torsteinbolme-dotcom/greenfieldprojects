@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Assumptions } from "@/financialEngine";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatNumber } from "@/lib/format";
+import { formatNumber, formatNumberExact, formatNumberTyped } from "@/lib/format";
 import {
   ANNUAL_METRICS,
   SUMMARY_METRICS,
@@ -83,21 +83,42 @@ function Amount({
   disabled: boolean;
   onChange: (n: number | undefined) => void;
 }) {
-  const [text, setText] = useState(value === undefined ? "" : String(value));
+  const toText = (v: number | undefined) => (v === undefined ? "" : formatNumberExact(v));
+  const [text, setText] = useState(toText(value));
   const [error, setError] = useState("");
+  const invalid = "Enter a nonnegative number with a decimal point or comma.";
+  // Keep whatever the user is typing; adopt a value that arrived from elsewhere (version switch,
+  // refresh, background reload) as soon as the current text no longer represents it.
+  useEffect(() => {
+    setText((current) => {
+      try {
+        if (inputAmount(current) === value) return current;
+      } catch {
+        // Unparseable text is always replaced by the incoming value.
+      }
+      return toText(value);
+    });
+  }, [value]);
   return (
     <div>
       <Input
         aria-label={label}
         aria-invalid={!!error}
-        className="min-w-28"
+        className="num min-w-28"
         inputMode="decimal"
         value={text}
         disabled={disabled}
         onChange={(e) => {
-          setText(e.target.value);
+          const typed = formatNumberTyped(e.target.value);
+          if (typed === null) {
+            setText(e.target.value);
+            setError(invalid);
+            e.target.setCustomValidity(invalid);
+            return;
+          }
+          setText(typed);
           try {
-            const n = inputAmount(e.target.value);
+            const n = inputAmount(typed);
             setError("");
             e.target.setCustomValidity("");
             onChange(n);
@@ -105,6 +126,15 @@ function Amount({
             setError(String(err));
             e.target.setCustomValidity(String(err));
           }
+        }}
+        onBlur={() => {
+          setText((current) => {
+            try {
+              return inputAmount(current) === value ? toText(value) : current;
+            } catch {
+              return current;
+            }
+          });
         }}
       />
       {error && (

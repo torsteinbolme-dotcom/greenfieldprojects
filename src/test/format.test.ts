@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatNumber, formatNumberInput, parseNumberInput, nok, nokM, pct, mult, int } from "@/lib/format";
+import { formatNumber, formatNumberExact, formatNumberInput, formatNumberTyped, parseNumberInput, nok, nokM, pct, mult, int } from "@/lib/format";
 
 describe("site number formatting", () => {
   it("uses spaces for thousands and commas for decimals", () => {
@@ -21,6 +21,22 @@ describe("site number formatting", () => {
     expect(parseNumberInput("12.5")).toBe(12.5);
     expect(formatNumberInput("1000000,00")).toBe("1 000 000,00");
     expect(formatNumberInput("1234,")).toBe("1 234,");
+  });
+  it("writes stored amounts with at least two decimals and keeps extra precision", () => {
+    expect(formatNumberExact(1000)).toBe("1 000,00");
+    expect(formatNumberExact(0)).toBe("0,00");
+    expect(formatNumberExact(275000000)).toBe("275 000 000,00");
+    expect(formatNumberExact(1234.56789)).toBe("1 234,56789");
+    expect(formatNumberExact(-1234.5)).toBe("-1 234,50");
+    expect(formatNumberExact(null)).toBe("");
+  });
+  it("groups thousands while typing without limiting the decimals", () => {
+    expect(formatNumberTyped("1000000")).toBe("1 000 000");
+    expect(formatNumberTyped("1 000,00")).toBe("1 000,00");
+    expect(formatNumberTyped("1234,")).toBe("1 234,");
+    expect(formatNumberTyped("1234,56789")).toBe("1 234,56789");
+    expect(formatNumberTyped("")).toBe("");
+    expect(formatNumberTyped("1x")).toBeNull();
   });
   it("rejects more than two typed decimal places and invalid values", () => {
     expect(formatNumberInput("1,234")).toBeNull();

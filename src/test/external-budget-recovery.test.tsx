@@ -218,7 +218,7 @@ it.each(["list", "history"] as const)(
       expect(screen.getByLabelText("Budget name")).toBe(nameInput);
       expect(nameInput).toHaveValue("Unsaved name");
       expect(screen.getByLabelText("Description")).toHaveValue("Unsaved description");
-      expect(screen.getByLabelText("All-in initial CAPEX (NOK)")).toHaveValue("1234,56789");
+      expect(screen.getByLabelText("All-in initial CAPEX (NOK)")).toHaveValue("1 234,56789");
       expect(screen.getByLabelText("Year 3 Passengers")).toHaveValue("0");
       expect(screen.getByLabelText("Year 4 Realized net ticket")).toHaveValue("21,98765");
       expect(screen.getByLabelText("Source notes")).toHaveValue("Unsaved provenance");

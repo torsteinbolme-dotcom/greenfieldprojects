@@ -47,10 +47,11 @@ export function editableVersion(v: BudgetVersion): BudgetDocument {
 }
 /** Empty is absent, explicit zero stays zero. No financial rounding/normalization. */
 export function inputAmount(text: string): number | undefined {
-  if (!text.trim()) return undefined;
-  if (!/^\d+(?:[.,]\d*)?$/.test(text.trim()))
+  const compact = text.replace(/\s/g, "");
+  if (!compact) return undefined;
+  if (!/^\d+(?:[.,]\d*)?$/.test(compact))
     throw Error("Enter a nonnegative number with a decimal point or comma.");
-  const n = Number(text.trim().replace(",", "."));
+  const n = Number(compact.replace(",", "."));
   if (!Number.isFinite(n)) throw Error("Enter a finite number.");
   return n;
 }
